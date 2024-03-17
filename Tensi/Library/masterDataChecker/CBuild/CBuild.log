@@ -1,0 +1,11 @@
+﻿  ConstCreate.cpp
+  file.cpp
+  main.cpp
+  MDataCreate.cpp
+  SaveCreate.cpp
+  string.cpp
+  コード生成しています。
+  Previous IPDB not found, fall back to full compilation.
+  All 2012 functions were compiled because no usable IPDB/IOBJ from previous compilation was found.
+  コード生成が終了しました。
+  CBuild.vcxproj -> C:\Users\ゆうき\Desktop\Tensi\Tensi\Library\masterDataChecker\masterDataChecker.exe
