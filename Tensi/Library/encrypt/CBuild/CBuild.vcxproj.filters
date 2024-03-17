@@ -1,0 +1,44 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Utility">
+      <UniqueIdentifier>{2df3c327-ed70-4699-aa09-36d34c981e6e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Main">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hh;hpp;hxx;h++;hm;inl;inc;ipp;xsd</Extensions>
+    </Filter>
+    <Filter Include="Utility\Key">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;c++;cppm;ixx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="Utility\Key\file">
+      <UniqueIdentifier>{70001c64-d6ae-4392-8c38-8d0bad8f6cb2}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="error.h">
+      <Filter>Utility</Filter>
+    </ClInclude>
+    <ClInclude Include="..\file.h">
+      <Filter>Utility\Key\file</Filter>
+    </ClInclude>
+    <ClInclude Include="..\key.h">
+      <Filter>Utility\Key</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="main.cpp">
+      <Filter>Main</Filter>
+    </ClCompile>
+    <ClCompile Include="..\file.cpp">
+      <Filter>Utility\Key\file</Filter>
+    </ClCompile>
+    <ClCompile Include="..\key.cpp">
+      <Filter>Utility\Key</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="exe名変更.txt" />
+  </ItemGroup>
+</Project>

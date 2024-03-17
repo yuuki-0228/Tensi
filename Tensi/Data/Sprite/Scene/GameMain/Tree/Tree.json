@@ -1,0 +1,20 @@
+{
+  "Base": {
+    "h": 160.0,
+    "w": 128.0
+  },
+  "Disp": {
+    "h": 160.0,
+    "w": 128.0
+  },
+  "FilePath": "Data\\Sprite\\Scene\\GameMain\\Tree\\Tree.json",
+  "IsLock": false,
+  "LocalPosition": 3,
+  "Scene": [
+    "None"
+  ],
+  "Stride": {
+    "h": 160.0,
+    "w": 128.0
+  }
+}

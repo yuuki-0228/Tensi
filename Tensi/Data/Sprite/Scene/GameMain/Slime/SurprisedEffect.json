@@ -1,0 +1,20 @@
+{
+  "Base": {
+    "h": 64.0,
+    "w": 64.0
+  },
+  "Disp": {
+    "h": 64.0,
+    "w": 64.0
+  },
+  "FilePath": "Data\\Sprite\\Scene\\GameMain\\Slime\\SurprisedEffect.json",
+  "IsLock": false,
+  "LocalPosition": 3,
+  "Scene": [
+    "None"
+  ],
+  "Stride": {
+    "h": 64.0,
+    "w": 64.0
+  }
+}

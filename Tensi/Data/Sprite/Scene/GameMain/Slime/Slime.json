@@ -1,0 +1,20 @@
+{
+  "Base": {
+    "h": 256.0,
+    "w": 384.0
+  },
+  "Disp": {
+    "h": 128.0,
+    "w": 128.0
+  },
+  "FilePath": "Data\\Sprite\\Scene\\GameMain\\Slime\\Slime.json",
+  "IsLock": false,
+  "LocalPosition": 3,
+  "Scene": [
+    "None"
+  ],
+  "Stride": {
+    "h": 128.0,
+    "w": 128.0
+  }
+}

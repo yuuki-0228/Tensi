@@ -1,0 +1,20 @@
+{
+  "Base": {
+    "h": 19.0,
+    "w": 13.0
+  },
+  "Disp": {
+    "h": 19.0,
+    "w": 13.0
+  },
+  "FilePath": "Data\\Sprite\\Scene\\GameMain\\Flower\\WateringAnim.json",
+  "IsLock": false,
+  "LocalPosition": 8,
+  "Scene": [
+    "None"
+  ],
+  "Stride": {
+    "h": 19.0,
+    "w": 13.0
+  }
+}

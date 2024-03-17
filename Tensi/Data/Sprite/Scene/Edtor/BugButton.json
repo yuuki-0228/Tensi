@@ -1,0 +1,145 @@
+{
+  "Base": {
+    "h": 64.0,
+    "w": 405.0
+  },
+  "Disp": {
+    "h": 64.0,
+    "w": 405.0
+  },
+  "FilePath": "Data\\Sprite\\Scene\\Edtor\\BugButton.json",
+  "GameClear": {
+    "0": {
+      "Color": {
+        "A": 1.0,
+        "B": 1.0,
+        "G": 1.0,
+        "R": 1.0
+      },
+      "Transform": {
+        "Position": {
+          "x": 5.0,
+          "y": 5.0,
+          "z": 100.0
+        },
+        "Rotation": {
+          "x": 0.0,
+          "y": 0.0,
+          "z": 0.0
+        },
+        "Scale": {
+          "x": 0.5,
+          "y": 0.5,
+          "z": 0.5
+        }
+      },
+      "UIAnimation": {
+        "Click": {
+          "Center": false,
+          "Left": true,
+          "Right": false
+        },
+        "EndMessage": "",
+        "IsLoop": true,
+        "Message": "BugButtonDown",
+        "PlayMax": 0,
+        "What": "Message",
+        "When": "Click"
+      }
+    },
+    "Num": 1
+  },
+  "GameMain": {
+    "0": {
+      "Color": {
+        "A": 1.0,
+        "B": 1.0,
+        "G": 1.0,
+        "R": 1.0
+      },
+      "Transform": {
+        "Position": {
+          "x": 5.0,
+          "y": 5.0,
+          "z": 100.0
+        },
+        "Rotation": {
+          "x": 0.0,
+          "y": 0.0,
+          "z": 0.0
+        },
+        "Scale": {
+          "x": 0.5,
+          "y": 0.5,
+          "z": 0.5
+        }
+      },
+      "UIAnimation": {
+        "Click": {
+          "Center": false,
+          "Left": true,
+          "Right": false
+        },
+        "EndMessage": "",
+        "IsLoop": true,
+        "Message": "BugButtonDown",
+        "PlayMax": 0,
+        "What": "Message",
+        "When": "Click"
+      }
+    },
+    "Num": 1
+  },
+  "IsLock": false,
+  "LocalPosition": 0,
+  "Scene": [
+    "Title",
+    "GameMain",
+    "GameClear"
+  ],
+  "Stride": {
+    "h": 64.0,
+    "w": 405.0
+  },
+  "Title": {
+    "0": {
+      "Color": {
+        "A": 1.0,
+        "B": 1.0,
+        "G": 1.0,
+        "R": 1.0
+      },
+      "Transform": {
+        "Position": {
+          "x": 5.0,
+          "y": 5.0,
+          "z": 100.0
+        },
+        "Rotation": {
+          "x": 0.0,
+          "y": 0.0,
+          "z": 0.0
+        },
+        "Scale": {
+          "x": 0.5,
+          "y": 0.5,
+          "z": 0.5
+        }
+      },
+      "UIAnimation": {
+        "Click": {
+          "Center": false,
+          "Left": true,
+          "Right": false
+        },
+        "EndMessage": "",
+        "IsLoop": true,
+        "Message": "BugButtonDown",
+        "PlayMax": 0,
+        "What": "Message",
+        "When": "Click"
+      }
+    },
+    "Num": 1
+  }
+}

@@ -1,0 +1,20 @@
+{
+  "Base": {
+    "h": 64.0,
+    "w": 64.0
+  },
+  "Disp": {
+    "h": 64.0,
+    "w": 64.0
+  },
+  "FilePath": "Data\\Sprite\\Collision\\SphereColl2D.json",
+  "IsLock": false,
+  "LocalPosition": 8,
+  "Scene": [
+    "None"
+  ],
+  "Stride": {
+    "h": 64.0,
+    "w": 64.0
+  }
+}

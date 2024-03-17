@@ -1,0 +1,20 @@
+{
+  "Base": {
+    "h": 1.0,
+    "w": 1.0
+  },
+  "Disp": {
+    "h": 1.0,
+    "w": 1.0
+  },
+  "FilePath": "Data\\Sprite\\Scene\\Edtor\\HitBox.json",
+  "IsLock": false,
+  "LocalPosition": 0,
+  "Scene": [
+    "None"
+  ],
+  "Stride": {
+    "h": 1.0,
+    "w": 1.0
+  }
+}

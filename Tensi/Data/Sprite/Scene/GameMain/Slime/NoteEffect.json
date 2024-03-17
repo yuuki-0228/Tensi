@@ -1,0 +1,20 @@
+{
+  "Base": {
+    "h": 32.0,
+    "w": 64.0
+  },
+  "Disp": {
+    "h": 32.0,
+    "w": 32.0
+  },
+  "FilePath": "Data\\Sprite\\Scene\\GameMain\\Slime\\NoteEffect.json",
+  "IsLock": false,
+  "LocalPosition": 3,
+  "Scene": [
+    "None"
+  ],
+  "Stride": {
+    "h": 32.0,
+    "w": 32.0
+  }
+}

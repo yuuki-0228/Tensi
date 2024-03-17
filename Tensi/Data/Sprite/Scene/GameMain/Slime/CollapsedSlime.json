@@ -1,0 +1,20 @@
+{
+  "Base": {
+    "h": 106.0,
+    "w": 254.0
+  },
+  "Disp": {
+    "h": 106.0,
+    "w": 254.0
+  },
+  "FilePath": "Data\\Sprite\\Scene\\GameMain\\Slime\\CollapsedSlime.json",
+  "IsLock": false,
+  "LocalPosition": 3,
+  "Scene": [
+    "None"
+  ],
+  "Stride": {
+    "h": 106.0,
+    "w": 254.0
+  }
+}

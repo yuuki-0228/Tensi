@@ -1,0 +1,56 @@
+{
+  ".Comment": [
+    "ウィンドウの設定が行えます。",
+    "----------------------------------------------",
+    "[BackColor           ] : 背景の色",
+    "[IsDispCenter        ] : 起動時に画面の中央に配置するか",
+    "[IsDispCloseMessage  ] : 「Escape」を押した時にメッセージボックスを表示させるか",
+    "[IsDispMouseCursor   ] : 画面にマウスカーソルを表示するか",
+    "[IsFPSRender         ] : 画面にFPSを描画するか",
+    "[IsFullScreenLock    ] : 「ALT + Enter」でフルスクリーンにできないようにするか",
+    "[IsInputNotActiveStop] : アクティブウィンドウでは無い場合操作を停止させるか",
+    "[IsLogStop           ] : ログファイルの作成を停止するか",
+    "[IsMaxLock           ] : 最大化ボタンを押せないようにするか",
+    "[IsMinLock           ] : 最小化ボタンを押せないようにするか",
+    "[IsPopUpWnd          ] : ウィンドウをポップアップウィンドウ（ 枠無し ）にするか",
+    "[IsShowOnTop         ] : ウィンドウを最前面で固定するか",
+    "[IsStartFullScreen   ] : 起動時にフルスクリーンで起動するか",
+    "[IsSizeLock          ] : サイズを変更できないようにするか",
+    "[Name                ] : アプリ / ウィンドウ名",
+    "[Pos                 ] : ウィンドウの表示位置",
+    "[Size                ] : ウィンドウのサイズ",
+    "[Version             ] : アプリバージョン",
+    "----------------------------------------------"
+  ],
+  "BackColor": {
+    "B": 0.0,
+    "G": 0.0,
+    "R": 0.0
+  },
+  "IsDispCenter": false,
+  "IsDispCloseMessage": false,
+  "IsDispMouseCursor": true,
+  "IsFPSRender": false,
+  "IsFullScreenLock": true,
+  "IsInputNotActiveStop": false,
+  "IsLogStop": false,
+  "IsMaxLock": true,
+  "IsMinLock": true,
+  "IsPopUpWnd": true,
+  "IsShowOnTop": true,
+  "IsSizeLock": true,
+  "IsStartFullScreen": false,
+  "Name": {
+    "App": "Slime",
+    "Wnd": "Slime"
+  },
+  "Pos": {
+    "x": 0.0,
+    "y": 0.0
+  },
+  "Size": {
+    "h": 720.0,
+    "w": 1280.0
+  },
+  "Version": "2.0.1"
+}

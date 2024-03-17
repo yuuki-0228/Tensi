@@ -1,0 +1,20 @@
+{
+  "Base": {
+    "h": 4.0,
+    "w": 4.0
+  },
+  "Disp": {
+    "h": 4.0,
+    "w": 4.0
+  },
+  "FilePath": "Data\\Sprite\\Collision\\PointColl2D.json",
+  "IsLock": false,
+  "LocalPosition": 8,
+  "Scene": [
+    "None"
+  ],
+  "Stride": {
+    "h": 4.0,
+    "w": 4.0
+  }
+}

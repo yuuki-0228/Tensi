@@ -1,0 +1,136 @@
+{
+  ".Comment": [
+    "機能とその機能に対応したキーの設定が行えます。",
+    "ここで宣言した機能は 'Input.cpp' で使用できます。",
+    "----------------------------------------------",
+    "[But] : コントローラ(XInput)の対応したボタン",
+    "[Key] : キーボードの対応したキー",
+    "----------------------------------------------"
+  ],
+  "Decision": {
+    "But": [
+      "B"
+    ],
+    "Key": [
+      "Space"
+    ]
+  },
+  "Down": {
+    "But": [
+      "LeftStick[Down]",
+      "RightStick[Down]",
+      "Down"
+    ],
+    "Key": [
+      "Down"
+    ]
+  },
+  "FreeCameraMoveB": {
+    "But": [
+    ],
+    "Key": [
+      "S"
+    ]
+  },
+  "FreeCameraMoveD": {
+    "But": [
+    ],
+    "Key": [
+      "Shift"
+    ]
+  },
+  "FreeCameraMoveF": {
+    "But": [
+    ],
+    "Key": [
+      "W"
+    ]
+  },
+  "FreeCameraMoveL": {
+    "But": [
+    ],
+    "Key": [
+      "A"
+    ]
+  },
+  "FreeCameraMoveR": {
+    "But": [
+    ],
+    "Key": [
+      "D"
+    ]
+  },
+  "FreeCameraMoveU": {
+    "But": [
+    ],
+    "Key": [
+      "Space"
+    ]
+  },
+  "FreeCameraRotXD": {
+    "But": [
+    ],
+    "Key": [
+      "F"
+    ]
+  },
+  "FreeCameraRotXU": {
+    "But": [
+    ],
+    "Key": [
+      "R"
+    ]
+  },
+  "FreeCameraRotYL": {
+    "But": [
+    ],
+    "Key": [
+      "Q"
+    ]
+  },
+  "FreeCameraRotYR": {
+    "But": [
+    ],
+    "Key": [
+      "E"
+    ]
+  },
+  "Left": {
+    "But": [
+      "LeftStick[Left]",
+      "RightStick[Left]",
+      "Left"
+    ],
+    "Key": [
+      "Left"
+    ]
+  },
+  "Right": {
+    "But": [
+      "RightStick[Right]",
+      "LeftStick[Right]",
+      "Right"
+    ],
+    "Key": [
+      "Right"
+    ]
+  },
+  "Start": {
+    "But": [
+      "Start"
+    ],
+    "Key": [
+      "Escape"
+    ]
+  },
+  "Up": {
+    "But": [
+      "LeftStick[Up]",
+      "RightStick[Up]",
+      "Up"
+    ],
+    "Key": [
+      "Up"
+    ]
+  }
+}

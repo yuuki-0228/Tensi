@@ -1,0 +1,70 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Utility">
+      <UniqueIdentifier>{2df3c327-ed70-4699-aa09-36d34c981e6e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Main">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hh;hpp;hxx;h++;hm;inl;inc;ipp;xsd</Extensions>
+    </Filter>
+    <Filter Include="Utility\String">
+      <UniqueIdentifier>{e3e14880-8017-4f1d-8fdd-a90630ef1806}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Utility\File">
+      <UniqueIdentifier>{ba6da078-56bc-4fd9-9466-1ad6aa91bd56}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Main\Const">
+      <UniqueIdentifier>{418dd237-fb35-46ae-8353-6f7f482ff42d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Main\Save">
+      <UniqueIdentifier>{ac14c573-bbda-4668-8c89-8b9937319461}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Main\MData">
+      <UniqueIdentifier>{03aabd22-9346-4794-a1cd-0da3722e8155}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="error.h">
+      <Filter>Utility</Filter>
+    </ClInclude>
+    <ClInclude Include="string.h">
+      <Filter>Utility\String</Filter>
+    </ClInclude>
+    <ClInclude Include="file.h">
+      <Filter>Utility\File</Filter>
+    </ClInclude>
+    <ClInclude Include="ConstCreate.h">
+      <Filter>Main\Const</Filter>
+    </ClInclude>
+    <ClInclude Include="SaveCreate.h">
+      <Filter>Main\Save</Filter>
+    </ClInclude>
+    <ClInclude Include="MDataCreate.h">
+      <Filter>Main\MData</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="main.cpp">
+      <Filter>Main</Filter>
+    </ClCompile>
+    <ClCompile Include="file.cpp">
+      <Filter>Utility\File</Filter>
+    </ClCompile>
+    <ClCompile Include="string.cpp">
+      <Filter>Utility\String</Filter>
+    </ClCompile>
+    <ClCompile Include="ConstCreate.cpp">
+      <Filter>Main\Const</Filter>
+    </ClCompile>
+    <ClCompile Include="SaveCreate.cpp">
+      <Filter>Main\Save</Filter>
+    </ClCompile>
+    <ClCompile Include="MDataCreate.cpp">
+      <Filter>Main\MData</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="exe名変更.txt" />
+  </ItemGroup>
+</Project>

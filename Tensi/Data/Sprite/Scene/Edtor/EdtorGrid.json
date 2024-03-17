@@ -1,0 +1,20 @@
+{
+  "Base": {
+    "h": 1.0,
+    "w": 1280.0
+  },
+  "Disp": {
+    "h": 1.0,
+    "w": 1280.0
+  },
+  "FilePath": "Data\\Sprite\\Scene\\Edtor\\EdtorGrid.json",
+  "IsLock": false,
+  "LocalPosition": 0,
+  "Scene": [
+    "None"
+  ],
+  "Stride": {
+    "h": 1.0,
+    "w": 1280.0
+  }
+}

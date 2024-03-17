@@ -1,0 +1,44 @@
+{
+  ".Comment": [
+    "UIエディタの詳細設定を行えます。",
+    "----------------------------------------------",
+    "[BackColor     ] : 背景の色",
+    "[GridColor     ] : グリッド線の色",
+    "[GridSpace     ] : グリッド線の間隔",
+    "[HitBoxColor   ] : 当たり判定の色",
+    "[IsAutoSave    ] : 自動で保存されるようにするか",
+    "[IsCreaterLog  ] : ログファイルを作成するか",
+    "[IsDispHitBox  ] : 当たり判定を表示するか",
+    "[IsDrag        ] : マウスで画像を移動させれるようにするか",
+    "[IsFileDelete  ] : 閉じたときにファイルを削除するか",
+    "[IsWidgetUpdate] : UIの更新を行うようにするか",
+    "[LogMax        ] : ログファイルの上限",
+    "----------------------------------------------"
+  ],
+  "BackColor": {
+    "A": 1.0,
+    "B": 9.999899930335232e-07,
+    "G": 9.999999974752427e-07,
+    "R": 9.999940857596812e-07
+  },
+  "GridColor": {
+    "A": 1.0,
+    "B": 0.501960813999176,
+    "G": 0.501960813999176,
+    "R": 0.501960813999176
+  },
+  "GridSpace": 64,
+  "HitBoxColor": {
+    "A": 0.19607843458652496,
+    "B": 0.0,
+    "G": 0.0,
+    "R": 1.0
+  },
+  "IsAutoSave": false,
+  "IsCreaterLog": true,
+  "IsDispHitBox": true,
+  "IsDrag": true,
+  "IsFileDelete": true,
+  "IsWidgetUpdate": false,
+  "LogMax": 100
+}

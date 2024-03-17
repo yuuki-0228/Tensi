@@ -1,0 +1,20 @@
+{
+  "Base": {
+    "h": 128.0,
+    "w": 192.0
+  },
+  "Disp": {
+    "h": 128.0,
+    "w": 192.0
+  },
+  "FilePath": "Data\\Sprite\\Scene\\GameMain\\SlimeFrame\\SlimeFrameIcon.json",
+  "IsLock": false,
+  "LocalPosition": 4,
+  "Scene": [
+    "None"
+  ],
+  "Stride": {
+    "h": 128.0,
+    "w": 192.0
+  }
+}

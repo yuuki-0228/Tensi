@@ -1,0 +1,18 @@
+{
+  "Base": {
+    "h": 384.0,
+    "w": 384.0
+  },
+  "Disp": {
+    "h": 38.4,
+    "w": 38.4
+  },
+  "FilePath": "Data\\Sprite\\WindowText\\ascii.json",
+  "IsLock": false,
+  "LocalPosition": 0,
+  "Scene": [],
+  "Stride": {
+    "h": 38.4,
+    "w": 38.4
+  }
+}

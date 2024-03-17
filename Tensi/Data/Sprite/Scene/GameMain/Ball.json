@@ -1,0 +1,20 @@
+{
+  "Base": {
+    "h": 132.0,
+    "w": 132.0
+  },
+  "Disp": {
+    "h": 66.0,
+    "w": 66.0
+  },
+  "FilePath": "Data\\Sprite\\Scene\\GameMain\\Ball.json",
+  "IsLock": false,
+  "LocalPosition": 8,
+  "Scene": [
+    "None"
+  ],
+  "Stride": {
+    "h": 66.0,
+    "w": 66.0
+  }
+}
