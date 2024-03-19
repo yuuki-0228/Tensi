@@ -112,6 +112,9 @@ void CPlayer::Update( const float& DeltaTime )
 	// ウィンドウオブジェクトの更新.
 	WindowObjectUpdate();
 
+	int a_b = 0;
+	a_b = 10;
+
 	// 描画エリアをそろえる.
 	m_CollapsedState.RenderArea		= m_SpriteState.RenderArea;
 	m_CollapsedState.RenderArea.w	= -1.0f;
