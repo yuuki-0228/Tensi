@@ -15,7 +15,6 @@ class CSphere2D;
 
 /************************************************
 *	“–‚½‚è”»’è•`‰æƒNƒ‰ƒX.
-*		ú±“c—F‹P.
 **/
 class CollisionRenderer final
 {

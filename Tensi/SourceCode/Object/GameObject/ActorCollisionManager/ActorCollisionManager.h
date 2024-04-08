@@ -13,7 +13,6 @@ enum class enCollObjType : unsigned char {
 
 /************************************************
 *	オブジェクトの当たり判定マネージャークラス.
-*		﨑田友輝.
 **/
 class ActorCollisionManager final
 {

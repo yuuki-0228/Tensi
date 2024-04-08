@@ -1,0 +1,20 @@
+{
+  "Base": {
+    "h": 69.0,
+    "w": 69.0
+  },
+  "Disp": {
+    "h": 69.0,
+    "w": 69.0
+  },
+  "FilePath": "Data\\Sprite\\Mask\\WindowMask.json",
+  "IsLock": false,
+  "LocalPosition": 0,
+  "Scene": [
+    "None"
+  ],
+  "Stride": {
+    "h": 69.0,
+    "w": 69.0
+  }
+}

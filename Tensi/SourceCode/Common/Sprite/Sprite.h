@@ -4,7 +4,6 @@
 
 /************************************************
 *	スプライトクラス.
-*		﨑田友輝.
 **/
 class CSprite final
 {
@@ -80,19 +79,11 @@ public:
 
 	// テクスチャの設定.
 	inline void SetTexture( ID3D11ShaderResourceView* pTexture ) { m_pTexture = pTexture; }
-	// マスクテクスチャの設定.
-	inline void SetMaskTexture( ID3D11ShaderResourceView* pTexture ) { m_pMaskTexture = pTexture; }
-	// ルールテクスチャの設定.
-	inline void SetRuleTexture( ID3D11ShaderResourceView* pTexture ) { m_pRuleTexture = pTexture; }
 
 	// アニメーションを行うかの設定.
 	inline void SetIsAnimPlay( const bool Flag ) { m_IsAnimPlay = Flag; }
 	// この画像を全て表示するかの設定.
 	inline void SetIsAllDisp( const bool Flag ) { m_IsAllDisp = Flag; }
-	// ディザ抜きを使用するか.
-	inline void SetDither( const bool Flag ) { m_DitherFlag = Flag; }
-	// アルファブロックを使用するか.
-	inline void SetAlphaBlock( const bool Flag ) { m_AlphaBlockFlag = Flag; }
 
 private:
 	// シェーダ作成.
@@ -196,8 +187,6 @@ private:
 	ID3D11Buffer*					m_pConstantBuffer;		// コンスタントバッファ.
 
 	ID3D11ShaderResourceView*		m_pTexture;				// テクスチャ.
-	ID3D11ShaderResourceView*		m_pMaskTexture;			// マスクテクスチャ.
-	ID3D11ShaderResourceView*		m_pRuleTexture;			// ルールテクスチャ.
 	ID3D11SamplerState*				m_pSampleLinears[static_cast<Sampler>( ESamplerState::Max )]; // サンプラ:テクスチャに各種フィルタをかける.
 
 	SVertex							m_Vertices[4];			// 頂点作成用.
@@ -208,8 +197,6 @@ private:
 	std::vector<std::string>*		m_pLogList;				// ログリスト.
 
 	bool							m_IsAnimPlay;			// アニメーションを行うか.
-	bool							m_DitherFlag;			// ディザ抜きを使用するか.
-	bool							m_AlphaBlockFlag;		// アルファブロックを使用するか.
 	bool							m_IsAllDisp;			// この画像を全て表示するか.
 	bool*							m_pIsCreaterLog;		// ログファイルを作成するか.
 };

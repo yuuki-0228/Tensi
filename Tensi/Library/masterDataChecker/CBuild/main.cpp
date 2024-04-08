@@ -1,15 +1,11 @@
 #include "error.h"
-#include "ConstCreate.h"
-#include "SaveCreate.h"
-#include "MDataCreate.h"
+#include "Check.h"
 
 namespace {
 	int NormalEnd() {
 		fprintf( stderr, "1>コード作成が終了しました。\n" );
 
-		ConstCreate::result();
-		SaveCreate::result();
-		MDataCreate::result();
+		Check::result();
 
 		fprintf( stderr, "========== コード作成: 1 正常終了、0 失敗 ==========\n" );
 		return S_OK;
@@ -22,13 +18,11 @@ namespace {
 }
 
 int main() {
-	fprintf( stderr, "Creatorを開始しました...\n" );
-	fprintf( stderr, "1>------ Creator 開始: プラグイン: creator ------\n" );
+	fprintf( stderr, "MasterDataCheckerを開始しました...\n" );
+	fprintf( stderr, "1>------ MasterDataChecker 開始: プラグイン: masterDataChecker ------\n" );
 	fprintf( stderr, "1>コード作成しています。\n" );
 
-	if ( FAILED( ConstCreate::main()	) ) return ErrorEnd();
-	if ( FAILED( SaveCreate::main()		) ) return ErrorEnd();
-	if ( FAILED( MDataCreate::main()	) ) return ErrorEnd();
+	if ( FAILED( Check::main()	) ) return ErrorEnd();
 
 	return NormalEnd();
 }

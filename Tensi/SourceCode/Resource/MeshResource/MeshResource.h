@@ -13,7 +13,6 @@ class CCollisionMesh;
 
 /************************************************
 *	メッシュリソースクラス.
-*		﨑田友輝.
 **/
 class MeshResource final
 {

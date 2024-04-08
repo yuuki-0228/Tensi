@@ -3,7 +3,6 @@
 
 /************************************************
 *	ウィンドウ設定クラス.
-*		﨑田友輝.
 **/
 class CWindowSetting final
 	: public CSystemBase

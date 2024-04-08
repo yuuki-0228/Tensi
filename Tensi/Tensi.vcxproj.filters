@@ -280,6 +280,7 @@
     <ClCompile Include="SourceCode\Utility\SaveDataManager\CommonSaveData\CommonSaveData.cpp" />
     <ClCompile Include="SourceCode\Utility\MasterData\MasterDataAccesser.cpp" />
     <ClCompile Include="SourceCode\Utility\MasterData\MasterDatas.cpp" />
+    <ClCompile Include="SourceCode\Object\GameObject\Actor\Window\Window.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="SourceCode\Global.h">
@@ -477,6 +478,7 @@
     <ClInclude Include="SourceCode\Utility\SaveDataManager\SaveData.h" />
     <ClInclude Include="SourceCode\Utility\MasterData\MasterDataAccesser.h" />
     <ClInclude Include="SourceCode\Utility\MasterData\MasterDatas.h" />
+    <ClInclude Include="SourceCode\Object\GameObject\Actor\Window\Window.h" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="ico.rc" />

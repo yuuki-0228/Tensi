@@ -41,8 +41,7 @@ struct stSpriteShaderConstantBuffer
 	ALIGN16 D3DXVECTOR4	vRenderArea;		// 描画するエリア.
 	ALIGN16 float		fViewPortWidth;		// ビューポート幅.
 	ALIGN16 float		fViewPortHeight;	// ビューポート高さ.
-	ALIGN16 D3DXVECTOR4 vDitherFlag;		// ディザ抜きを使用するか(xが1以上なら使用する).
-	ALIGN16 D3DXVECTOR4 vAlphaBlockFlag;	// アルファブロックを使用するか(xが1以上なら使用する).
+	ALIGN16 D3DXVECTOR4 vFlag;				// フラグ(1以上なら使用する)(x:ディザ抜きを使用するか)(y:アルファブロックを使用するか)(z:カラーにマスクを使用するか).
 } typedef SSpriteShaderConstantBuffer;
 
 // 幅高さ構造体.
@@ -314,31 +313,48 @@ struct stSpriteAnimState
 // 描画用画像情報構造体.
 struct stSpriteRenderState
 {
-	SSpriteAnimState	AnimState;			// アニメーション情報.
-	SUIAnimState		UIAnimState;		// UIアニメーション情報.
-	STransform			Transform;			// トランスフォーム.
-	ESamplerState		SmaplerNo;			// サンプラ番号.
-	D3DXCOLOR4			Color;				// 色.
-	D3DXVECTOR4			RenderArea;			// 描画するエリア( 左上x, 左上y, 幅, 高さ ).
-	std::string			SceneName;			// どのシーンか.
-	std::string			No;					// どの設定の画像か.
-	bool				IsDisp;				// 表示するか.
-	bool				IsGrab;				// つかまれているか.
-	bool				IsLock;				// つかめなくするか.
+	SSpriteAnimState			AnimState;		// アニメーション情報.
+	SUIAnimState				UIAnimState;	// UIアニメーション情報.
+	STransform					Transform;		// トランスフォーム.
+	ID3D11ShaderResourceView*	MaskTexture;	// マスクテクスチャ.
+	ID3D11ShaderResourceView*	RuleTexture;	// ルールテクスチャ.
+	ESamplerState				SmaplerNo;		// サンプラ番号.
+	D3DXCOLOR4					Color;			// 色.
+	D3DXVECTOR4					RenderArea;		// 描画するエリア( 左上x, 左上y, 幅, 高さ ).
+	std::string					SceneName;		// どのシーンか.
+	std::string					No;				// どの設定の画像か.
+	bool						IsDisp;			// 表示するか.
+	bool						IsDither;		// ディザ抜きを使用するか.
+	bool						IsAlphaBlock;	// アルファブロックを使用するか.
+	bool						IsColorMask;	// 色の変更を指定するためにマスクを使用するか.
+	bool						IsGrab;			// つかまれているか.
+	bool						IsLock;			// つかめなくするか.
+
 
 	stSpriteRenderState()
 		: AnimState		()
 		, UIAnimState	()
 		, Transform		()
+		, MaskTexture	( nullptr )
+		, RuleTexture	( nullptr )
 		, SmaplerNo		( ESamplerState::Wrap )
 		, Color			( Color4::White )
 		, RenderArea	( 0.0f, 0.0f, -1.0f, -1.0f )
 		, SceneName		( "" )
 		, No			( "" )
 		, IsDisp		( true )
+		, IsDither		( false )
+		, IsAlphaBlock	( true )
+		, IsColorMask	( false )
 		, IsGrab		( false )
 		, IsLock		( false )
 	{}
+
+	~stSpriteRenderState()
+	{
+		SAFE_RELEASE( RuleTexture	);
+		SAFE_RELEASE( MaskTexture	);
+	}
 
 } typedef SSpriteRenderState;
 using SSpriteRenderStateList = std::vector<SSpriteRenderState>;

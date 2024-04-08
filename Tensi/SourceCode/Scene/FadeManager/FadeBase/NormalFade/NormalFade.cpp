@@ -16,7 +16,6 @@ bool CNormalFade::Init()
 {
 	// ‰æ‘œ‚ÌÝ’è.
 	m_pFadeSprite		= SpriteResource::GetSprite( "Fade", &m_FadeState );
-	m_pFadeSprite->SetRuleTexture( nullptr );
 
 	// ‰ŠúÝ’è.
 	m_FadeState.Color.w = Color::ALPHA_MIN;
@@ -39,7 +38,6 @@ void CNormalFade::Render()
 //---------------------------.
 void CNormalFade::FadeSetting()
 {
-	m_pFadeSprite->SetRuleTexture( nullptr );
 }
 
 //---------------------------.

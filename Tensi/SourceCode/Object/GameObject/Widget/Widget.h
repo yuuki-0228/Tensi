@@ -39,7 +39,6 @@ namespace {
 
 /************************************************
 *	ゲーム内のUIベースクラス.
-*		﨑田友輝.
 **/
 class CWidget
 	: public CGameObject

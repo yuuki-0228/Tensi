@@ -38,16 +38,12 @@ CSprite::CSprite()
 	, m_pVertexBuffer3D			( nullptr )
 	, m_pSampleLinears			()
 	, m_pTexture				( nullptr )
-	, m_pMaskTexture			( nullptr )
-	, m_pRuleTexture			( nullptr )
 	, m_Vertices				()
 	, m_SpriteState				()
 	, m_SpriteRenderState		()
 	, m_SpriteStateData			()
 	, m_pLogList				( nullptr )
 	, m_IsAnimPlay				( true )
-	, m_DitherFlag				( false )
-	, m_AlphaBlockFlag			( true )
 	, m_IsAllDisp				( true )
 	, m_pIsCreaterLog			( nullptr )
 {
@@ -56,7 +52,6 @@ CSprite::CSprite()
 CSprite::~CSprite()
 {
 	for ( auto& s : m_pSampleLinears )	SAFE_RELEASE( s );
-	SAFE_RELEASE( m_pMaskTexture	);
 	SAFE_RELEASE( m_pTexture		);
 	SAFE_RELEASE( m_pVertexBuffer3D	);
 	SAFE_RELEASE( m_pVertexBufferUI	);
@@ -216,7 +211,7 @@ void CSprite::RenderUI( SSpriteRenderState* pRenderState )
 	D3DXMATRIX mWorld = RenderState->Transform.GetWorldMatrix() * mOffSet;
 
 	// 使用するシェーダの登録.
-	const int PSShaderNo = m_pRuleTexture == nullptr ? m_pMaskTexture == nullptr ? 0 : 1 : 2;
+	const int PSShaderNo = RenderState->RuleTexture == nullptr ? RenderState->MaskTexture == nullptr || RenderState->IsColorMask ? 0 : 1 : 2;
 	m_pContext->VSSetShader( m_pVertexShader, nullptr, 0 );
 	m_pContext->PSSetShader( m_pPixelShaders[PSShaderNo],  nullptr, 0 );
 
@@ -253,10 +248,13 @@ void CSprite::RenderUI( SSpriteRenderState* pRenderState )
 		cb.fViewPortHeight	= WndH;
 
 		// ディザ抜きを使用するか.
-		cb.vDitherFlag.x = m_DitherFlag == true ? 1.0f : 0.0f;
+		cb.vFlag.x = RenderState->IsDither == true ? 1.0f : 0.0f;
 
 		// アルファブロックを使用するかを渡す.
-		cb.vAlphaBlockFlag.x = m_AlphaBlockFlag == true ? 1.0f : 0.0f;
+		cb.vFlag.y = RenderState->IsAlphaBlock == true ? 1.0f : 0.0f;
+
+		// カラーマスクを使用するかを渡す.
+		cb.vFlag.z = RenderState->IsColorMask == true ? 1.0f : 0.0f;
 
 		memcpy_s( pData.pData, pData.RowPitch,
 			(void*) ( &cb ), sizeof( cb ) );
@@ -283,17 +281,17 @@ void CSprite::RenderUI( SSpriteRenderState* pRenderState )
 	// テクスチャをシェーダに渡す.
 	m_pContext->PSSetSamplers( 0, 1, &m_pSampleLinears[static_cast<Sampler>( RenderState->SmaplerNo )] );
 	m_pContext->PSSetShaderResources( 0, 1, &m_pTexture );
-	m_pContext->PSSetShaderResources( 1, 1, &m_pMaskTexture );
-	m_pContext->PSSetShaderResources( 2, 1, &m_pRuleTexture );
+	m_pContext->PSSetShaderResources( 1, 1, &RenderState->MaskTexture );
+	m_pContext->PSSetShaderResources( 2, 1, &RenderState->RuleTexture );
 
 	// アルファブレンド有効にする.
-	if ( !m_DitherFlag ) DirectX11::SetAlphaBlend( true );
+	if ( !RenderState->IsDither ) DirectX11::SetAlphaBlend( true );
 
 	// プリミティブをレンダリング.
 	m_pContext->Draw( 4, 0 );// 板ポリ(頂点4つ分).
 
 	// アルファブレンド無効にする.
-	if ( !m_DitherFlag ) DirectX11::SetAlphaBlend( false );
+	if ( !RenderState->IsDither ) DirectX11::SetAlphaBlend( false );
 }
 
 //----------------------------.
@@ -337,7 +335,7 @@ void CSprite::Render3D( SSpriteRenderState* pRenderState, const bool IsBillBoard
 	}
 
 	// 使用するシェーダの登録.
-	const int PSShaderNo = m_pRuleTexture == nullptr ? m_pMaskTexture == nullptr ? 0 : 1 : 2;
+	const int PSShaderNo = RenderState->RuleTexture == nullptr ? RenderState->MaskTexture == nullptr || RenderState->IsColorMask ? 0 : 1 : 2;
 	m_pContext->VSSetShader( m_pVertexShader, nullptr, 0 );
 	m_pContext->PSSetShader( m_pPixelShaders[PSShaderNo], nullptr, 0 );
 
@@ -373,10 +371,13 @@ void CSprite::Render3D( SSpriteRenderState* pRenderState, const bool IsBillBoard
 		cb.fViewPortHeight	= 0.0f;
 
 		// ディザ抜きを使用するか.
-		cb.vDitherFlag.x = m_DitherFlag == true ? 1.0f : 0.0f;
+		cb.vFlag.x = RenderState->IsDither == true ? 1.0f : 0.0f;
 
 		// アルファブロックを使用するかを渡す.
-		cb.vAlphaBlockFlag.x = m_AlphaBlockFlag == true ? 1.0f : 0.0f;
+		cb.vFlag.y = RenderState->IsAlphaBlock == true ? 1.0f : 0.0f;
+
+		// カラーマスクを使用するかを渡す.
+		cb.vFlag.z = RenderState->IsColorMask == true ? 1.0f : 0.0f;
 
 		memcpy_s( pData.pData, pData.RowPitch,
 			(void*) ( &cb ), sizeof( cb ) );
@@ -403,17 +404,17 @@ void CSprite::Render3D( SSpriteRenderState* pRenderState, const bool IsBillBoard
 	// テクスチャをシェーダに渡す.
 	m_pContext->PSSetSamplers( 0, 1, &m_pSampleLinears[static_cast<Sampler>( RenderState->SmaplerNo )] );
 	m_pContext->PSSetShaderResources( 0, 1, &m_pTexture );
-	m_pContext->PSSetShaderResources( 1, 1, &m_pMaskTexture );
-	m_pContext->PSSetShaderResources( 2, 1, &m_pRuleTexture );
+	m_pContext->PSSetShaderResources( 1, 1, &RenderState->MaskTexture );
+	m_pContext->PSSetShaderResources( 2, 1, &RenderState->RuleTexture );
 
 	// アルファブレンド有効にする.
-	if ( !m_DitherFlag ) DirectX11::SetAlphaBlend( true );
+	if ( !RenderState->IsDither ) DirectX11::SetAlphaBlend( true );
 
 	// プリミティブをレンダリング.
 	m_pContext->Draw( 4, 0 );// 板ポリ(頂点4つ分).
 
 	// アルファブレンド無効にする.
-	if ( !m_DitherFlag ) DirectX11::SetAlphaBlend( false );
+	if ( !RenderState->IsDither ) DirectX11::SetAlphaBlend( false );
 }
 
 //----------------------------.

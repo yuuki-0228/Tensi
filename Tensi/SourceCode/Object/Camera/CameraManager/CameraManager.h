@@ -8,7 +8,6 @@ class CFreeCamera;
 
 /************************************************
 *	カメラマネージャークラス.
-*		﨑田友輝.
 **/
 class CameraManager final
 {

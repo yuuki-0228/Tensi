@@ -4,7 +4,6 @@
 
 /************************************************
 *	ランダムクラス.
-*		﨑田友輝.
 **/
 class Random final
 {
@@ -52,8 +51,8 @@ private:
 private:
 	// コピー・ムーブコンストラクタ, 代入演算子の削除.
 	Random( const Random & )				= delete;
-	Random& operator = ( const Random & ) = delete;
-	Random( Random && )					= delete;
+	Random& operator = ( const Random & )	= delete;
+	Random( Random && )						= delete;
 	Random& operator = ( Random && )		= delete;
 };
 

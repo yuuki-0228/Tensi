@@ -16,7 +16,6 @@ enum class enCodePage {
 
 /************************************************
 *	•¶Žš—ñ•ÏŠ·
-*		ú±“c—F‹P.
 **/
 namespace StringConversion {
 	// std::string ‚ð std::wstring ‚É•ÏŠ·.

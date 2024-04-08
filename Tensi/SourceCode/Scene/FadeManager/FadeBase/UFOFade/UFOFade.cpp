@@ -28,6 +28,7 @@ bool CUFOFade::Init()
 	m_UFOState.Transform.Scale			= END_FADEOUT_SCALE_VEC3;
 	m_UFOState.Transform.Position.x		= static_cast<float>( WND_W / 2 );
 	m_UFOState.Transform.Position.y		= static_cast<float>( WND_H / 2 );
+	m_UFOState.IsAlphaBlock				= false;
 	return true;
 }
 
@@ -39,9 +40,7 @@ void CUFOFade::Render()
 {
 	if ( m_UFOState.Transform.Scale == END_FADEOUT_SCALE_VEC3 ) return;
 
-	m_pSpriteUFO->SetAlphaBlock( false );
 	m_pSpriteUFO->RenderUI( &m_UFOState );
-	m_pSpriteUFO->SetAlphaBlock( true );
 	m_pFadeSprite->RenderUI( &m_FadeState );
 }
 

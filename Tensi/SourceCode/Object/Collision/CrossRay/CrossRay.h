@@ -16,7 +16,6 @@ namespace {
 
 /************************************************
 *	十字レイクラス.
-*		﨑田友輝.
 **/
 class CCrossRay final
 	: public CColliderBase

@@ -3,7 +3,6 @@
 
 /************************************************
 *	バグ報告クラス.
-*		﨑田友輝.
 **/
 class CBugReport final
 	: public CSystemBase

@@ -6,7 +6,6 @@ class CSceneWidget;
 
 /************************************************
 *	UIエディタ.
-*		﨑田友輝.
 **/
 class CUIEditor final
 	: public CEditorBase

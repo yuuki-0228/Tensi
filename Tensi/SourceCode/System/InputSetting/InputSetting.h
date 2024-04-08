@@ -4,7 +4,6 @@
 
 /************************************************
 *	“ü—Íİ’èƒNƒ‰ƒX.
-*		ú±“c—F‹P.
 **/
 class InputSetting final
 	: public CSystemBase

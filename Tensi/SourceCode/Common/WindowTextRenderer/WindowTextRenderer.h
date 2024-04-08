@@ -4,7 +4,6 @@
 
 /************************************************
 *	ウィンドウに表示するテキストクラス.
-*		﨑田友輝.
 **/
 class WindowTextRenderer final
 	: public CCommon

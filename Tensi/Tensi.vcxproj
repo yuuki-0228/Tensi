@@ -51,6 +51,7 @@
     <ClCompile Include="SourceCode\Object\GameObject\Actor\WindowObject\WateringCan\WateringCan.cpp" />
     <ClCompile Include="SourceCode\Object\GameObject\Actor\WindowObject\WateringCan\WaterManager\WaterManager.cpp" />
     <ClCompile Include="SourceCode\Object\GameObject\Actor\WindowObject\WateringCan\WaterManager\Water\Water.cpp" />
+    <ClCompile Include="SourceCode\Object\GameObject\Actor\Window\Window.cpp" />
     <ClCompile Include="SourceCode\Utility\Const\Const.cpp" />
     <ClCompile Include="SourceCode\Utility\MasterData\MasterDataAccesser.cpp" />
     <ClCompile Include="SourceCode\Utility\MasterData\MasterDatas.cpp" />
@@ -196,6 +197,7 @@
     <ClInclude Include="SourceCode\Object\GameObject\Actor\WindowObject\WateringCan\WaterManager\WaterData.h" />
     <ClInclude Include="SourceCode\Object\GameObject\Actor\WindowObject\WateringCan\WaterManager\WaterManager.h" />
     <ClInclude Include="SourceCode\Object\GameObject\Actor\WindowObject\WateringCan\WaterManager\Water\Water.h" />
+    <ClInclude Include="SourceCode\Object\GameObject\Actor\Window\Window.h" />
     <ClInclude Include="SourceCode\Utility\Const\Const.h" />
     <ClInclude Include="SourceCode\Utility\MasterData\MasterDataAccesser.h" />
     <ClInclude Include="SourceCode\Utility\MasterData\MasterDatas.h" />

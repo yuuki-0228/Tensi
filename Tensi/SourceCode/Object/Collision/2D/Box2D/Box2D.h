@@ -4,7 +4,6 @@
 
 /**************************************
 *	2Dの四角クラス.
-*		﨑田友輝.
 **/
 class CBox2D final
 	: public CColliderBase

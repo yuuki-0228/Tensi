@@ -33,7 +33,6 @@ struct stCameraState {
 
 /************************************************
 *	カメラベースクラス.
-*		﨑田友輝.
 **/
 class CCameraBase
 	: public CObject

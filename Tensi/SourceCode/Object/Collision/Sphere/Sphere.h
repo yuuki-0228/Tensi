@@ -5,7 +5,6 @@ class CStaticMesh;
 
 /**************************************
 *	‹…‘ÌƒNƒ‰ƒX.
-*		ú±“c—F‹P.
 **/
 class CSphere final
 	: public CColliderBase

@@ -4,7 +4,6 @@
 
 /**************************************
 *	2D‚Ì‰~ƒNƒ‰ƒX.
-*		ú±“c—F‹P.
 **/
 class CSphere2D final
 	: public CColliderBase

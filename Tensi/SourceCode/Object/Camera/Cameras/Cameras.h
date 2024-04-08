@@ -21,7 +21,6 @@ enum class enCameraType : unsigned char
 
 /************************************************
 *	複数のカメラを所持しているクラス.
-*		﨑田友輝.
 **/
 class CCameras final
 {

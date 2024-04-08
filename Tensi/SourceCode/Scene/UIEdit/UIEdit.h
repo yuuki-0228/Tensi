@@ -6,7 +6,6 @@ class CUIEditor;
 
 /************************************************
 *	UIエディタシーン.
-*		﨑田友輝.
 **/
 class CUIEdit final
 	: public CSceneBase

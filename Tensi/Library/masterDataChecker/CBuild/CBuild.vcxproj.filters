@@ -14,14 +14,8 @@
     <Filter Include="Utility\File">
       <UniqueIdentifier>{ba6da078-56bc-4fd9-9466-1ad6aa91bd56}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Main\Const">
+    <Filter Include="Main\Check">
       <UniqueIdentifier>{418dd237-fb35-46ae-8353-6f7f482ff42d}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Main\Save">
-      <UniqueIdentifier>{ac14c573-bbda-4668-8c89-8b9937319461}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Main\MData">
-      <UniqueIdentifier>{03aabd22-9346-4794-a1cd-0da3722e8155}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -34,14 +28,8 @@
     <ClInclude Include="file.h">
       <Filter>Utility\File</Filter>
     </ClInclude>
-    <ClInclude Include="ConstCreate.h">
-      <Filter>Main\Const</Filter>
-    </ClInclude>
-    <ClInclude Include="SaveCreate.h">
-      <Filter>Main\Save</Filter>
-    </ClInclude>
-    <ClInclude Include="MDataCreate.h">
-      <Filter>Main\MData</Filter>
+    <ClInclude Include="Check.h">
+      <Filter>Main\Check</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -54,14 +42,8 @@
     <ClCompile Include="string.cpp">
       <Filter>Utility\String</Filter>
     </ClCompile>
-    <ClCompile Include="ConstCreate.cpp">
-      <Filter>Main\Const</Filter>
-    </ClCompile>
-    <ClCompile Include="SaveCreate.cpp">
-      <Filter>Main\Save</Filter>
-    </ClCompile>
-    <ClCompile Include="MDataCreate.cpp">
-      <Filter>Main\MData</Filter>
+    <ClCompile Include="Check.cpp">
+      <Filter>Main\Check</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

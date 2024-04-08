@@ -3,7 +3,6 @@
 
 /************************************************
 *	三人称カメラクラス.
-*		﨑田友輝.
 **/
 class CThirdPersonCamera final
 	: public CCameraBase

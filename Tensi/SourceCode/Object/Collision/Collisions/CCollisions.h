@@ -28,7 +28,6 @@ enum class enCollType : unsigned char
 
 /************************************************
 *	•¡”‚Ì“–‚½‚è”»’è‚ğŠ‚µ‚Ä‚¢‚éƒNƒ‰ƒX.
-*		ú±“c—F‹P.
 **/
 class CCollisions final
 {

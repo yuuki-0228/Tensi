@@ -8,7 +8,6 @@ using D3DXCOLOR4 = D3DXVECTOR4;
 /************************************************
 *	色一覧( R,G,B ).
 *	https://www.webcreatorbox.com/webinfo/color-name
-*		﨑田友輝.
 **/
 namespace Color3 {
 	constexpr float COLOR_MAX = 1.0f; // 色の最大値.
@@ -226,7 +225,6 @@ namespace Color = Color3;
 /************************************************
 *	色一覧( R,G,B,A ).
 *	https://www.webcreatorbox.com/webinfo/color-name
-*		﨑田友輝.
 **/
 namespace Color4 {
 	constexpr float COLOR_MAX = 1.0f; // 色の最大値.

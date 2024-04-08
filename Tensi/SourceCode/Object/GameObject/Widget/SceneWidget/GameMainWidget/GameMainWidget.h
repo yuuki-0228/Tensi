@@ -3,7 +3,6 @@
 
 /************************************************
 *	ゲームメインUIクラス.
-*		井谷凌.
 **/
 class CGameMainWidget final
 	: public CSceneWidget

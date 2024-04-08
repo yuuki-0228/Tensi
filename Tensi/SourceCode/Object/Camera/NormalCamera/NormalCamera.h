@@ -3,7 +3,6 @@
 
 /************************************************
 *	通常のカメラクラス.
-*		﨑田友輝.
 **/
 class CNormalCamera final
 	: public CCameraBase

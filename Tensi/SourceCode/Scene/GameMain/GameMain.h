@@ -13,10 +13,10 @@ class CWeedManager;
 class CFlowerManager;
 class CHouse;
 class CWaterFall;
+class CWindow;
 
 /************************************************
 *	ゲームクラス.
-*		﨑田友輝.
 **/
 class CGameMain final
 	: public CSceneBase
@@ -59,5 +59,6 @@ private:
 	std::shared_ptr<CFlowerManager>			m_pFlowerManager;	// 花.
 	std::shared_ptr<CHouse>					m_pHouse;			// 家.
 	std::shared_ptr<CWaterFall>				m_pWaterFall;		// 滝.
+	std::shared_ptr<CWindow>				m_pWindow;			// ウィンドウ.
 	std::unique_ptr<CGameMainWidget>		m_GameMainWidget;	// UI.
 };

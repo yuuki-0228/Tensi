@@ -20,7 +20,6 @@ struct stLightState
 
 /************************************************
 *	ライトクラス.
-*		﨑田友輝.
 **/
 class Light final
 	: public CObject

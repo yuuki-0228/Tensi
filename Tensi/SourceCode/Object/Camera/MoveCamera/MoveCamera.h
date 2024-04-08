@@ -3,7 +3,6 @@
 
 /************************************************
 *	移動するカメラクラス.
-*		﨑田友輝.
 **/
 class CMoveCamera final
 	: public CCameraBase

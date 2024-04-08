@@ -17,7 +17,7 @@ bool CMaskFade::Init()
 	// ‰æ‘œ‚ÌÝ’è.
 	m_pFadeSprite	= SpriteResource::GetSprite( "Fade", &m_FadeState );
 	m_pMaskTexture	= SpriteResource::GetSprite( "FadeMask" )->GetTexture();
-	m_pFadeSprite->SetRuleTexture( m_pMaskTexture );
+	m_FadeState.RuleTexture = m_pMaskTexture;
 
 	// ‰ŠúÝ’è.
 	m_FadeState.Color.w = Color::ALPHA_MIN;
@@ -40,7 +40,6 @@ void CMaskFade::Render()
 //---------------------------.
 void CMaskFade::FadeSetting()
 {
-	m_pFadeSprite->SetRuleTexture( m_pMaskTexture );
 }
 
 //---------------------------.

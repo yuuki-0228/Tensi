@@ -4,3 +4,5 @@
 # x64ファイルは含めない
 /x64/
 Tensi/x64/
+
+Tensi/RData/

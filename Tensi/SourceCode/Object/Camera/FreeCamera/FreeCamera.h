@@ -3,7 +3,6 @@
 
 /************************************************
 *	自由に動かせるカメラクラス.
-*		﨑田友輝.
 **/
 class CFreeCamera final
 	: public CCameraBase

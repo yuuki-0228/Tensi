@@ -16,8 +16,7 @@ cbuffer per_mesh : register(b0)	//ﾚｼﾞｽﾀ番号.
 	float4	g_RenderArea		: packoffset(c6);	//描画する範囲(左上x, 左上y, 幅, 高さ).
 	float	g_ViewPortW			: packoffset(c7);	//ﾋﾞｭｰﾎﾟｰﾄ幅.
 	float	g_ViewPortH			: packoffset(c8);	//ﾋﾞｭｰﾎﾟｰﾄ高さ.
-	float4	g_vDitherFlag		: packoffset(c9);	//ﾃﾞｲｻﾞ抜きを使用するか.
-	float4	g_vAlphaBlockFlag	: packoffset(c10);	//ｱﾙﾌｧﾌﾞﾛｯｸを使用するか.
+	float4	g_vFlag				: packoffset(c9);	//ﾌﾗｸﾞ(x:ﾃﾞｲｻﾞ抜きを使用するか)(y:ｱﾙﾌｧﾌﾞﾛｯｸを使用するか)(z:ｶﾗｰにﾏｽｸを使用するか).
 };
 
 //頂点ｼｪｰﾀﾞの出力ﾊﾟﾗﾒｰﾀ.
@@ -66,7 +65,13 @@ float4 PS_Main( VS_OUTPUT input ) : SV_Target
 	float4 finalColor = g_Texture.Sample(g_samLinear, input.UV); //色を返す.
 
 	//ﾌﾟﾛｸﾞﾗﾑ制御の色をかけ合わせる.
-	finalColor *= g_Color;
+	if (g_vFlag.z >= 1.0f){
+		float4 maskColor = g_MaskTexture.Sample(g_samLinear, input.UV);
+		finalColor.rgb *= (1.0f - (1.0f - g_Color.rgb)*maskColor.r);
+	}
+	else{
+		finalColor.rgb *= g_Color.rgb;
+	}
 	
 	// 描画するエリア外の場合透明にする.
 	if ( input.Pos.x < g_RenderArea.x || input.Pos.x > g_RenderArea.x + g_RenderArea.z ||
@@ -76,12 +81,12 @@ float4 PS_Main( VS_OUTPUT input ) : SV_Target
 	}
 	
 	// アルファブロック計算.
-	if (g_vAlphaBlockFlag.x >= 1.0f){
+	if (g_vFlag.y >= 1.0f){
 		clip(finalColor.a - 0.0001f);
 	}
 	
 	// ディザ抜き計算.
-	if ( g_vDitherFlag.x >= 1.0f ) {
+	if ( g_vFlag.x >= 1.0f ) {
 		const int pt_x = (int) fmod( input.Pos.x, 4.0f );
 		const int pt_y = (int) fmod( input.Pos.y, 4.0f );
 		const float dither = DITHER_PATTERN[pt_y][pt_x];
@@ -100,7 +105,7 @@ float4 PS_Mask(VS_OUTPUT input) : SV_Target
 
 	// 色を掛け合わせる.
 	finalColor.a *= 1.0f - maskColor.r;
-	finalColor *= g_Color;
+	finalColor.rgb *= g_Color.rgb;
 	
 	// 描画するエリア外の場合透明にする.
 	if ( input.Pos.x < g_RenderArea.x || input.Pos.x > g_RenderArea.x + g_RenderArea.z ||
@@ -110,12 +115,12 @@ float4 PS_Mask(VS_OUTPUT input) : SV_Target
 	}
 	
 	// アルファブロック計算.
-	if (g_vAlphaBlockFlag.x >= 1.0f){
+	if (g_vFlag.y >= 1.0f){
 		clip(finalColor.a - 0.0001f);
 	}
 	
 	// ディザ抜き計算.
-	if ( g_vDitherFlag.x >= 1.0f ) {
+	if ( g_vFlag.x >= 1.0f ) {
 		const int pt_x = (int) fmod( input.Pos.x, 4.0f );
 		const int pt_y = (int) fmod( input.Pos.y, 4.0f );
 		const float dither = DITHER_PATTERN[pt_y][pt_x];
@@ -137,7 +142,12 @@ float4 PS_Transition(VS_OUTPUT input) : SV_Target
 	float4 finalColor = texColor * maskAlpha + texColor * (1 - texColor.a);
 	
 	// 色をかけ合わせる.
-	finalColor.rbg *= g_Color.rgb;
+	if (g_vFlag.z >= 1.0f){
+		finalColor.rgb *= (1.0f - (1.0f - g_Color.rgb) * maskColor.r);
+	}
+	else{
+		finalColor.rgb *= g_Color.rgb;
+	}
 	
 	// 描画するエリア外の場合透明にする.
 	if ( input.Pos.x < g_RenderArea.x || input.Pos.x > g_RenderArea.x + g_RenderArea.z ||
@@ -147,12 +157,12 @@ float4 PS_Transition(VS_OUTPUT input) : SV_Target
 	}
 	
 	// アルファブロック計算.
-	if (g_vAlphaBlockFlag.x >= 1.0f){
+	if (g_vFlag.y >= 1.0f){
 		clip(finalColor.a - 0.0001f);
 	}
 	
 	// ディザ抜き計算.
-	if ( g_vDitherFlag.x >= 1.0f ) {
+	if ( g_vFlag.x >= 1.0f ) {
 		const int pt_x = (int) fmod( input.Pos.x, 4.0f );
 		const int pt_y = (int) fmod( input.Pos.y, 4.0f );
 		const float dither = DITHER_PATTERN[pt_y][pt_x];

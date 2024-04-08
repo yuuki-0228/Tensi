@@ -17,7 +17,6 @@ enum class enFadeType : unsigned char
 
 /************************************************
 *	フェードマネージャークラス.
-*		﨑田友輝.
 **/
 class FadeManager final
 {

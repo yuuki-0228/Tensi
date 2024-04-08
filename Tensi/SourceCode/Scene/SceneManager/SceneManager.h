@@ -17,7 +17,6 @@ enum class enSceneList : unsigned char
 
 /************************************************
 *	シーンマネージャー.
-*		﨑田友輝.
 **/
 class SceneManager final
 {

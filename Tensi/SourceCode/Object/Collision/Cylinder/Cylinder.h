@@ -5,7 +5,6 @@ class CStaticMesh;
 
 /**************************************
 *	‰ñ“]‚µ‚È‚¢‰~’ŒƒNƒ‰ƒX.
-*		ú±“c—F‹P.
 **/
 class CCylinder final
 	: public CColliderBase

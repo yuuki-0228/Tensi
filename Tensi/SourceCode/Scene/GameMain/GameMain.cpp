@@ -12,6 +12,7 @@
 #include "..\..\Object\GameObject\Actor\FlowerManager\FlowerManager.h"
 #include "..\..\Object\GameObject\Actor\House\House.h"
 #include "..\..\Object\GameObject\Actor\WaterFall\WaterFall.h"
+#include "..\..\Object\GameObject\Actor\Window\Window.h"
 #include "..\..\Object\GameObject\Widget\SceneWidget\GameMainWidget\GameMainWidget.h"
 #include "..\..\Object\GameObject\ActorCollisionManager\ActorCollisionManager.h"
 #include "..\..\Resource\SpriteResource\SpriteResource.h"
@@ -36,6 +37,7 @@ CGameMain::CGameMain()
 	, m_pFlowerManager	( nullptr )
 	, m_pHouse			( nullptr )
 	, m_pWaterFall		( nullptr )
+	, m_pWindow			( nullptr )
 	, m_GameMainWidget	( nullptr )
 {
 }
@@ -60,6 +62,7 @@ bool CGameMain::Init()
 	m_pFlowerManager	= std::make_shared<CFlowerManager>();
 	m_pHouse			= std::make_shared<CHouse>();
 	m_pWaterFall		= std::make_shared<CWaterFall>();
+	m_pWindow			= std::make_shared<CWindow>();
 	m_GameMainWidget	= std::make_unique<CGameMainWidget>();
 
 	m_pPlayer->Init();
@@ -73,7 +76,11 @@ bool CGameMain::Init()
 	m_pFlowerManager->Init();
 	m_pHouse->Init();
 	m_pWaterFall->Init();
+	m_pWindow->Init();
 	m_GameMainWidget->Init();
+
+	m_pWindow->Create( { 1.0f, 1.0f, 1.0f }, { 1.0f, 1.0f }, "手持ち" );
+	m_pWindow->SetRender( [&]() { m_pBall->Render(); } );
 
 	// ライトの初期化.
 	Light::SetDirection( INIT_LIGHT_DIRECTION );
@@ -153,6 +160,8 @@ void CGameMain::Update( const float& DeltaTime )
 	m_pWeedManager->Update( DeltaTime );
 	m_pFlowerManager->Update( DeltaTime );
 
+	m_pWindow->Update( DeltaTime );
+
 	// 当たり判定処理.
 	ActorCollisionManager::Collision();
 
@@ -169,6 +178,8 @@ void CGameMain::Update( const float& DeltaTime )
 	m_pWeedManager->LateUpdate( DeltaTime );
 	m_pFlowerManager->LateUpdate( DeltaTime );
 
+	m_pWindow->LateUpdate( DeltaTime );
+
 	// デバックの更新.
 	m_pPlayer->DebugUpdate( DeltaTime );
 	m_pBall->DebugUpdate( DeltaTime );
@@ -181,6 +192,8 @@ void CGameMain::Update( const float& DeltaTime )
 	m_pTree->DebugUpdate( DeltaTime );
 	m_pWeedManager->DebugUpdate( DeltaTime );
 	m_pFlowerManager->DebugUpdate( DeltaTime );
+
+	m_pWindow->DebugUpdate( DeltaTime );
 
 	// UIの更新.
 	m_GameMainWidget->Update( DeltaTime );
@@ -210,6 +223,8 @@ void CGameMain::SpriteUIRender()
 	m_pSuperBall->Render();
 	m_pSlimeFrame->Render();
 	m_pPlayer->Render();
+
+	m_pWindow->Render();
 }
 void CGameMain::SubSpriteUIRender()
 {
@@ -225,6 +240,8 @@ void CGameMain::SubSpriteUIRender()
 	m_pSuperBall->SubRender();
 	m_pSlimeFrame->SubRender();
 	m_pPlayer->SubRender();
+
+	m_pWindow->SubRender();
 }
 
 //---------------------------.
