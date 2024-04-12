@@ -100,3 +100,14 @@ bool Random::Probability( float Ratio )
 {
 	return static_cast<float>( GetRand( 1, 100 ) ) <= Ratio * 100.0f;
 }
+
+//----------------------------.
+// •¶š—ñ‚ğæ“¾.
+//----------------------------.
+std::string Random::Shuffle( std::string Text )
+{
+	auto* pI = GetInstance();
+
+	std::shuffle( Text.begin(), Text.end(), pI->m_mt );
+	return Text;
+}

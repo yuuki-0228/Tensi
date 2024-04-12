@@ -1,8 +1,7 @@
-# .vsは含めない
 .vs/
-
-# x64ファイルは含めない
 /x64/
+/Debug/
+/Release/
 Tensi/x64/
-
-Tensi/RData/
+Tensi/Debug/
+Tensi/Release/

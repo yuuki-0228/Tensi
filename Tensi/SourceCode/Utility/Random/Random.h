@@ -36,6 +36,11 @@ public:
 	static bool Probability( float	Molecule, float Denominator );
 	static bool Probability( float	Ratio );
 
+	// リストをシャッフルする.
+	template<class T>
+	static std::vector<T> Shuffle( std::vector<T> List );
+	static std::string Shuffle( std::string Text );
+
 private:
 	// インスタンスの取得.
 	static Random* GetInstance();
@@ -79,4 +84,16 @@ inline T Random::GetRand( const std::vector<T>& Vector ) {
 	// ランダムで返す要素を選ぶ.
 	const int Max = static_cast<int>( Vector.size() ) - 1;
 	return Vector[GetRand( 0, Max )];
+}
+
+//---------------------------.
+// リストをシャッフルする.
+//---------------------------.
+template<class T>
+inline std::vector<T> Random::Shuffle( std::vector<T> List )
+{
+	auto* pI = GetInstance();
+
+	std::shuffle( List.begin(), List.end(), pI->m_mt );
+	return List;
 }
