@@ -195,16 +195,20 @@ HRESULT CMain::Create()
 		StringConversion::to_wString( WorkFile ).c_str() );
 #endif // #ifndef _DEBUG.
 	
-#ifdef _DEBUG
-	// バージョンファイルの作成
 	const std::string appv = WndSetting["Version"];
 	const std::string fp   = PARAMETER_FILE_PATH + appv + std::string( ".bin" );
+#ifdef _DEBUG
+	// バージョンファイルの作成
 	FileManager::BinarySave( fp.c_str(), appv );
-#endif // _DEBUG
+#else
+	if ( FileManager::FileCheck( fp ) == false ) {
+		InfoMessage( "古いバージョンのデータです.." );
+	}
+#endif
 
 	// ウィンドウハンドルの設定.
-	Input::SethWnd(		m_hWnd );
-	DragAndDrop::SethWnd(	m_hWnd );
+	Input::SethWnd( m_hWnd );
+	DragAndDrop::SethWnd( m_hWnd );
 	return S_OK;
 }
 
@@ -334,6 +338,7 @@ HRESULT CMain::InitWindow( HINSTANCE hInstance )
 		nullptr,					// メニュー設定.
 		hInstance,					// インスタンス番号.
 		nullptr );					// ウィンドウ作成時に発生するイベントに渡すデータ.
+
 	if ( !m_hSubWnd ) {
 		ErrorMessage( "サブウィンドウ作成失敗" );
 		return E_FAIL;

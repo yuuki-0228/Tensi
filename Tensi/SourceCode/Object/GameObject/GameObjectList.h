@@ -6,7 +6,7 @@ enum class enObjectTagList : unsigned int
 	None,
 
 	Player,			// プレイヤー.
-	Ball,			// ボール.
+	NormalBall,		// 普通のボール.
 	HeavyBall,		// 重いボール.
 	SuperBall,		// スーパーボール.
 	Weed,			// 雑草.

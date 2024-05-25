@@ -70,7 +70,7 @@ float4 PS_Main( VS_OUTPUT input ) : SV_Target
 		finalColor.rgb *= (1.0f - (1.0f - g_Color.rgb)*maskColor.r);
 	}
 	else{
-		finalColor.rgb *= g_Color.rgb;
+		finalColor.rgba *= g_Color.rgba;
 	}
 	
 	// 描画するエリア外の場合透明にする.
@@ -146,7 +146,7 @@ float4 PS_Transition(VS_OUTPUT input) : SV_Target
 		finalColor.rgb *= (1.0f - (1.0f - g_Color.rgb) * maskColor.r);
 	}
 	else{
-		finalColor.rgb *= g_Color.rgb;
+		finalColor.rgba *= g_Color.rgba;
 	}
 	
 	// 描画するエリア外の場合透明にする.

@@ -53,6 +53,8 @@ std::tm TimeManager::Yesterday( std::tm tm )
 {
 	tm.tm_mday -= 1;
 	time_t tomorrow = std::mktime( &tm );
+
+	if ( tomorrow = -1 ) return GetTime();
 	return *std::localtime( &tomorrow );
 }
 
@@ -63,5 +65,7 @@ std::tm TimeManager::Tomorrow( std::tm tm )
 {
 	tm.tm_mday += 1;
 	time_t tomorrow = std::mktime( &tm );
+
+	if ( tomorrow = -1 ) return GetTime();
 	return *std::localtime( &tomorrow );
 }

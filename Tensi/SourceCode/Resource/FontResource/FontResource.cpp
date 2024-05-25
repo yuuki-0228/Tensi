@@ -81,6 +81,9 @@ HRESULT FontResource::FontLoad()
 		std::for_each( Dir_itr, End_itr, SpriteLoad );
 	}
 	catch ( const std::filesystem::filesystem_error& e ) {
+		// ファイルが見つからないエラーは無視する.
+		if ( std::string( e.what() ).find( "指定されたパスが見つかりません。" ) != std::string::npos ) return S_OK;
+
 		// エラーメッセージを表示.
 		ErrorMessage( e.path1().string().c_str() );
 		return E_FAIL;

@@ -1,0 +1,20 @@
+{
+  "Base": {
+    "h": 58.0,
+    "w": 78.0
+  },
+  "Disp": {
+    "h": 58.0,
+    "w": 78.0
+  },
+  "FilePath": "Data\\Sprite\\Mask\\GroundMask.json",
+  "IsLock": false,
+  "LocalPosition": 0,
+  "Scene": [
+    "None"
+  ],
+  "Stride": {
+    "h": 58.0,
+    "w": 78.0
+  }
+}

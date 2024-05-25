@@ -1,18 +1,17 @@
 #include "GameMain.h"
 #include "..\..\Common\Sprite\Sprite.h"
 #include "..\..\Object\Light\Light.h"
-#include "..\..\Object\GameObject\Actor\WindowObject\Player\Player.h"
-#include "..\..\Object\GameObject\Actor\WindowObject\Ball\Ball.h"
-#include "..\..\Object\GameObject\Actor\WindowObject\HeavyBall\HeavyBall.h"
-#include "..\..\Object\GameObject\Actor\WindowObject\SuperBall\SuperBall.h"
-#include "..\..\Object\GameObject\Actor\WindowObject\WateringCan\WateringCan.h"
+#include "..\..\Object\GameObject\Actor\WindowObjectManager\WindowObject\Player\Player.h"
+#include "..\..\Object\GameObject\Actor\WindowObjectManager\WindowObject\Ball\NormalBall\NormalBall.h"
+#include "..\..\Object\GameObject\Actor\WindowObjectManager\WindowObject\Ball\HeavyBall\HeavyBall.h"
+#include "..\..\Object\GameObject\Actor\WindowObjectManager\WindowObject\Ball\SuperBall\SuperBall.h"
+#include "..\..\Object\GameObject\Actor\WindowObjectManager\WindowObject\WateringCan\WateringCan.h"
 #include "..\..\Object\GameObject\Actor\SlimeFrame\SlimeFrame.h"
-#include "..\..\Object\GameObject\Actor\Tree\Tree.h"
-#include "..\..\Object\GameObject\Actor\WeedManager\CWeedManager.h"
-#include "..\..\Object\GameObject\Actor\FlowerManager\FlowerManager.h"
-#include "..\..\Object\GameObject\Actor\House\House.h"
-#include "..\..\Object\GameObject\Actor\WaterFall\WaterFall.h"
-#include "..\..\Object\GameObject\Actor\Window\Window.h"
+#include "..\..\Object\GameObject\Actor\ActorBackGround\Tree\Tree.h"
+#include "..\..\Object\GameObject\Actor\ActorBackGround\WeedManager\WeedManager.h"
+#include "..\..\Object\GameObject\Actor\ActorBackGround\FlowerManager\FlowerManager.h"
+#include "..\..\Object\GameObject\Actor\ActorBackGround\House\House.h"
+#include "..\..\Object\GameObject\Actor\ActorBackGround\WaterFall\WaterFall.h"
 #include "..\..\Object\GameObject\Widget\SceneWidget\GameMainWidget\GameMainWidget.h"
 #include "..\..\Object\GameObject\ActorCollisionManager\ActorCollisionManager.h"
 #include "..\..\Resource\SpriteResource\SpriteResource.h"
@@ -27,7 +26,7 @@ namespace {
 
 CGameMain::CGameMain()
 	: m_pPlayer			( nullptr )
-	, m_pBall			( nullptr )
+	, m_pNormalBall		( nullptr )
 	, m_pHeavyBall		( nullptr )
 	, m_pSuperBall		( nullptr )
 	, m_pSlimeFrame		( nullptr )
@@ -37,7 +36,6 @@ CGameMain::CGameMain()
 	, m_pFlowerManager	( nullptr )
 	, m_pHouse			( nullptr )
 	, m_pWaterFall		( nullptr )
-	, m_pWindow			( nullptr )
 	, m_GameMainWidget	( nullptr )
 {
 }
@@ -52,7 +50,7 @@ CGameMain::~CGameMain()
 bool CGameMain::Init()
 {
 	m_pPlayer			= std::make_shared<CPlayer>();
-	m_pBall				= std::make_shared<CBall>();
+	m_pNormalBall		= std::make_shared<CNormalBall>();
 	m_pHeavyBall		= std::make_shared<CHeavyBall>();
 	m_pSuperBall		= std::make_shared<CSuperBall>();
 	m_pSlimeFrame		= std::make_shared<CSlimeFrame>();
@@ -62,11 +60,10 @@ bool CGameMain::Init()
 	m_pFlowerManager	= std::make_shared<CFlowerManager>();
 	m_pHouse			= std::make_shared<CHouse>();
 	m_pWaterFall		= std::make_shared<CWaterFall>();
-	m_pWindow			= std::make_shared<CWindow>();
 	m_GameMainWidget	= std::make_unique<CGameMainWidget>();
 
 	m_pPlayer->Init();
-	m_pBall->Init();
+	m_pNormalBall->Init();
 	m_pHeavyBall->Init();
 	m_pSuperBall->Init();
 	m_pWateringCan->Init();
@@ -76,11 +73,7 @@ bool CGameMain::Init()
 	m_pFlowerManager->Init();
 	m_pHouse->Init();
 	m_pWaterFall->Init();
-	m_pWindow->Init();
 	m_GameMainWidget->Init();
-
-	m_pWindow->Create( { 1.0f, 1.0f, 1.0f }, { 1.0f, 1.0f }, "手持ち" );
-	m_pWindow->SetRender( [&]() { m_pBall->Render(); } );
 
 	// ライトの初期化.
 	Light::SetDirection( INIT_LIGHT_DIRECTION );
@@ -149,51 +142,46 @@ void CGameMain::Update( const float& DeltaTime )
 
 	// 更新.
 	m_pPlayer->Update( DeltaTime );
-	m_pBall->Update( DeltaTime );
+	m_pNormalBall->Update( DeltaTime );
 	m_pHeavyBall->Update( DeltaTime );
 	m_pSuperBall->Update( DeltaTime );
 	m_pWateringCan->Update( DeltaTime );
 	m_pSlimeFrame->Update( DeltaTime );
-	m_pHouse->Update( DeltaTime );
+//	m_pHouse->Update( DeltaTime );
 	m_pWaterFall->Update( DeltaTime );
-	m_pTree->Update( DeltaTime );
+//	m_pTree->Update( DeltaTime );
 	m_pWeedManager->Update( DeltaTime );
 	m_pFlowerManager->Update( DeltaTime );
 
-	m_pWindow->Update( DeltaTime );
 
 	// 当たり判定処理.
 	ActorCollisionManager::Collision();
 
 	// 当たり判定終了後の更新.
 	m_pPlayer->LateUpdate( DeltaTime );
-	m_pBall->LateUpdate( DeltaTime );
+	m_pNormalBall->LateUpdate( DeltaTime );
 	m_pHeavyBall->LateUpdate( DeltaTime );
 	m_pSuperBall->LateUpdate( DeltaTime );
 	m_pWateringCan->LateUpdate( DeltaTime );
 	m_pSlimeFrame->LateUpdate( DeltaTime );
-	m_pHouse->LateUpdate( DeltaTime );
+//	m_pHouse->LateUpdate( DeltaTime );
 	m_pWaterFall->LateUpdate( DeltaTime );
-	m_pTree->LateUpdate( DeltaTime );
+//	m_pTree->LateUpdate( DeltaTime );
 	m_pWeedManager->LateUpdate( DeltaTime );
 	m_pFlowerManager->LateUpdate( DeltaTime );
 
-	m_pWindow->LateUpdate( DeltaTime );
-
 	// デバックの更新.
 	m_pPlayer->DebugUpdate( DeltaTime );
-	m_pBall->DebugUpdate( DeltaTime );
+	m_pNormalBall->DebugUpdate( DeltaTime );
 	m_pHeavyBall->DebugUpdate( DeltaTime );
 	m_pSuperBall->DebugUpdate( DeltaTime );
 	m_pWateringCan->DebugUpdate( DeltaTime );
 	m_pSlimeFrame->DebugUpdate( DeltaTime );
-	m_pHouse->DebugUpdate( DeltaTime );
+//	m_pHouse->DebugUpdate( DeltaTime );
 	m_pWaterFall->DebugUpdate( DeltaTime );
-	m_pTree->DebugUpdate( DeltaTime );
+//	m_pTree->DebugUpdate( DeltaTime );
 	m_pWeedManager->DebugUpdate( DeltaTime );
 	m_pFlowerManager->DebugUpdate( DeltaTime );
-
-	m_pWindow->DebugUpdate( DeltaTime );
 
 	// UIの更新.
 	m_GameMainWidget->Update( DeltaTime );
@@ -216,15 +204,13 @@ void CGameMain::SpriteUIRender()
 	m_pWateringCan->Render();
 	m_pWeedManager->Render();
 	m_pFlowerManager->Render();
-	m_pTree->Render();
-	m_pHouse->Render();
-	m_pBall->Render();
+//	m_pTree->Render();
+//	m_pHouse->Render();
+	m_pNormalBall->Render();
 	m_pHeavyBall->Render();
 	m_pSuperBall->Render();
 	m_pSlimeFrame->Render();
 	m_pPlayer->Render();
-
-	m_pWindow->Render();
 }
 void CGameMain::SubSpriteUIRender()
 {
@@ -233,15 +219,13 @@ void CGameMain::SubSpriteUIRender()
 	m_pWateringCan->SubRender();
 	m_pWeedManager->SubRender();
 	m_pFlowerManager->SubRender();
-	m_pTree->SubRender();
-	m_pHouse->SubRender();
-	m_pBall->SubRender();
+//	m_pTree->SubRender();
+//	m_pHouse->SubRender();
+	m_pNormalBall->SubRender();
 	m_pHeavyBall->SubRender();
 	m_pSuperBall->SubRender();
 	m_pSlimeFrame->SubRender();
 	m_pPlayer->SubRender();
-
-	m_pWindow->SubRender();
 }
 
 //---------------------------.

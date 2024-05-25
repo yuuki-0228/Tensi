@@ -1,5 +1,5 @@
 #include "WindowObjectManager.h"
-#include "..\WindowObject\WindowObject.h"
+#include "WindowObject\WindowObject.h"
 #include "..\..\..\..\Utility\Input\Input.h"
 
 WindowObjectManager::WindowObjectManager()
