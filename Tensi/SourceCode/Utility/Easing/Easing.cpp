@@ -1,4 +1,5 @@
 #include "Easing.h"
+#ifdef ENABLE_EASING
 #include "..\Math\Math.h"
 #include <limits>
 #include <algorithm>
@@ -431,3 +432,5 @@ float Easing::Easing( const std::string& Name, float Time, float TotalTime, floa
 	else if (	Name == "InOutBounce"	) return InOutBounce(	Time, TotalTime, Min, Max );
 	return 0.0f;
 }
+
+#endif

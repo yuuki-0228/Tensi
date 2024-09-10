@@ -1,5 +1,5 @@
 #pragma once
-#include "..\Actor.h"
+#include "..\..\Actor.h"
 
 /************************************************
 *	背景に表示するオブジェクトのベースクラス.
@@ -14,6 +14,9 @@ public:
 	// 背景オブジェクトは主に"Render()"を使用せず"SubRender()"を使用する
 	virtual void Render() override {};
 	virtual void SubRender() override = 0;
+
+	// 親トランスフォームを設定
+	void AttachParent( STransform* pTransform ) { m_Transform.AttachParent( pTransform ); }
 
 private:
 

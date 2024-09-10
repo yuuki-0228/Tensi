@@ -11,7 +11,6 @@ enum class enSceneList : unsigned char
 
 	GameMain,
 
-	UIEdit,
 	Max
 } typedef ESceneList;
 

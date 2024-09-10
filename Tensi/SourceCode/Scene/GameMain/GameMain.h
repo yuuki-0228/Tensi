@@ -8,11 +8,6 @@ class CHeavyBall;
 class CSuperBall;
 class CWateringCan;
 class CSlimeFrame;
-class CTree;
-class CWeedManager;
-class CFlowerManager;
-class CHouse;
-class CWaterFall;
 
 /************************************************
 *	ゲームクラス.
@@ -53,10 +48,5 @@ private:
 	std::shared_ptr<CSuperBall>				m_pSuperBall;		// スーパーボール.
 	std::shared_ptr<CWateringCan>			m_pWateringCan;		// ジョウロ.
 	std::shared_ptr<CSlimeFrame>			m_pSlimeFrame;		// スライムフレーム.
-	std::shared_ptr<CTree>					m_pTree;			// 木.
-	std::shared_ptr<CWeedManager>			m_pWeedManager;		// 雑草.
-	std::shared_ptr<CFlowerManager>			m_pFlowerManager;	// 花.
-	std::shared_ptr<CHouse>					m_pHouse;			// 家.
-	std::shared_ptr<CWaterFall>				m_pWaterFall;		// 滝.
 	std::unique_ptr<CGameMainWidget>		m_GameMainWidget;	// UI.
 };

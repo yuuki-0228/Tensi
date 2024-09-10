@@ -88,7 +88,6 @@ private:
 	SSpriteRenderState			m_Box2DState;		// ボックス2Dの情報.
 	SSpriteRenderState			m_Sphere2DState;	// 円2Dの情報.
 	SSpriteRenderState			m_Point2DState;		// 点2Dの情報.
-
 	CBool						m_IsPointRender;	// 点を描画するか.
 	CBool						m_IsSphereRender;	// 球体を描画するか.
 	CBool						m_IsCylinderRender;	// 円柱を描画するか.
@@ -97,7 +96,6 @@ private:
 	CBool						m_IsPoint2DRender;	// 点2Dを描画するか.
 	CBool						m_IsBox2DRender;	// ボックス2Dを描画するか.
 	CBool						m_IsSphere2DRender;	// 円2Dを描画するか.
-
 private:
 	// コピー・ムーブコンストラクタ, 代入演算子の削除.
 	CollisionRenderer( const CollisionRenderer & )				= delete;

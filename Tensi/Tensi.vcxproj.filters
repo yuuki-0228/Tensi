@@ -221,8 +221,6 @@
     <ClCompile Include="SourceCode\Common\Common.cpp" />
     <ClCompile Include="SourceCode\Utility\FileManager\DragAndDrop\DragAndDrop.cpp" />
     <ClCompile Include="SourceCode\Utility\FileManager\ImagSize\ImageSize.cpp" />
-    <ClCompile Include="SourceCode\Scene\UIEdit\UIEdit.cpp" />
-    <ClCompile Include="SourceCode\Editor\UIEditor\UIEditor.cpp" />
     <ClCompile Include="SourceCode\Editor\EditorBase.cpp" />
     <ClCompile Include="Library\ImGui\imgui_stdlib.cpp" />
     <ClCompile Include="SourceCode\Utility\Input\Controller\DirectInput\DirectInput.cpp" />
@@ -258,17 +256,17 @@
     <ClCompile Include="SourceCode\Utility\TimeManager\TimeManager.cpp" />
     <ClCompile Include="SourceCode\Object\GameObject\Actor\ActorEffect\NoteEffectManager\NoteEffect\NoteEffect.cpp" />
     <ClCompile Include="SourceCode\Object\GameObject\Actor\ActorEffect\NoteEffectManager\NoteEffectManager.cpp" />
-    <ClCompile Include="SourceCode\Object\GameObject\Actor\ActorBackGround\Tree\Tree.cpp" />
+    <ClCompile Include="SourceCode\Object\GameObject\Actor\BackGroundManager\ActorBackGround\Tree\Tree.cpp" />
     <ClCompile Include="SourceCode\Utility\SaveDataManager\SaveDataManager.cpp" />
-    <ClCompile Include="SourceCode\Object\GameObject\Actor\ActorBackGround\House\House.cpp" />
-    <ClCompile Include="SourceCode\Object\GameObject\Actor\ActorBackGround\WeedManager\WeedManager.cpp" />
-    <ClCompile Include="SourceCode\Object\GameObject\Actor\ActorBackGround\FlowerManager\Flower\Flower.cpp" />
-    <ClCompile Include="SourceCode\Object\GameObject\Actor\ActorBackGround\FlowerManager\FlowerManager.cpp" />
-    <ClCompile Include="SourceCode\Object\GameObject\Actor\ActorBackGround\WeedManager\Weed\Weed.cpp" />
+    <ClCompile Include="SourceCode\Object\GameObject\Actor\BackGroundManager\ActorBackGround\House\House.cpp" />
+    <ClCompile Include="SourceCode\Object\GameObject\Actor\BackGroundManager\ActorBackGround\WeedManager\WeedManager.cpp" />
+    <ClCompile Include="SourceCode\Object\GameObject\Actor\BackGroundManager\ActorBackGround\FlowerManager\Flower\Flower.cpp" />
+    <ClCompile Include="SourceCode\Object\GameObject\Actor\BackGroundManager\ActorBackGround\FlowerManager\FlowerManager.cpp" />
+    <ClCompile Include="SourceCode\Object\GameObject\Actor\BackGroundManager\ActorBackGround\WeedManager\Weed\Weed.cpp" />
     <ClCompile Include="SourceCode\Utility\SaveDataManager\FlowerSaveData\FlowerSaveData.cpp" />
     <ClCompile Include="SourceCode\Utility\SaveDataManager\WeedSaveData\WeedSaveData.cpp" />
-    <ClCompile Include="SourceCode\Object\GameObject\Actor\ActorBackGround\WaterFall\WaterFall.cpp" />
-    <ClCompile Include="SourceCode\Object\GameObject\Actor\ActorBackGround\WaterFall\WaterFallTile\WaterFallTile.cpp" />
+    <ClCompile Include="SourceCode\Object\GameObject\Actor\BackGroundManager\ActorBackGround\WaterFall\WaterFall.cpp" />
+    <ClCompile Include="SourceCode\Object\GameObject\Actor\BackGroundManager\ActorBackGround\WaterFall\WaterFallTile\WaterFallTile.cpp" />
     <ClCompile Include="SourceCode\Utility\Const\Const.cpp" />
     <ClCompile Include="SourceCode\Object\GameObject\Actor\WindowObjectManager\WindowObject\WateringCan\WateringCan.cpp" />
     <ClCompile Include="SourceCode\Object\GameObject\Actor\WindowObjectManager\WindowObject\WaterManager\Water\Water.cpp" />
@@ -282,7 +280,10 @@
     <ClCompile Include="SourceCode\Utility\MasterData\MasterDatas.cpp" />
     <ClCompile Include="SourceCode\Object\GameObject\Actor\Window\Window.cpp" />
     <ClCompile Include="SourceCode\Object\GameObject\Actor\ActorEffect\ActorEffect.cpp" />
-    <ClCompile Include="SourceCode\Object\GameObject\Actor\ActorBackGround\ActorBackGround.cpp" />
+    <ClCompile Include="SourceCode\Object\GameObject\Actor\BackGroundManager\ActorBackGround\ActorBackGround.cpp" />
+    <ClCompile Include="SourceCode\Object\GameObject\Actor\BackGroundManager\ActorBackGround\Ground\GroundTile\GroundTile.cpp" />
+    <ClCompile Include="SourceCode\Object\GameObject\Actor\BackGroundManager\ActorBackGround\Ground\Ground.cpp" />
+    <ClCompile Include="SourceCode\Object\GameObject\Actor\BackGroundManager\BackGroundManager.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="SourceCode\Global.h">
@@ -417,8 +418,6 @@
     <ClInclude Include="SourceCode\Common\Common.h" />
     <ClInclude Include="SourceCode\Utility\FileManager\DragAndDrop\DragAndDrop.h" />
     <ClInclude Include="SourceCode\Utility\FileManager\ImagSize\ImageSize.h" />
-    <ClInclude Include="SourceCode\Scene\UIEdit\UIEdit.h" />
-    <ClInclude Include="SourceCode\Editor\UIEditor\UIEditor.h" />
     <ClInclude Include="SourceCode\Editor\EditorBase.h" />
     <ClInclude Include="Library\ImGui\imgui_stdlib.h" />
     <ClInclude Include="SourceCode\Utility\Input\Controller\DirectInput\DirectInput.h" />
@@ -454,19 +453,19 @@
     <ClInclude Include="SourceCode\Utility\TimeManager\TimeManager.h" />
     <ClInclude Include="SourceCode\Object\GameObject\Actor\ActorEffect\NoteEffectManager\NoteEffectManager.h" />
     <ClInclude Include="SourceCode\Object\GameObject\Actor\ActorEffect\NoteEffectManager\NoteEffect\NoteEffect.h" />
-    <ClInclude Include="SourceCode\Object\GameObject\Actor\ActorBackGround\Tree\Tree.h" />
+    <ClInclude Include="SourceCode\Object\GameObject\Actor\BackGroundManager\ActorBackGround\Tree\Tree.h" />
     <ClInclude Include="SourceCode\Utility\SaveDataManager\SaveDataManager.h" />
-    <ClInclude Include="SourceCode\Object\GameObject\Actor\ActorBackGround\House\House.h" />
-    <ClInclude Include="SourceCode\Object\GameObject\Actor\ActorBackGround\WeedManager\WeedManager.h" />
-    <ClInclude Include="SourceCode\Object\GameObject\Actor\ActorBackGround\FlowerManager\Flower\Flower.h" />
-    <ClInclude Include="SourceCode\Object\GameObject\Actor\ActorBackGround\FlowerManager\FlowerManager.h" />
-    <ClInclude Include="SourceCode\Object\GameObject\Actor\ActorBackGround\WeedManager\Weed\Weed.h" />
-    <ClInclude Include="SourceCode\Object\GameObject\Actor\ActorBackGround\FlowerManager\Flower\FlowerSaveData.h" />
+    <ClInclude Include="SourceCode\Object\GameObject\Actor\BackGroundManager\ActorBackGround\House\House.h" />
+    <ClInclude Include="SourceCode\Object\GameObject\Actor\BackGroundManager\ActorBackGround\WeedManager\WeedManager.h" />
+    <ClInclude Include="SourceCode\Object\GameObject\Actor\BackGroundManager\ActorBackGround\FlowerManager\Flower\Flower.h" />
+    <ClInclude Include="SourceCode\Object\GameObject\Actor\BackGroundManager\ActorBackGround\FlowerManager\FlowerManager.h" />
+    <ClInclude Include="SourceCode\Object\GameObject\Actor\BackGroundManager\ActorBackGround\WeedManager\Weed\Weed.h" />
+    <ClInclude Include="SourceCode\Object\GameObject\Actor\BackGroundManager\ActorBackGround\FlowerManager\Flower\FlowerSaveData.h" />
     <ClInclude Include="SourceCode\Utility\SaveDataManager\FlowerSaveData\FlowerSaveData.h" />
     <ClInclude Include="SourceCode\Utility\SaveDataManager\WeedSaveData\WeedSaveData.h" />
-    <ClInclude Include="SourceCode\Object\GameObject\Actor\ActorBackGround\WeedManager\Weed\WeedSaveData.h" />
-    <ClInclude Include="SourceCode\Object\GameObject\Actor\ActorBackGround\WaterFall\WaterFall.h" />
-    <ClInclude Include="SourceCode\Object\GameObject\Actor\ActorBackGround\WaterFall\WaterFallTile\WaterFallTile.h" />
+    <ClInclude Include="SourceCode\Object\GameObject\Actor\BackGroundManager\ActorBackGround\WeedManager\Weed\WeedSaveData.h" />
+    <ClInclude Include="SourceCode\Object\GameObject\Actor\BackGroundManager\ActorBackGround\WaterFall\WaterFall.h" />
+    <ClInclude Include="SourceCode\Object\GameObject\Actor\BackGroundManager\ActorBackGround\WaterFall\WaterFallTile\WaterFallTile.h" />
     <ClInclude Include="SourceCode\Utility\Const\Const.h" />
     <ClInclude Include="SourceCode\Object\GameObject\Actor\WindowObjectManager\WindowObject\WateringCan\WateringCan.h" />
     <ClInclude Include="SourceCode\Object\GameObject\Actor\WindowObjectManager\WindowObject\WaterManager\Water\Water.h" />
@@ -482,7 +481,11 @@
     <ClInclude Include="SourceCode\Utility\MasterData\MasterDatas.h" />
     <ClInclude Include="SourceCode\Object\GameObject\Actor\Window\Window.h" />
     <ClInclude Include="SourceCode\Object\GameObject\Actor\ActorEffect\ActorEffect.h" />
-    <ClInclude Include="SourceCode\Object\GameObject\Actor\ActorBackGround\ActorBackGround.h" />
+    <ClInclude Include="SourceCode\Object\GameObject\Actor\BackGroundManager\ActorBackGround\ActorBackGround.h" />
+    <ClInclude Include="SourceCode\Object\GameObject\Actor\BackGroundManager\ActorBackGround\Ground\GroundTile\GroundTile.h" />
+    <ClInclude Include="SourceCode\Object\GameObject\Actor\BackGroundManager\ActorBackGround\Ground\Ground.h" />
+    <ClInclude Include="SourceCode\Object\GameObject\Actor\BackGroundManager\BackGroundManager.h" />
+    <ClInclude Include="SourceCode\SystemSetting.h" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="ico.rc" />

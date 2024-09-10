@@ -1,4 +1,6 @@
 #pragma once
+#include "..\..\SystemSetting.h"
+#ifdef ENABLE_EASING
 #include "..\..\Global.h"
 
 /************************************************
@@ -52,3 +54,4 @@ namespace Easing {
 	// イージングリストからイージングを行う.
 	float Easing( const std::string& Name, float Time, float TotalTime, float Back, float Max = 1.0f, float Min = 0.0f );
 };
+#endif

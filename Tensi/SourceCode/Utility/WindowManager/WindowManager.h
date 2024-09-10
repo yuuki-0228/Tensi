@@ -1,4 +1,6 @@
 #pragma once
+#include "..\..\SystemSetting.h"
+#ifdef ENABLE_WINDOW
 #include "..\..\Global.h"
 
 // ウィンドウクラス定数.
@@ -193,3 +195,5 @@ private:
 	bool			m_IsDesktopIconUpdate;		// デスクトップのアイコンの位置を更新したか.
 	bool			m_IsTaskBarUpdate;			// タスクバーの更新をしたか.
 };
+
+#endif

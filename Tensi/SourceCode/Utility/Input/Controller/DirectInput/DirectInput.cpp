@@ -33,7 +33,11 @@ DirectInput::DirectInput()
 	, m_JoyState	()
 	, m_Status		( 0 )
 	, m_StatusOld	( 0 )
+#ifdef ENABLE_CLASS_BOOL
 	, m_ButStop		( false, u8"DirectInput‚Ìƒ{ƒ^ƒ“‚ð’âŽ~‚³‚¹‚é‚©", "Input" )
+#else
+	, m_ButStop		( false )
+#endif
 {
 }
 

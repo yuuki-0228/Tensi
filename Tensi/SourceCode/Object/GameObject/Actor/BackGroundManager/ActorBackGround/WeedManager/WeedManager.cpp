@@ -1,9 +1,9 @@
 #include "WeedManager.h"
 #include "Weed/Weed.h"
-#include "..\..\..\..\..\Resource\SpriteResource\SpriteResource.h"
-#include "..\..\..\..\..\Utility\WindowManager\WindowManager.h"
-#include "..\..\..\..\..\Utility\Random\Random.h"
-#include "..\..\..\..\..\Utility\SaveDataManager\SaveDataManager.h"
+#include "..\..\..\..\..\..\Resource\SpriteResource\SpriteResource.h"
+#include "..\..\..\..\..\..\Utility\WindowManager\WindowManager.h"
+#include "..\..\..\..\..\..\Utility\Random\Random.h"
+#include "..\..\..\..\..\..\Utility\SaveDataManager\SaveDataManager.h"
 
 CWeedManager::CWeedManager()
 	: m_pWeedList	()

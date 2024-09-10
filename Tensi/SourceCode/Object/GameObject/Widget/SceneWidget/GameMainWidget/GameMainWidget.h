@@ -17,5 +17,8 @@ public:
 	// XV.
 	virtual void Update( const float& DeltaTime ) override;
 
+	// •`‰æ.
+	virtual void Render() override;
+
 private:
 };

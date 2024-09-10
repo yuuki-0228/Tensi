@@ -1,4 +1,6 @@
 #pragma once
+#include "..\..\..\SystemSetting.h"
+#ifdef ENABLE_CLASS_BOOL
 #include <string>
 #include <unordered_map>
 
@@ -92,3 +94,4 @@ private:
 	BitFlagManager( BitFlagManager && )						= delete;
 	BitFlagManager& operator = ( BitFlagManager && )		= delete;
 };
+#endif

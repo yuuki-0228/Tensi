@@ -10,6 +10,8 @@
 #include <Windows.h>
 #include <crtdbg.h>
 #include <memory>
+#include <vector>
+#include <unordered_map>
 #include <limits>
 
 #include <d3dx9.h>

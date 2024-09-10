@@ -1,4 +1,5 @@
 #include "BitFlagManager.h"
+#ifdef ENABLE_CLASS_BOOL
 #include <memory>
 #include <Windows.h>
 
@@ -174,3 +175,5 @@ void BitFlagManager::SetGroup( const Handle & handle, const std::string & group 
 {
 	GetInstance()->m_SaveDataList[handle].Group = group;
 }
+
+#endif

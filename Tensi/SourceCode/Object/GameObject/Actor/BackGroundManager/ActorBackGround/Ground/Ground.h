@@ -1,17 +1,15 @@
 #pragma once
-#include "..\..\Actor.h"
-
-class CWaterFallTile;
+#include "..\..\..\Actor.h"
 
 /************************************************
-*	滝クラス.
+*	地面クラス.
 **/
-class CWaterFall final
+class CGround
 	: public CActor
 {
 public:
-	CWaterFall();
-	~CWaterFall();
+	CGround();
+	~CGround();
 
 	// 初期化.
 	virtual bool Init() override;
@@ -23,14 +21,9 @@ public:
 	virtual void Render() override {};
 	virtual void SubRender() override;
 
-	// 滝の設定.
+	// 地面の設置
 	void Setting();
 
 private:
-	// 滝を作る.
-	void CreateWaterFall();
 
-private:
-	std::vector<std::unique_ptr<CWaterFallTile>>	m_WaterFallTileList;	// 滝のタイルリスト
-	float											m_ImageSize;			// 画像のサイズ
 };

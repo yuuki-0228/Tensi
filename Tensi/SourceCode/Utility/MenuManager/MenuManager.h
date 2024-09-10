@@ -1,4 +1,6 @@
 #pragma once
+#include "..\..\SystemSetting.h"
+#ifdef ENABLE_MENU
 #include "..\..\Global.h"
 
 /************************************************
@@ -30,3 +32,4 @@ private:
 	bool	m_IsSuperBall;		// スーパーボールを表示しているか.
 	bool	m_IsPlayer;			// プレイヤーを表示しているか.
 };
+#endif

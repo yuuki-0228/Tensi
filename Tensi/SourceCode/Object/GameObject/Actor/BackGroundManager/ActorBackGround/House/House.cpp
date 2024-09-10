@@ -1,8 +1,8 @@
 #include "House.h"
-#include "..\..\..\..\..\Utility\WindowManager\WindowManager.h"
-#include "..\..\..\..\..\Resource\SpriteResource\SpriteResource.h"
-#include "..\..\..\..\..\Utility\Random\Random.h"
-#include "..\..\..\..\..\Utility\Input\Input.h"
+#include "..\..\..\..\..\..\Utility\WindowManager\WindowManager.h"
+#include "..\..\..\..\..\..\Resource\SpriteResource\SpriteResource.h"
+#include "..\..\..\..\..\..\Utility\Random\Random.h"
+#include "..\..\..\..\..\..\Utility\Input\Input.h"
 
 CHouse::CHouse()
 	: m_pTent		( nullptr )

@@ -1,4 +1,6 @@
 #pragma once
+#include "..\..\SystemSetting.h"
+#ifdef ENABLE_CLASS_BOOL
 #include "BitFlagManager/BitFlagManager.h"
 #include <string>
 
@@ -47,3 +49,4 @@ public:
 private:
 	BitFlagManager::Handle m_Handle; // ƒnƒ“ƒhƒ‹.
 };
+#endif

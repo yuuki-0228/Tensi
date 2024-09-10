@@ -1,5 +1,7 @@
 #pragma once
-#include "..\..\.\Global.h"
+#include "..\..\SystemSetting.h"
+#ifdef ENABLE_COLOR
+#include "..\..\Global.h"
 #include <algorithm>
 
 using D3DXCOLOR3 = D3DXVECTOR3;
@@ -435,3 +437,4 @@ namespace Color4 {
 	}
 	using namespace BlackSeries;
 }
+#endif

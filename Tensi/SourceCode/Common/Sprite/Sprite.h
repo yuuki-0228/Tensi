@@ -16,43 +16,17 @@ public:
 
 	// 初期化.
 	HRESULT Init( const std::string& FilePath );
-	// 指定したシーンでスプライトの情報を初期化する.
-	void InitSceneSpriteState( const std::string& SceneName, const int& No );
 
 	// UIでレンダリング.
 	void RenderUI( SSpriteRenderState* pRenderState = nullptr );
 	// 3Dでレンダリング.
 	void Render3D( SSpriteRenderState* pRenderState = nullptr, const bool IsBillBoard = false );
 
-	// UIエディタのImGuiの描画.
-	void UIEdtorImGuiRender( const bool IsAutoSave, SSpriteRenderState* pRenderState = nullptr );
-	// マウスのつかみ判定の描画.
-	void HitBoxRender( const D3DXVECTOR4& Color = Color4::Red, SSpriteRenderState* pRenderState = nullptr );
-
-	// マウスのドラッグの更新.
-	bool DragUpdate( const bool IsDrag, const bool IsAutoSave, SSpriteRenderState* pRenderState = nullptr );
 	// マウスに重なっているか取得する.
 	bool GetIsOverlappingTheMouse( SSpriteRenderState* pRenderState );
 
-	// スプライト情報を保存する.
-	HRESULT SpriteStateDataSave( SSpriteRenderState* pRenderState = nullptr );
 	// スプライト情報の取得.
 	HRESULT SpriteStateDataLoad();
-	// スプライト情報の保存して再読み込み.
-	HRESULT SpriteStateSaveReload();
-
-	// 表示しているスプライトから特定のシーンを削除.
-	HRESULT DispSpriteDeleteScene( const bool IsAutoSave, const std::string& DispScene, SSpriteRenderState* pRenderState = nullptr );
-	// 表示しているスプライトの数を減らす.
-	HRESULT DispSpriteDeleteNum( const bool IsAutoSave, const std::string& DispScene, const int No, SSpriteRenderState* pRenderState = nullptr );
-
-	// 表示するスプライトの追加.
-	HRESULT AddDispSprite( const bool IsAutoSave, const std::string& DispScene, SSpriteRenderState* pRenderState = nullptr );
-
-	// 表示するシーンの取得.
-	std::vector<std::string> GetDispSceneList() const { return m_SpriteState.DispSceneList; }
-	// 表示する個数の取得.
-	int GetSceneDispNum( const std::string& SceneName ) { return m_SpriteState.SceneDispNum[SceneName]; }
 
 	// テクスチャの取得.
 	inline ID3D11ShaderResourceView* GetTexture() const { return m_pTexture; }
@@ -107,72 +81,6 @@ private:
 
 	// 中心座標に変換するための追加座標の取得.
 	D3DXPOSITION3 GetAddCenterPosition();
-
-	// UIアニメーションの更新.
-	void UIAnimUpdate( SSpriteRenderState* pRenderState );
-
-	// UIアニメーションの初期化.
-	void UIAnimInit( SSpriteRenderState* pRenderState );
-	// UIアニメーションを行うか調べる.
-	bool UIAnimPlayCheck( SSpriteRenderState* pRenderState );
-	// 拡縮UIアニメーション.
-	void ScaleUIAnimUpdate( SSpriteRenderState* pRenderState );
-	// 透明/不透明UIアニメーション.
-	void AlphaUIAnimUpdate( SSpriteRenderState* pRenderState );
-	// 回転UIアニメーション.
-	void RotateUIAnimUpdate( SSpriteRenderState* pRenderState );
-	// 移動UIアニメーション.
-	void MoveUIAnimUpdate( SSpriteRenderState* pRenderState );
-	// 振り子UIアニメーション.
-	void PendulumUIAnimUpdate( SSpriteRenderState* pRenderState );
-	// アニメーションUIアニメーション.
-	void AnimationUIAnimUpdate( SSpriteRenderState* pRenderState );
-	// UVスクロールUIアニメーション.
-	void ScrollUIAnimUpdate( SSpriteRenderState* pRenderState );
-	// メッセージUIアニメーション.
-	void MessageUIAnimUpdate( SSpriteRenderState* pRenderState );
-
-	// UIアニメーションの文字列を変換する.
-	std::string ConvertUIAnimationString( const std::string& string );
-
-	// いつ行うかの仮データを作成する.
-	void CreateWhenTempData( SSpriteRenderState* pRenderState );
-	// いつ行うかの詳細設定.
-	void WhenAdvancedSetting( SSpriteRenderState* pRenderState );
-	// 特定のキーが押されている時の詳細設定.
-	void KeyAdvancedSetting( SSpriteRenderState* pRenderState );
-	// クリックされた時の詳細設定.
-	void ClickAdvancedSetting( SSpriteRenderState* pRenderState );
-	// メッセージを受け取った時の詳細設定.
-	void GetMessageAdvancedSetting( SSpriteRenderState* pRenderState );
-	// ランダムの詳細設定.
-	void RandomAdvancedSetting( SSpriteRenderState* pRenderState );
-
-	// 何を行うかの仮データを作成する.
-	void CreateWhatTempData( SSpriteRenderState* pRenderState );
-	// 何を行うかの詳細設定.
-	void WhatAdvancedSetting( SSpriteRenderState* pRenderState );
-	// ループ再生の詳細設定.
-	void LoopAdvancedSetting( SSpriteRenderState* pRenderState );
-	// 拡縮の詳細設定.
-	void ScaleAdvancedSetting( SSpriteRenderState* pRenderState );
-	// 透明/不透明の点滅の詳細設定.
-	void AlphaAdvancedSetting( SSpriteRenderState* pRenderState );
-	// 回転の詳細設定.
-	void RotateAdvancedSetting( SSpriteRenderState* pRenderState );
-	// 移動の詳細設定.
-	void MoveAdvancedSetting( SSpriteRenderState* pRenderState );
-	// 振り子の詳細設定.
-	void PendulumAdvancedSetting( SSpriteRenderState* pRenderState );
-	// アニメーションの詳細設定.
-	void AnimationAdvancedSetting( SSpriteRenderState* pRenderState );
-	// UVスクロールの詳細設定.
-	void ScrollAdvancedSetting( SSpriteRenderState* pRenderState );
-	// メッセージの詳細設定.
-	void MessageAdvancedSetting( SSpriteRenderState* pRenderState );
-
-	// 新しく追加するスプライトの仮データを作成する.
-	void NewDispSpriteTmpData( SSpriteRenderState* pRenderState, const std::string& SceneName, const int No );
 
 private:
 	ID3D11Device*					m_pDevice;				// デバイスオブジェクト.

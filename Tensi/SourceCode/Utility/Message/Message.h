@@ -1,4 +1,6 @@
 #pragma once
+#include "..\..\SystemSetting.h"
+#ifdef ENABLE_MESSAGE
 #include "..\..\Global.h"
 
 namespace Msg{
@@ -73,3 +75,4 @@ private:
 private:
 	std::unordered_map<std::string, bool> m_MsgList;
 };
+#endif

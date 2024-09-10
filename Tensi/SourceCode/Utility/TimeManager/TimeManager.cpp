@@ -1,4 +1,5 @@
 #include "TimeManager.h"
+#ifdef ENABLE_TIME
 
 //---------------------------.
 // Œ»İ‚Ì“ú‚ğæ“¾.
@@ -69,3 +70,5 @@ std::tm TimeManager::Tomorrow( std::tm tm )
 	if ( tomorrow = -1 ) return GetTime();
 	return *std::localtime( &tomorrow );
 }
+
+#endif

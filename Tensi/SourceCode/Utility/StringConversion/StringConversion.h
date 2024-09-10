@@ -1,4 +1,6 @@
 #pragma once
+#include "..\..\SystemSetting.h"
+#ifdef ENABLE_STRING_CONVERSION
 #include <string>
 #include <nameof\nameof.hpp>
 
@@ -107,3 +109,5 @@ inline int StringConversion::EnumNum() {
 	while ( EnumCheck<T>( Cnt ) ) Cnt++;
 	return	Cnt;
 }
+
+#endif

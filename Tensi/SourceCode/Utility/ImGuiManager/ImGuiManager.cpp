@@ -18,7 +18,9 @@ ImGuiManager::ImGuiManager()
 #else	// #ifdef _DEBUG.
 	, m_IsRender		( false )
 #endif	// #ifdef _DEBUG.
+#ifdef ENABLE_CLASS_BOOL
 	, m_IsDispSample	( false, u8"ImGuiのサンプルを表示/非表示", "System" )
+#endif
 {
 }
 
@@ -103,14 +105,18 @@ void ImGuiManager::Render()
 		}
 		SystemWindowManager::Render();
 		MessageWindow::Render();
+#ifdef ENABLE_CLASS_BOOL
 		DebugFlagWindow::Render();
+#endif
 		DebugWindow::Render();
 
+#ifdef ENABLE_CLASS_BOOL
 		if ( pI->m_IsDispSample.get() ) {
 			bool IsDispSample = pI->m_IsDispSample.get();
 			ImGui::ShowDemoWindow( &IsDispSample );
 			pI->m_IsDispSample = IsDispSample;
 		}
+#endif
 	}
 	ImGui::Render();
 	ImGui_ImplDX11_RenderDrawData( ImGui::GetDrawData() );

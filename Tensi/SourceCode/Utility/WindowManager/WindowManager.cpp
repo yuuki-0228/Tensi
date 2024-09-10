@@ -1,4 +1,5 @@
 #include "WindowManager.h"
+#ifdef ENABLE_WINDOW
 #include "..\Input\Input.h"
 #include <dwmapi.h>
 #include <psapi.h>
@@ -746,3 +747,5 @@ void WindowManager::TaskBarUpdate()
 	pI->m_TaskBar.cbSize = sizeof( pI->m_TaskBar );
 	SHAppBarMessage( ABM_GETTASKBARPOS, &pI->m_TaskBar );
 }
+
+#endif

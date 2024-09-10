@@ -1,0 +1,17 @@
+#pragma once
+// フラグマネージャーで管理されるbool型を有効
+#define ENABLE_CLASS_BOOL
+// 色に関する機能の有効
+#define ENABLE_COLOR
+// イージングに関する機能の有効
+#define ENABLE_EASING
+// メッセージ機能の有効
+#define ENABLE_MESSAGE
+// 文字変換に関する機能の有効
+#define ENABLE_STRING_CONVERSION
+// 時間に関する機能の有効
+#define ENABLE_MENU
+// Windowsのメニューに関する機能の有効
+#define ENABLE_TIME
+// Windowsのウィンドウに関する機能の有効
+#define ENABLE_WINDOW

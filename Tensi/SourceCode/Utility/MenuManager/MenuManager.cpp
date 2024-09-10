@@ -1,5 +1,6 @@
 #include "MenuManager.h"
-#include "..\..\Object\GameObject\Actor\WindowObject\WindowObject.h"
+#ifdef ENABLE_MENU
+#include "..\..\Object\GameObject\Actor\WindowObjectManager\WindowObject\WindowObject.h"
 #include "..\..\Object\GameObject\Actor\WindowObjectManager\WindowObjectManager.h"
 
 MenuManager::MenuManager()
@@ -91,7 +92,7 @@ void MenuManager::SelectMenu( const WORD No )
 	case 0:
 		// ボールの表示/非表示の設定.
 		pI->m_IsDispBall = !pI->m_IsDispBall;
-		WindowObjectManager::GetObjectPtr( EObjectTag::Ball, 0 )->SetIsDisp( pI->m_IsDispBall );
+		WindowObjectManager::GetObjectPtr( EObjectTag::NormalBall, 0 )->SetIsDisp( pI->m_IsDispBall );
 		break;
 	case 1:
 		// 重いボールの表示/非表示の設定.
@@ -114,3 +115,5 @@ void MenuManager::SelectMenu( const WORD No )
 		break;
 	}
 }
+
+#endif

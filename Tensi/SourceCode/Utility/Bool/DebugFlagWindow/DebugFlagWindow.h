@@ -1,4 +1,6 @@
 #pragma once
+#include "..\..\..\SystemSetting.h"
+#ifdef ENABLE_CLASS_BOOL
 #include "..\..\..\Global.h"
 
 /************************************************
@@ -30,3 +32,4 @@ private:
 	DebugFlagWindow( DebugFlagWindow && )						= delete;
 	DebugFlagWindow& operator = ( DebugFlagWindow && )		= delete;
 };
+#endif

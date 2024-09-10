@@ -1,4 +1,6 @@
 #pragma once
+#include "..\..\SystemSetting.h"
+#ifdef ENABLE_TIME
 #include "..\..\Global.h"
 
 /************************************************
@@ -23,3 +25,5 @@ namespace TimeManager {
 	// –¾“ú‚ðŽæ“¾.
 	std::tm Tomorrow( std::tm tm = GetTime() );
 };
+
+#endif

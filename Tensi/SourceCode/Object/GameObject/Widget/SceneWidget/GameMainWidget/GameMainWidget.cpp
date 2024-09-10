@@ -15,8 +15,7 @@ CGameMainWidget::~CGameMainWidget()
 //---------------------------.
 bool CGameMainWidget::Init()
 {
-	SetSceneName( ESceneList::GameMain );
-	GetSpriteList();
+	m_SceneType = ESceneList::GameMain;
 	return true;
 }
 
@@ -26,4 +25,11 @@ bool CGameMainWidget::Init()
 void CGameMainWidget::Update( const float& DeltaTime )
 {
 	m_DeltaTime = DeltaTime;
+}
+
+//---------------------------.
+// •`‰æ.
+//---------------------------.
+void CGameMainWidget::Render()
+{
 }

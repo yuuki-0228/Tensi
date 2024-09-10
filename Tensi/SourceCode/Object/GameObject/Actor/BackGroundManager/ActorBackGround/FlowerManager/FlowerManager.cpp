@@ -1,9 +1,9 @@
 #include "FlowerManager.h"
 #include "Flower/Flower.h"
-#include "..\..\..\..\..\Resource\SpriteResource\SpriteResource.h"
-#include "..\..\..\..\..\Utility\WindowManager\WindowManager.h"
-#include "..\..\..\..\..\Utility\Random\Random.h"
-#include "..\..\..\..\..\Utility\SaveDataManager\SaveDataManager.h"
+#include "..\..\..\..\..\..\Resource\SpriteResource\SpriteResource.h"
+#include "..\..\..\..\..\..\Utility\WindowManager\WindowManager.h"
+#include "..\..\..\..\..\..\Utility\Random\Random.h"
+#include "..\..\..\..\..\..\Utility\SaveDataManager\SaveDataManager.h"
 
 namespace {
 	const std::vector<D3DXCOLOR3> COLOR_LIST = {

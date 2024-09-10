@@ -6,35 +6,7 @@
 #include "..\..\..\Resource\FontResource\FontResource.h"
 
 namespace {
-	// 選択肢列挙体.
-	enum class enChoice : unsigned char {
-		StartChoice,	// 最初の選択肢.
-		EndChoice,		// 最後の選択肢.
 
-		Max,			// 最大要素数.
-	} typedef EChoice;
-
-	// タイトルの選択肢列挙体.
-	enum class enTitleChoice : unsigned char
-	{
-		GameStart,			// ゲーム開始.
-		MiniGame,			// ミニゲーム.
-		PizzaEdit,			// ピザエディタ.
-		RankingDelete,		// ランキングの削除.
-		GameEnd,			// ゲーム終了.
-
-		Max,				// 最大要素数.
-		Start	= 0,		// 一番最初の選択肢.
-		End		= Max - 1,	// 一番最後の選択肢.
-	} typedef ETitleChoice;
-
-	// 拡縮管理列挙体.
-	enum class enScaling : unsigned char
-	{
-		None,			// 待機中.
-		Expand,			// 拡大中.
-		Shrink,			// 縮小中.
-	} typedef EScaling;
 }
 
 /************************************************

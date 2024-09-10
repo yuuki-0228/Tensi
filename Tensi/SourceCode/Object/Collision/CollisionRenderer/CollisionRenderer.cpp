@@ -61,29 +61,28 @@ CollisionRenderer* CollisionRenderer::GetInstance()
 void CollisionRenderer::Render()
 {
 #ifdef _DEBUG
-//	CollisionRenderer* pI = GetInstance();
-//
-//	// 当たり判定を表示するか.
-//	if ( DebugKeyInput::IsKeyPress( VK_CONTROL ) ) {
-//		if ( DebugKeyInput::IsKeyDown( VK_F1 ) ) pI->m_IsPointRender.Inversion();		// 点の表示/非表示.
-//		if ( DebugKeyInput::IsKeyDown( VK_F2 ) ) pI->m_IsSphereRender.Inversion();		// 球体の表示/非表示.
-//		if ( DebugKeyInput::IsKeyDown( VK_F3 ) ) pI->m_IsCylinderRender.Inversion();	// 円柱の表示/非表示.
-//		if ( DebugKeyInput::IsKeyDown( VK_F4 ) ) pI->m_IsRayRender.Inversion();		// レイの表示/非表示.
-//		if ( DebugKeyInput::IsKeyDown( VK_F5 ) ) pI->m_IsMeshRender.Inversion();		// メッシュの表示/非表示.
-//		if ( DebugKeyInput::IsKeyDown( VK_F6 ) ) pI->m_IsPoint2DRender.Inversion();	// 点2Dの表示/非表示.
-//		if ( DebugKeyInput::IsKeyDown( VK_F7 ) ) pI->m_IsBox2DRender.Inversion();		// ボックス2Dの表示/非表示.
-//		if ( DebugKeyInput::IsKeyDown( VK_F8 ) ) pI->m_IsSphere2DRender.Inversion();	// 円2Dの表示/非表示.
-//	}
-//
-//	PointRender();		// 点の描画.
-//	SphereRender();		// 球体の描画.
-//	CylinderRender();	// 円柱の描画.
-//	RayRender();		// レイの描画.
-//	MeshRender();		// メッシュの描画.
-//	Point2DRender();	// 点2Dの描画.
-//	Box2DRender();		// ボックス2Dの描画.
-//	Sphere2DRender();	// 円2Dの描画.
-//
+	CollisionRenderer* pI = GetInstance();
+
+	// 当たり判定を表示するか.
+	if ( DebugKeyInput::IsKeyPress( VK_CONTROL ) ) {
+		if ( DebugKeyInput::IsKeyDown( VK_F1 ) ) pI->m_IsPointRender.Inversion();		// 点の表示/非表示.
+		if ( DebugKeyInput::IsKeyDown( VK_F2 ) ) pI->m_IsSphereRender.Inversion();		// 球体の表示/非表示.
+		if ( DebugKeyInput::IsKeyDown( VK_F3 ) ) pI->m_IsCylinderRender.Inversion();	// 円柱の表示/非表示.
+		if ( DebugKeyInput::IsKeyDown( VK_F4 ) ) pI->m_IsRayRender.Inversion();			// レイの表示/非表示.
+		if ( DebugKeyInput::IsKeyDown( VK_F5 ) ) pI->m_IsMeshRender.Inversion();		// メッシュの表示/非表示.
+		if ( DebugKeyInput::IsKeyDown( VK_F6 ) ) pI->m_IsPoint2DRender.Inversion();		// 点2Dの表示/非表示.
+		if ( DebugKeyInput::IsKeyDown( VK_F7 ) ) pI->m_IsBox2DRender.Inversion();		// ボックス2Dの表示/非表示.
+		if ( DebugKeyInput::IsKeyDown( VK_F8 ) ) pI->m_IsSphere2DRender.Inversion();	// 円2Dの表示/非表示.
+	}
+
+	PointRender();		// 点の描画.
+	SphereRender();		// 球体の描画.
+	CylinderRender();	// 円柱の描画.
+	RayRender();		// レイの描画.
+	MeshRender();		// メッシュの描画.
+	Point2DRender();	// 点2Dの描画.
+	Box2DRender();		// ボックス2Dの描画.
+	Sphere2DRender();	// 円2Dの描画.
 #endif // #ifdef _DEBUG.
 }
 

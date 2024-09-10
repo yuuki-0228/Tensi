@@ -1,4 +1,5 @@
 #include "DebugFlagWindow.h"
+#ifdef ENABLE_CLASS_BOOL
 #include "..\BitFlagManager\BitFlagManager.h"
 #include "..\..\ImGuiManager\ImGuiManager.h"
 #include <fstream>
@@ -98,3 +99,5 @@ void DebugFlagWindow::FlagFind()
 	ImGui::InputText( " ", &GetInstance()->m_FindString );
 	ImGui::Separator();
 }
+
+#endif

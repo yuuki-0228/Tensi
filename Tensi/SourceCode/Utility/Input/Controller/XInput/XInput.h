@@ -144,8 +144,13 @@ private:
 	XINPUT_STATE		m_state;			// キー入力情報.
 	XINPUT_STATE		m_stateOld;			// キー入力情報(キーストローク判定用).
 	XINPUT_VIBRATION	m_vibration;		// 振動.
+#ifdef ENABLE_CLASS_BOOL
 	CBool				m_IsVibration;		// 振動を使用するか.
 	CBool				m_ButStop;			// ボタンを停止する.
+#else
+	bool				m_IsVibration;		// 振動を使用するか.
+	bool				m_ButStop;			// ボタンを停止する.
+#endif
 	bool				m_connect;			// 接続判定.
 	bool				m_IsNotActiveStop;	// アクティブウィンドウではない時に停止させるか.
 

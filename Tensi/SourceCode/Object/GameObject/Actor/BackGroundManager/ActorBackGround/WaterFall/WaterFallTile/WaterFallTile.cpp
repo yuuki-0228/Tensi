@@ -1,6 +1,6 @@
 #include "WaterFallTile.h"
-#include "..\..\..\..\..\..\Resource\SpriteResource\SpriteResource.h"
-#include "..\..\..\..\..\..\Utility\WindowManager\WindowManager.h"
+#include "..\..\..\..\..\..\..\Resource\SpriteResource\SpriteResource.h"
+#include "..\..\..\..\..\..\..\Utility\WindowManager\WindowManager.h"
 
 namespace {
 	constexpr int WATERFALL_PATTERN_NO	= 0;	// ëÍÇÃÉpÉ^Å[ÉìNo

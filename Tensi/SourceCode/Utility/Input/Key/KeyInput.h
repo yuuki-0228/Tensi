@@ -64,7 +64,11 @@ private:
 private:
 	BYTE	m_NowState[KEY_MAX];	// 現在のキーの状態.
 	BYTE	m_OldState[KEY_MAX];	// 前回のキーの状態.
+#ifdef ENABLE_CLASS_BOOL
 	CBool	m_KeyStop;				// 全てのキーを停止する.
+#else
+	bool	m_KeyStop;				// 全てのキーを停止する.
+#endif
 	bool	m_IsNotActiveStop;		// アクティブウィンドウではない時に停止させるか.
 
 private:

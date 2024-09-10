@@ -1,8 +1,8 @@
 #include "Tree.h"
-#include "..\..\..\..\..\Resource\SpriteResource\SpriteResource.h"
-#include "..\..\..\..\..\Utility\Random\Random.h"
-#include "..\..\..\..\..\Utility\WindowManager\WindowManager.h"
-#include "..\..\..\..\..\Utility\Input\Input.h"
+#include "..\..\..\..\..\..\Resource\SpriteResource\SpriteResource.h"
+#include "..\..\..\..\..\..\Utility\Random\Random.h"
+#include "..\..\..\..\..\..\Utility\WindowManager\WindowManager.h"
+#include "..\..\..\..\..\..\Utility\Input\Input.h"
 
 namespace {
 	enum enTreeNo : unsigned char {

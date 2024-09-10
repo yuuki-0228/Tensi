@@ -62,4 +62,3 @@ MasterDataAccesser* MasterDataAccesser::GetInstance()
 	static std::unique_ptr<MasterDataAccesser> pInstance = std::make_unique<MasterDataAccesser>();
 	return pInstance.get();
 }
-

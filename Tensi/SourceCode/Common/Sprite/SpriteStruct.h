@@ -82,50 +82,8 @@ struct stSpriteState
 	D3DXVECTOR2								OffSet;				// 補正値.
 	D3DXPOSITION3							AddCenterPos;		// 中心座標に変換用の追加座標.
 	ELocalPosition							LocalPosNo;			// ローカル座標の番号.
-	std::vector<std::string>				DispSceneList;		// 表示するシーン名.
-	std::unordered_map<std::string, int>	SceneDispNum;		// シーンに表示する個数.
 	std::string								FilePath;			// ファイルパス.
 } typedef SSpriteState;
-
-// UIアニメーション情報構造体.
-struct stUIAnimState
-{
-	std::string		UIAnimWhen;			// いつ行うか.
-	std::string		UIAnimWhat;			// 何を行うか.
-	std::string		EndMessage;			// 再生終了時のメッセージ名.
-	STransform		StartTransform;		// 初期のトランスフォーム.
-	D3DXCOLOR4		StartColor;			// 初期の色.
-	bool			Flag_x;				// x方向のフラグ.
-	bool			Flag_y;				// y方向のフラグ.
-	bool			IsLoop;				// ループさせるか.
-	bool			IsAnimPlay;			// アニメーションをするか.
-	float			AnimCnt;			// アニメーション用のカウント.
-	float			Cnt_x;				// x方向のカウント.
-	float			Cnt_y;				// y方向のカウント.
-	float			Speed_x;			// x方向の速度.
-	float			Speed_y;			// y方向の速度.
-	int				PlayCnt;			// 再生カウント.
-	int				PlayMax;			// 再生上限.
-
-	stUIAnimState()
-		: UIAnimWhen		( "None" )
-		, UIAnimWhat		( "None" )
-		, EndMessage		( "" )
-		, StartTransform	()
-		, StartColor		( Color4::White )
-		, Flag_x			( false )
-		, Flag_y			( false )
-		, IsLoop			( true )
-		, IsAnimPlay		( false )
-		, AnimCnt			( 0.0f )
-		, Cnt_x				( 0.0f )
-		, Cnt_y				( 0.0f )
-		, Speed_x			( 0.0f )
-		, Speed_y			( 0.0f )
-		, PlayCnt			( 0 )
-		, PlayMax			( 0 )
-	{}
-} typedef SUIAnimState;
 
 // スプライトアニメーション情報構造体.
 struct stSpriteAnimState
@@ -314,40 +272,30 @@ struct stSpriteAnimState
 struct stSpriteRenderState
 {
 	SSpriteAnimState			AnimState;		// アニメーション情報.
-	SUIAnimState				UIAnimState;	// UIアニメーション情報.
 	STransform					Transform;		// トランスフォーム.
 	ID3D11ShaderResourceView*	MaskTexture;	// マスクテクスチャ.
 	ID3D11ShaderResourceView*	RuleTexture;	// ルールテクスチャ.
 	ESamplerState				SmaplerNo;		// サンプラ番号.
 	D3DXCOLOR4					Color;			// 色.
 	D3DXVECTOR4					RenderArea;		// 描画するエリア( 左上x, 左上y, 幅, 高さ ).
-	std::string					SceneName;		// どのシーンか.
-	std::string					No;				// どの設定の画像か.
 	bool						IsDisp;			// 表示するか.
 	bool						IsDither;		// ディザ抜きを使用するか.
 	bool						IsAlphaBlock;	// アルファブロックを使用するか.
 	bool						IsColorMask;	// 色の変更を指定するためにマスクを使用するか.
-	bool						IsGrab;			// つかまれているか.
-	bool						IsLock;			// つかめなくするか.
 
 
 	stSpriteRenderState()
 		: AnimState		()
-		, UIAnimState	()
 		, Transform		()
 		, MaskTexture	( nullptr )
 		, RuleTexture	( nullptr )
 		, SmaplerNo		( ESamplerState::Wrap )
 		, Color			( Color4::White )
 		, RenderArea	( 0.0f, 0.0f, -1.0f, -1.0f )
-		, SceneName		( "" )
-		, No			( "" )
 		, IsDisp		( true )
 		, IsDither		( false )
 		, IsAlphaBlock	( true )
 		, IsColorMask	( false )
-		, IsGrab		( false )
-		, IsLock		( false )
 	{}
 
 	~stSpriteRenderState()

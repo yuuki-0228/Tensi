@@ -25,5 +25,9 @@ private:
 private:
 	CStaticMesh*	m_pMesh;		// モデル.
 	STransform		m_Transform;	// トランスフォーム.
+#ifdef ENABLE_CLASS_BOOL
 	CBool			m_IsRender;		// 表示するか.
+#else
+	bool			m_IsRender;		// 表示するか
+#endif
 };

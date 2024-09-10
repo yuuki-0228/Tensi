@@ -6,6 +6,7 @@
 #pragma comment( lib, "dxguid.lib" )
 #pragma comment( lib, "dinput8.lib" )
 #include "..\..\..\Bool\Bool.h"
+#include <vector>
 
 enum class DIRECT_INPUT_KEY : int	//基底型をintにする.
 {
@@ -102,7 +103,11 @@ private:
 	unsigned int			m_Status;		// 入力情報.
 	unsigned int			m_StatusOld;	// 前回フレームの入力情報.
 
+#ifdef ENABLE_CLASS_BOOL
 	CBool					m_ButStop;		// ボタンを停止する.
+#else
+	bool					m_ButStop;		// ボタンを停止する.
+#endif
 };
 
 

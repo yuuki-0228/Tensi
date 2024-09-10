@@ -97,7 +97,9 @@ private:
 private:
 	std::queue<std::function<void()>>	m_RenderQueue;
 	bool								m_IsRender;
+#ifdef ENABLE_CLASS_BOOL
 	CBool								m_IsDispSample;
+#endif
 
 private:
 	// コピー・ムーブコンストラクタ, 代入演算子の削除.

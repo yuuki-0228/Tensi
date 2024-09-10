@@ -7,7 +7,11 @@
 PositionRenderer::PositionRenderer()
 	: m_pMesh		( nullptr )
 	, m_Transform	()
+#ifdef ENABLE_CLASS_BOOL
 	, m_IsRender	( false, u8"À•W‚Ì•\¦/”ñ•\¦", u8"System" )
+#else
+	, m_IsRender	( false )
+#endif
 {
 }
 

@@ -8,7 +8,11 @@ namespace {
 KeyInput::KeyInput()
 	: m_NowState		()
 	, m_OldState		()
+#ifdef ENABLE_CLASS_BOOL
 	, m_KeyStop			( false, u8"キーボードのキーを停止するか", "Input" )
+#else
+	, m_KeyStop			( false )
+#endif
 	, m_IsNotActiveStop	( false )
 {
 	// ウィンドウの設定の取得.
@@ -52,7 +56,7 @@ bool KeyInput::IsKeyPress( const int Key )
 	KeyInput* pI = GetInstance();
 	if ( pI->m_IsNotActiveStop && !DirectX11::IsWindowActive() ) return false;
 
-	if (		pI->m_KeyStop.get() ) return false;
+	if (		pI->m_KeyStop == true ) return false;
 	return (	pI->m_NowState[Key] & 0x80 ) != 0;
 }
 
@@ -66,7 +70,7 @@ bool KeyInput::IsKeyDown( const int Key )
 	if ( pI->m_IsNotActiveStop && !DirectX11::IsWindowActive() ) return false;
 
 	// 現在入力で前回入力してなければ.
-	if (		pI->m_KeyStop.get() ) return false;
+	if (		pI->m_KeyStop == true ) return false;
 	return	(	pI->m_OldState[Key] & 0x80 ) == 0 &&
 			(	pI->m_NowState[Key] & 0x80 ) != 0;
 }
@@ -81,7 +85,7 @@ bool KeyInput::IsKeyUp( const int Key )
 	if ( pI->m_IsNotActiveStop && !DirectX11::IsWindowActive() ) return false;
 
 	// 現在も入力で前回も入力なら.
-	if (		pI->m_KeyStop.get() ) return false;
+	if (		pI->m_KeyStop == true ) return false;
 	return	(	pI->m_OldState[Key] & 0x80 ) != 0 &&
 			(	pI->m_NowState[Key] & 0x80 ) == 0;
 }
@@ -96,7 +100,7 @@ bool KeyInput::IsKeyRepeat( const int Key )
 	if ( pI->m_IsNotActiveStop && !DirectX11::IsWindowActive() ) return false;
 
 	// 現在も入力で前回も入力なら.
-	if (		pI->m_KeyStop.get() ) return false;
+	if (		pI->m_KeyStop == true ) return false;
 	return	(	pI->m_OldState[Key] & 0x80 ) != 0 &&
 			(	pI->m_NowState[Key] & 0x80 ) != 0;
 }

@@ -1,6 +1,5 @@
 #include "SceneManager.h"
 #include "..\GameMain\GameMain.h"
-#include "..\UIEdit\UIEdit.h"
 #include "..\..\Common\DirectX\DirectX11.h"
 #include "..\..\Common\SoundManeger\SoundManeger.h"
 #include "..\..\Object\GameObject\ActorCollisionManager\ActorCollisionManager.h"
@@ -179,10 +178,6 @@ void SceneManager::SceneChangeUpdate()
 		case ESceneList::GameMain:
 			SoundManager::BGMAllStop();
 			pI->m_pScene = std::make_unique<CGameMain>();
-			break;
-		case ESceneList::UIEdit:
-			SoundManager::BGMAllStop();
-			pI->m_pScene = std::make_unique<CUIEdit>();
 			break;
 		default:
 			break;

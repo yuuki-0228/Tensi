@@ -1,4 +1,5 @@
 #include "StringConversion.h"
+#ifdef ENABLE_STRING_CONVERSION
 #include <Windows.h>
 #include <iostream>
 #include <iomanip>
@@ -83,3 +84,5 @@ std::wstring StringConversion::to_RightPaddingString( const std::wstring& ws, co
 	const std::string& PaddingString	= to_RightPaddingString( String, n, PaddedChar );
 	return StringConversion::to_wString( PaddingString );
 }
+
+#endif

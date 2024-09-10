@@ -1,4 +1,5 @@
 #include "Bool.h"
+#ifdef ENABLE_CLASS_BOOL
 
 void CBool::operator=( const bool Flag )
 {
@@ -51,3 +52,5 @@ CBool::~CBool()
 	BitFlagManager::DeleteFlag( m_Handle );
 	m_Handle = 0;
 }
+
+#endif

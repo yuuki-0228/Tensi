@@ -1,17 +1,13 @@
 #include "GameMain.h"
 #include "..\..\Common\Sprite\Sprite.h"
 #include "..\..\Object\Light\Light.h"
+#include "..\..\Object\GameObject\Actor\BackGroundManager\BackGroundManager.h"
 #include "..\..\Object\GameObject\Actor\WindowObjectManager\WindowObject\Player\Player.h"
 #include "..\..\Object\GameObject\Actor\WindowObjectManager\WindowObject\Ball\NormalBall\NormalBall.h"
 #include "..\..\Object\GameObject\Actor\WindowObjectManager\WindowObject\Ball\HeavyBall\HeavyBall.h"
 #include "..\..\Object\GameObject\Actor\WindowObjectManager\WindowObject\Ball\SuperBall\SuperBall.h"
 #include "..\..\Object\GameObject\Actor\WindowObjectManager\WindowObject\WateringCan\WateringCan.h"
 #include "..\..\Object\GameObject\Actor\SlimeFrame\SlimeFrame.h"
-#include "..\..\Object\GameObject\Actor\ActorBackGround\Tree\Tree.h"
-#include "..\..\Object\GameObject\Actor\ActorBackGround\WeedManager\WeedManager.h"
-#include "..\..\Object\GameObject\Actor\ActorBackGround\FlowerManager\FlowerManager.h"
-#include "..\..\Object\GameObject\Actor\ActorBackGround\House\House.h"
-#include "..\..\Object\GameObject\Actor\ActorBackGround\WaterFall\WaterFall.h"
 #include "..\..\Object\GameObject\Widget\SceneWidget\GameMainWidget\GameMainWidget.h"
 #include "..\..\Object\GameObject\ActorCollisionManager\ActorCollisionManager.h"
 #include "..\..\Resource\SpriteResource\SpriteResource.h"
@@ -31,11 +27,6 @@ CGameMain::CGameMain()
 	, m_pSuperBall		( nullptr )
 	, m_pSlimeFrame		( nullptr )
 	, m_pWateringCan	( nullptr )
-	, m_pTree			( nullptr )
-	, m_pWeedManager	( nullptr )
-	, m_pFlowerManager	( nullptr )
-	, m_pHouse			( nullptr )
-	, m_pWaterFall		( nullptr )
 	, m_GameMainWidget	( nullptr )
 {
 }
@@ -49,17 +40,14 @@ CGameMain::~CGameMain()
 //---------------------------.
 bool CGameMain::Init()
 {
+	BackGroundManager::Init();
+
 	m_pPlayer			= std::make_shared<CPlayer>();
 	m_pNormalBall		= std::make_shared<CNormalBall>();
 	m_pHeavyBall		= std::make_shared<CHeavyBall>();
 	m_pSuperBall		= std::make_shared<CSuperBall>();
 	m_pSlimeFrame		= std::make_shared<CSlimeFrame>();
 	m_pWateringCan		= std::make_shared<CWateringCan>();
-	m_pTree				= std::make_shared<CTree>();
-	m_pWeedManager		= std::make_shared<CWeedManager>();
-	m_pFlowerManager	= std::make_shared<CFlowerManager>();
-	m_pHouse			= std::make_shared<CHouse>();
-	m_pWaterFall		= std::make_shared<CWaterFall>();
 	m_GameMainWidget	= std::make_unique<CGameMainWidget>();
 
 	m_pPlayer->Init();
@@ -68,11 +56,6 @@ bool CGameMain::Init()
 	m_pSuperBall->Init();
 	m_pWateringCan->Init();
 	m_pSlimeFrame->Init();
-	m_pTree->Init();
-	m_pWeedManager->Init();
-	m_pFlowerManager->Init();
-	m_pHouse->Init();
-	m_pWaterFall->Init();
 	m_GameMainWidget->Init();
 
 	// ライトの初期化.
@@ -89,9 +72,7 @@ bool CGameMain::Init()
 //---------------------------.
 bool CGameMain::FirstPlayInit()
 {
-	m_pWeedManager->Fill( 100 );	// 雑草を生やす
-	m_pFlowerManager->Fill( 10 );	// 花を植える
-	m_pWaterFall->Setting();		// 滝の設定.
+	BackGroundManager::FirstPlayInit();
 	return true;
 }
 
@@ -105,23 +86,7 @@ bool CGameMain::LoginInit( std::tm lastDay )
 
 	Log::PushLog( "前回のログインから" + std::to_string(diff.tm_mday) + "日空いています");
 
-
-	// 雑草を生やす(ログインしていない日の分も抽選する)
-	for ( int i = 0; i < diff.tm_mday; ++i ) {
-		if ( m_pWeedManager->GetNum() < 300 && Random::Probability( 1, 2 ) ) {
-			const int Num = Random::GetRand( 5, 10 );
-			m_pWeedManager->Fill( Num );
-			Log::PushLog( "雑草を" + std::to_string( Num ) + "本生やしました" );
-		}
-	}
-
-	// 花を植える
-	if ( m_pFlowerManager->GetNum() < 100 && Random::Probability( 1, 10 ) ) {
-		const int Num = Random::GetRand( 1, 2 );
-		m_pFlowerManager->Fill( Num );
-		Log::PushLog( "花を" + std::to_string( Num ) + "本植えました" );
-	}
-
+	BackGroundManager::LoginInit( now, diff );
 	return false;
 }
 
@@ -130,58 +95,35 @@ bool CGameMain::LoginInit( std::tm lastDay )
 //---------------------------.
 void CGameMain::Update( const float& DeltaTime )
 {
-	if ( DebugKeyInput::IsKeyDown( 'P' ) ) {
-		m_pTree->Fill( Input::GetMousePosition3() );
-	}
-	if ( DebugKeyInput::IsKeyDown( 'O' ) ) {
-		m_pHouse->Setting( Input::GetMousePosition3() );
-	}
-	if ( DebugKeyInput::IsKeyDown( 'I' ) ) {
-		m_pWeedManager->Fill( 50 );
-	}
-
 	// 更新.
+	BackGroundManager::Update( DeltaTime );
 	m_pPlayer->Update( DeltaTime );
 	m_pNormalBall->Update( DeltaTime );
 	m_pHeavyBall->Update( DeltaTime );
 	m_pSuperBall->Update( DeltaTime );
 	m_pWateringCan->Update( DeltaTime );
 	m_pSlimeFrame->Update( DeltaTime );
-//	m_pHouse->Update( DeltaTime );
-	m_pWaterFall->Update( DeltaTime );
-//	m_pTree->Update( DeltaTime );
-	m_pWeedManager->Update( DeltaTime );
-	m_pFlowerManager->Update( DeltaTime );
-
 
 	// 当たり判定処理.
 	ActorCollisionManager::Collision();
 
 	// 当たり判定終了後の更新.
+	BackGroundManager::LateUpdate( DeltaTime );
 	m_pPlayer->LateUpdate( DeltaTime );
 	m_pNormalBall->LateUpdate( DeltaTime );
 	m_pHeavyBall->LateUpdate( DeltaTime );
 	m_pSuperBall->LateUpdate( DeltaTime );
 	m_pWateringCan->LateUpdate( DeltaTime );
 	m_pSlimeFrame->LateUpdate( DeltaTime );
-//	m_pHouse->LateUpdate( DeltaTime );
-	m_pWaterFall->LateUpdate( DeltaTime );
-//	m_pTree->LateUpdate( DeltaTime );
-	m_pWeedManager->LateUpdate( DeltaTime );
-	m_pFlowerManager->LateUpdate( DeltaTime );
 
 	// デバックの更新.
+	BackGroundManager::DebugUpdate( DeltaTime );
 	m_pPlayer->DebugUpdate( DeltaTime );
 	m_pNormalBall->DebugUpdate( DeltaTime );
 	m_pHeavyBall->DebugUpdate( DeltaTime );
 	m_pSuperBall->DebugUpdate( DeltaTime );
 	m_pWateringCan->DebugUpdate( DeltaTime );
 	m_pSlimeFrame->DebugUpdate( DeltaTime );
-//	m_pHouse->DebugUpdate( DeltaTime );
-	m_pWaterFall->DebugUpdate( DeltaTime );
-//	m_pTree->DebugUpdate( DeltaTime );
-	m_pWeedManager->DebugUpdate( DeltaTime );
-	m_pFlowerManager->DebugUpdate( DeltaTime );
 
 	// UIの更新.
 	m_GameMainWidget->Update( DeltaTime );
@@ -200,12 +142,8 @@ void CGameMain::ModelRender()
 void CGameMain::SpriteUIRender()
 {
 	m_GameMainWidget->Render();
-	m_pWaterFall->Render();
+	BackGroundManager::Render();
 	m_pWateringCan->Render();
-	m_pWeedManager->Render();
-	m_pFlowerManager->Render();
-//	m_pTree->Render();
-//	m_pHouse->Render();
 	m_pNormalBall->Render();
 	m_pHeavyBall->Render();
 	m_pSuperBall->Render();
@@ -215,12 +153,8 @@ void CGameMain::SpriteUIRender()
 void CGameMain::SubSpriteUIRender()
 {
 	m_GameMainWidget->SubRender();
-	m_pWaterFall->SubRender();
+	BackGroundManager::SubRender();
 	m_pWateringCan->SubRender();
-	m_pWeedManager->SubRender();
-	m_pFlowerManager->SubRender();
-//	m_pTree->SubRender();
-//	m_pHouse->SubRender();
 	m_pNormalBall->SubRender();
 	m_pHeavyBall->SubRender();
 	m_pSuperBall->SubRender();

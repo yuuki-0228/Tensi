@@ -17,8 +17,14 @@ XInput::XInput()
 	, m_state			()
 	, m_stateOld		()
 	, m_vibration		()
+#ifdef ENABLE_CLASS_BOOL
 	, m_IsVibration		( false, u8"XInput‚ÌU“®‚ðŽg—p‚·‚é‚©",		"Input" )
 	, m_ButStop			( false, u8"XInput‚Ìƒ{ƒ^ƒ“‚ð’âŽ~‚³‚¹‚é‚©",	"Input" )
+#else
+	, m_IsVibration		( false )
+	, m_ButStop			( false )
+
+#endif
 	, m_connect			( false )
 	, m_IsNotActiveStop	( false )
 {
@@ -73,7 +79,7 @@ bool XInput::IsKeyPress( WORD GamePad )
 	XInput* pI = GetInstance();
 	if ( pI->m_IsNotActiveStop && !DirectX11::IsWindowActive() ) return false;
 
-	if ( pI->m_ButStop.get() ) return false;
+	if ( pI->m_ButStop == true ) return false;
 	switch ( GamePad ) {
 	case XINPUT_LSTICK_U:
 	case XINPUT_LSTICK_D:
@@ -101,7 +107,7 @@ bool XInput::IsKeyDown( WORD GamePad )
 	XInput* pI = GetInstance();
 	if ( pI->m_IsNotActiveStop && !DirectX11::IsWindowActive() ) return false;
 
-	if ( pI->m_ButStop.get() ) return false;
+	if ( pI->m_ButStop == true ) return false;
 	switch ( GamePad ) {
 	case XINPUT_LSTICK_U:
 	case XINPUT_LSTICK_D:
@@ -129,7 +135,7 @@ bool XInput::IsKeyUp( WORD GamePad )
 	XInput* pI = GetInstance();
 	if ( pI->m_IsNotActiveStop && !DirectX11::IsWindowActive() ) return false;
 
-	if ( pI->m_ButStop.get() ) return false;
+	if ( pI->m_ButStop == true ) return false;
 	switch ( GamePad ) {
 	case XINPUT_LSTICK_U:
 	case XINPUT_LSTICK_D:
@@ -157,7 +163,7 @@ bool XInput::IsKeyRepeat( WORD GamePad )
 	XInput* pI = GetInstance();
 	if ( pI->m_IsNotActiveStop && !DirectX11::IsWindowActive() ) return false;
 
-	if ( pI->m_ButStop.get() ) return false;
+	if ( pI->m_ButStop == true ) return false;
 	switch ( GamePad ) {
 		case XINPUT_LSTICK_U:
 		case XINPUT_LSTICK_D:
@@ -183,7 +189,7 @@ bool XInput::SetVibration( const float LMotorSpd, const float RMotorSpd)
 {
 	XInput* pI = GetInstance();
 
-	if ( pI->m_IsVibration.get() ) {
+	if ( pI->m_IsVibration == true ) {
 		pI->m_vibration.wLeftMotorSpeed  =
 			static_cast<WORD>( INPUT_VIBRATION_MAX * Clamp( LMotorSpd, 0.0f, 1.0f ) );;
 		pI->m_vibration.wRightMotorSpeed =

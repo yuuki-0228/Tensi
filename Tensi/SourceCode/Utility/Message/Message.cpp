@@ -1,4 +1,5 @@
 #include "Message.h"
+#ifdef ENABLE_MESSAGE
 
 Message::Message()
 	: m_MsgList	()
@@ -186,3 +187,5 @@ bool Message::AutoMsgCheck( const std::string& CheckMsg )
 	if( pI->m_MsgList[Msg::NEW_MSG			+ Msg] ) return true;
 	return false;
 }
+
+#endif
