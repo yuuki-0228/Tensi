@@ -26,9 +26,6 @@ extern LRESULT ImGui_ImplWin32_WndProcHandler( HWND, UINT, WPARAM, LPARAM );
 
 static const decltype( WM_USER ) WM_NOTIFYICON = WM_USER + 100;
 
-// サブウィンドウを常時クリック判定を無くすか
-#define SUB_WND_ALWAY_CLICK_LOSE
-
 namespace{
 	constexpr char		PARAMETER_FILE_PATH[]		= "Data\\Parameter\\";								// パラメーターファイルパス.
 	constexpr char		WINDOW_SETTING_FILE_PATH[]	= "Data\\Parameter\\Config\\WindowSetting.json";	// ウィンドウの設定のファイルパス.
@@ -69,6 +66,9 @@ CMain::~CMain()
 	DeleteDC(		m_hDc		);
 	DeleteObject(	m_hSubWnd	);
 	DeleteObject(	m_hWnd		);
+
+	// デスクトップを再描画
+	SystemParametersInfo( SPI_SETDESKWALLPAPER, 0, NULL, SPIF_SENDCHANGE );
 }
 
 //---------------------------.
@@ -325,24 +325,8 @@ HRESULT CMain::InitWindow( HINSTANCE hInstance )
 	}
 	WindowManager::SetWnd( m_hWnd );
 
-	// サブウィンドウの作成.
-	m_hSubWnd = CreateWindowEx(
-		dwExStyle,					// 拡張機能( 透過ウィンドウ:WS_EX_LAYERED ).
-		wAppName.c_str(),			// アプリ名.
-		wWndName.c_str(),			// ウィンドウタイトル.
-		dwStyle,					// ウィンドウ種別(普通).
-		rect.left, rect.top,		// 表示位置x,y座標.
-		sizex,						// ウィンドウ幅.
-		sizey,						// ウィンドウ高さ.
-		nullptr,					// 親ウィンドウハンドル.
-		nullptr,					// メニュー設定.
-		hInstance,					// インスタンス番号.
-		nullptr );					// ウィンドウ作成時に発生するイベントに渡すデータ.
-
-	if ( !m_hSubWnd ) {
-		ErrorMessage( "サブウィンドウ作成失敗" );
-		return E_FAIL;
-	}
+	// WorkerWをサブウィンドウとして登録.
+	m_hSubWnd = FindWorkerW();
 	WindowManager::SetSubWnd( m_hSubWnd );
 
 	// DCの取得.
@@ -367,8 +351,7 @@ HRESULT CMain::InitWindow( HINSTANCE hInstance )
 	UpdateWindow( m_hSubWnd );
 
 	// 最背面に移動させる.
-	SetWindowPos( m_hWnd,	 HWND_BOTTOM, 0, 0, 0, 0, ( SWP_NOMOVE | SWP_NOSIZE | SWP_SHOWWINDOW ) );
-	SetWindowPos( m_hSubWnd, HWND_BOTTOM, 0, 0, 0, 0, ( SWP_NOMOVE | SWP_NOSIZE | SWP_SHOWWINDOW ) );
+	SetWindowPos( m_hWnd, HWND_BOTTOM, 0, 0, 0, 0, ( SWP_NOMOVE | SWP_NOSIZE | SWP_SHOWWINDOW ) );
 
 	// マウスカーソルを表示するか.
 	if ( WndSetting["IsDispMouseCursor"] == false ) {
@@ -474,11 +457,6 @@ LRESULT CALLBACK CMain::MsgProc(
 		break;
 	case WM_SIZE:
 		break;
-	case WM_WINDOWPOSCHANGING:
-		// サブウィンドウの位置が更新された時に最背面に変更する
-		if ( hWnd != WindowManager::GetSubWnd() ) break;
-		( ( LPWINDOWPOS )lParam )->hwndInsertAfter = HWND_BOTTOM;
-		break;
 	}
 
 	// メインに返す情報.
@@ -499,11 +477,6 @@ void CMain::WindowInit()
 	LONG SublStyle = GetWindowLong( m_hSubWnd, GWL_EXSTYLE );
 	SublStyle ^= WS_EX_LAYERED;
 	SetWindowLong( m_hSubWnd, GWL_EXSTYLE, SublStyle );
-#ifdef SUB_WND_ALWAY_CLICK_LOSE
-	// サブは常時クリックの判定を無くす
-	SublStyle |= WS_EX_TRANSPARENT | WS_EX_LAYERED | WS_EX_TOOLWINDOW;
-	SetWindowLong( m_hSubWnd, GWL_EXSTYLE, SublStyle );
-#endif
 
 	// ウィンドウの透明効果を無効にする.
 	LONG MainlStyle = GetWindowLong( m_hWnd, GWL_EXSTYLE );
@@ -566,21 +539,29 @@ void CMain::ClickUpdate()
 		lStyle		&= WS_EX_TRANSPARENT & WS_EX_LAYERED | WS_EX_TOOLWINDOW;
 		SetWindowLong( m_hWnd, GWL_EXSTYLE, lStyle );
 	}
+}
 
-#ifndef SUB_WND_ALWAY_CLICK_LOSE
-	// サブウィンドウのマウスの下のカラーの取得.
-	COLORREF SubColor = GetPixel( m_hSubDc, static_cast<int>( Pos.x ), static_cast<int>( Pos.y ) );
-	
-	// 真っ黒の場合クリック判定を無くす.
-	if ( GetRValue( SubColor ) == 0 && GetGValue( SubColor ) == 0 && GetBValue( SubColor ) == 0 ) {
-		LONG lStyle  = GetWindowLong( m_hSubWnd, GWL_EXSTYLE );
-		lStyle		|= WS_EX_TRANSPARENT | WS_EX_LAYERED | WS_EX_TOOLWINDOW;
-		SetWindowLong( m_hSubWnd, GWL_EXSTYLE, lStyle );
+//---------------------------.
+// WorkerWの取得
+//---------------------------.
+HWND CMain::FindWorkerW()
+{
+	HWND hProgman = FindWindow( L"Progman", NULL );
+	if ( hProgman == NULL ) {
+		return NULL;
 	}
-	else {
-		LONG lStyle  = GetWindowLong( m_hSubWnd, GWL_EXSTYLE );
-		lStyle		&= WS_EX_TRANSPARENT & WS_EX_LAYERED | WS_EX_TOOLWINDOW;
-		SetWindowLong( m_hSubWnd, GWL_EXSTYLE, lStyle );
-	}
-#endif
+
+	// Progmanの子ウィンドウを列挙し、WorkerWを探す
+	HWND hWorkerW = NULL;
+	EnumWindows( []( HWND hwnd, LPARAM lParam ) -> BOOL {
+		HWND hShellDefView = FindWindowEx( hwnd, NULL, L"SHELLDLL_DefView", NULL );
+		if ( hShellDefView != NULL ) {
+			HWND* phWorkerW = ( HWND* ) lParam;
+			*phWorkerW = FindWindowEx( NULL, hwnd, L"WorkerW", NULL );
+			return FALSE;
+		}
+		return TRUE;
+	}, ( LPARAM ) &hWorkerW );
+
+	return hWorkerW;
 }

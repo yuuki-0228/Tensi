@@ -36,6 +36,9 @@ private:
 	// ウィンドウのクリック判定の更新.
 	void ClickUpdate();
 
+	// WorkerWの取得
+	HWND FindWorkerW();
+
 private:
 	HWND							m_hWnd;			// ウィンドウハンドル.
 	HWND							m_hSubWnd;		// サブウィンドウハンドル.

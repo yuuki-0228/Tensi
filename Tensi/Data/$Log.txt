@@ -1,0 +1,64 @@
+[2025/5/21 0:44] >> App launch
+
+[0:44:43] >> DirectX11 デバイス作成 : 成功
+[0:44:43] >> 乱数の初期化 : 成功
+[0:44:43] >> 入力クラスの初期化 : 成功
+[0:44:43] >> ウィンドウテキストの初期化 : 成功
+[0:44:43] >> Imguiの初期化 : 成功
+[0:44:43] >> ------ サウンド読み込み開始 -------
+[0:44:43] >> Data\Sound\SE\ImguiSE.mp3 読み込み : 成功
+[0:44:43] >> ------ サウンド読み込み終了 -------
+[0:44:43] >> ------ スレッドロード開始 ------
+[0:44:43] >> ------ スプライト読み込み開始 ------
+[0:44:43] >> Data\Sprite\Collision\BoxColl2D.png 読み込み : 成功
+[0:44:43] >> Data\Sprite\Collision\PointColl2D.png 読み込み : 成功
+[0:44:43] >> Data\Sprite\Collision\SphereColl2D.png 読み込み : 成功
+[0:44:43] >> Data\Sprite\Fade\Fade.png 読み込み : 成功
+[0:44:43] >> Data\Sprite\Fade\UFO.png 読み込み : 成功
+[0:44:43] >> Data\Sprite\Mask\FadeMask.png 読み込み : 成功
+[0:44:43] >> Data\Sprite\Mask\GroundMask.png 読み込み : 成功
+[0:44:43] >> Data\Sprite\Mask\WindowMask.png 読み込み : 成功
+[0:44:44] >> Data\Sprite\Scene\Edtor\BugButton.png 読み込み : 成功
+[0:44:44] >> Data\Sprite\Scene\Edtor\EdtorGrid.png 読み込み : 成功
+[0:44:44] >> Data\Sprite\Scene\Edtor\HitBox.png 読み込み : 成功
+[0:44:44] >> Data\Sprite\Scene\GameMain\Ball.png 読み込み : 成功
+[0:44:44] >> Data\Sprite\Scene\GameMain\Enemy\Bat.png 読み込み : 成功
+[0:44:44] >> Data\Sprite\Scene\GameMain\Flower\Flower.png 読み込み : 成功
+[0:44:44] >> Data\Sprite\Scene\GameMain\Flower\WateringAnim.png 読み込み : 成功
+[0:44:44] >> Data\Sprite\Scene\GameMain\Ground.png 読み込み : 成功
+[0:44:44] >> Data\Sprite\Scene\GameMain\House\Tent.png 読み込み : 成功
+[0:44:44] >> Data\Sprite\Scene\GameMain\Slime\CollapsedSlime.png 読み込み : 成功
+[0:44:44] >> Data\Sprite\Scene\GameMain\Slime\NoteEffect.png 読み込み : 成功
+[0:44:44] >> Data\Sprite\Scene\GameMain\Slime\SleepEffect.png 読み込み : 成功
+[0:44:44] >> Data\Sprite\Scene\GameMain\Slime\Slime.png 読み込み : 成功
+[0:44:44] >> Data\Sprite\Scene\GameMain\Slime\SurprisedEffect.png 読み込み : 成功
+[0:44:44] >> Data\Sprite\Scene\GameMain\SlimeFrame\SlimeFrameBack.png 読み込み : 成功
+[0:44:44] >> Data\Sprite\Scene\GameMain\SlimeFrame\SlimeFrameIcon.png 読み込み : 成功
+[0:44:44] >> Data\Sprite\Scene\GameMain\Tree\Apple.png 読み込み : 成功
+[0:44:44] >> Data\Sprite\Scene\GameMain\Tree\Sapling.png 読み込み : 成功
+[0:44:44] >> Data\Sprite\Scene\GameMain\Tree\SmallTree.png 読み込み : 成功
+[0:44:44] >> Data\Sprite\Scene\GameMain\Tree\SmallTreeLeaf.png 読み込み : 成功
+[0:44:44] >> Data\Sprite\Scene\GameMain\Tree\Tree.png 読み込み : 成功
+[0:44:44] >> Data\Sprite\Scene\GameMain\Tree\TreeLeaf.png 読み込み : 成功
+[0:44:44] >> Data\Sprite\Scene\GameMain\WaterFall.png 読み込み : 成功
+[0:44:44] >> Data\Sprite\Scene\GameMain\WateringCan\Water.png 読み込み : 成功
+[0:44:44] >> Data\Sprite\Scene\GameMain\WateringCan\WaterGauge.png 読み込み : 成功
+[0:44:44] >> Data\Sprite\Scene\GameMain\WateringCan\WateringCan.png 読み込み : 成功
+[0:44:44] >> Data\Sprite\Scene\GameMain\Weed.png 読み込み : 成功
+[0:44:44] >> Data\Sprite\Scene\GameMain\Window.png 読み込み : 成功
+[0:44:44] >> Data\Sprite\Scene\GameMain\WindowClose.png 読み込み : 成功
+[0:44:44] >> Data\Sprite\WindowText\ascii.png 読み込み : 成功
+[0:44:44] >> ------ スプライト読み込み終了 ------
+[0:44:44] >> ------ エフェクト読み込み開始 ------
+[0:44:44] >> ------ エフェクト読み込み終了 ------
+[0:44:44] >> ------ フォント読み込み開始 ------
+[0:44:44] >> Data\Sprite\Font\NasuM.ttf 読み込み : 成功
+[0:44:44] >> Data\Sprite\Font\コーポレート・ロゴ ver2 Medium.otf 読み込み : 成功
+[0:44:44] >> ------ フォント読み込み終了 ------
+[0:44:44] >> ------ メッシュ読み込み開始 ------
+[0:44:44] >> Data\Mesh\Collision\Cylinder_c.x 読み込み : 成功
+[0:44:44] >> Data\Mesh\Collision\Sphere_c.x 読み込み : 成功
+[0:44:44] >> Data\Mesh\Static\XYZModel.X 読み込み : 成功
+[0:44:44] >> ------ メッシュ読み込み終了 ------
+[0:44:44] >> ------ スレッドロード終了 ------
+[0:44:44] >> ------ メインループ開始 ------
