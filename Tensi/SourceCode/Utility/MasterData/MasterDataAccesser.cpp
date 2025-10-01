@@ -1,7 +1,7 @@
 #include "MasterDataAccesser.h"
 
 namespace {
-	const std::string DATA_PATH = "..\\..\\..\\Data\\Parameter\\MasterData";
+	const std::string DATA_PATH = "Data\\Parameter\\MasterData";
 }
 
 MasterDataAccesser::MasterDataAccesser()
