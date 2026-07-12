@@ -114,6 +114,9 @@ private:
 	// デバイスとスワップチェイン作成.
 	HRESULT CreateDeviceAndSwapChain();
 
+	// サブウィンドウ用: DirectComposition 合成スワップチェイン作成.
+	HRESULT CreateCompositionSwapChain( const int No );
+
 	// バックバッファ作成：カラー用レンダーターゲットビュー作成.
 	HRESULT CreateColorBackBufferRTV();
 
@@ -144,6 +147,13 @@ private:
 	std::vector<ID3D11RenderTargetView*>	m_pBackBuffer_TexRTV;		// レンダ―ターゲットビュー.
 	std::vector<ID3D11Texture2D*>			m_pBackBuffer_DSTex;		// デプスステンシル用テクスチャ.
 	std::vector<ID3D11DepthStencilView*>	m_pBackBuffer_DSTexDSV;		// デプスステンシルビュー.
+
+	// DirectComposition( サブウィンドウの透過合成用 ).
+	//	dcomp.h の具象型を DirectX11.h に持ち込むと旧DirectX SDKのd2d1.hと衝突するため、
+	//	IUnknown* として保持する( 生成/SetRoot等は DCompHelper.cpp 側で完結させる ).
+	IUnknown*								m_pDCompDevice;				// DComp デバイス.
+	IUnknown*								m_pDCompTarget;				// DComp ターゲット.
+	IUnknown*								m_pDCompVisual;				// DComp ビジュアル.
 
 	// 深度(Z)テスト設定.
 	ID3D11DepthStencilState*				m_pDepthStencilStateOn;		// 有効設定.

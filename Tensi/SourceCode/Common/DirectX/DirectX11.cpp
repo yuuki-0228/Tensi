@@ -1,4 +1,5 @@
 #include "DirectX11.h"
+#include "DCompHelper.h"
 #include "..\..\Utility\Log\Log.h"
 #include "..\..\Utility\FileManager\FileManager.h"
 #include <mutex>
@@ -115,6 +116,9 @@ DirectX11::DirectX11()
 	, m_pBackBuffer_TexRTV		()
 	, m_pBackBuffer_DSTex		()
 	, m_pBackBuffer_DSTexDSV	()
+	, m_pDCompDevice			( nullptr )
+	, m_pDCompTarget			( nullptr )
+	, m_pDCompVisual			( nullptr )
 	, m_pDepthStencilStateOn	( nullptr )
 	, m_pDepthStencilStateOff	( nullptr )
 	, m_pAlphaBlendOn			( nullptr )
@@ -204,7 +208,9 @@ void DirectX11::Release()
 		SAFE_RELEASE( pI->m_pBackBuffer_TexRTV[i]	);
 		SAFE_RELEASE( pI->m_pSwapChain[i]			);
 	}
-	SAFE_RELEASE( pI->m_pContext11				);
+	SAFE_RELEASE( pI->m_pDCompVisual			);
+	SAFE_RELEASE( pI->m_pDCompTarget			);
+	SAFE_RELEASE( pI->m_pDCompDevice			);	SAFE_RELEASE( pI->m_pContext11				);
 	SAFE_RELEASE( pI->m_pDevice11				);
 }
 
@@ -217,9 +223,18 @@ void DirectX11::ClearBackBuffer( int No )
 	DirectX11* pI = GetInstance();
 
 	// カラーバックバッファ.
-	pI->m_BackColor.w = 0.0f;
-	pI->m_pContext11->ClearRenderTargetView(
-		pI->m_pBackBuffer_TexRTV[No], pI->m_BackColor );
+	if ( No == 0 ) {
+		pI->m_BackColor.w = 0.0f;
+		pI->m_pContext11->ClearRenderTargetView(
+			pI->m_pBackBuffer_TexRTV[No], pI->m_BackColor );
+	}
+	else {
+		// サブウィンドウはプリマルチプライドアルファ合成のため完全透明(0,0,0,0)でクリアする.
+		// ( 描画した部分以外は透過して、デスクトップの壁紙がそのまま表示される ).
+		constexpr float ClearColor[4] = { 0.0f, 0.0f, 0.0f, 0.0f };
+		pI->m_pContext11->ClearRenderTargetView(
+			pI->m_pBackBuffer_TexRTV[No], ClearColor );
+	}
 
 	// レンダーターゲットビューとデプスステンシルビューをパイプラインにセット.
 	pI->m_pContext11->OMSetRenderTargets(
@@ -379,7 +394,18 @@ HRESULT DirectX11::CreateDeviceAndSwapChain()
 		sd.SampleDesc.Count		= 1;										// マルチサンプルの数.
 		sd.SampleDesc.Quality	= 0;										// マルチサンプルのクオリティ.
 		sd.Windowed				= TRUE;										// ウィンドウモード(フルスクリーン時はFALSE).
-	
+
+		// サブウィンドウ( 壁紙レイヤー )は DirectComposition で合成する.
+		// Win11 24H2以降、デスクトップ(WorkerW)配下のウィンドウは
+		// 通常の HWND スワップチェーンの Present では DWM に合成されず表示されない.
+		// プリマルチプライドアルファの合成用スワップチェーンを使うことで表示され、
+		// さらに描画した部分以外が透過して壁紙がそのまま見える.
+		// ※メインウィンドウのデバイスを使い回すため i == 0 の作成が終わった後に作成すること.
+		if ( i != 0 ) {
+			if ( FAILED( CreateCompositionSwapChain( i ) ) ) return E_FAIL;
+			continue;
+		}
+
 		// 作成を試みる機能レベルの優先を指定.
 		//	(GPUがサポートする機能セットの定義).
 		//	D3D_FEATURE_LEVEL列挙型の配列.
@@ -450,6 +476,35 @@ HRESULT DirectX11::CreateDeviceAndSwapChain()
 	return S_OK;
 }
 
+//---------------------------.
+// サブウィンドウ用: DirectComposition 合成スワップチェイン作成.
+//	Win11 24H2以降、壁紙レイヤー( WorkerW )配下のウィンドウは通常の
+//	HWND スワップチェーンでは DWM に合成されないため、
+//	合成用スワップチェーン + DirectComposition でウィンドウに関連付ける.
+//	プリマルチプライドアルファのため、完全透明(0,0,0,0)でクリアすると
+//	描画した部分以外は壁紙がそのまま透けて見える.
+//	( 実際の生成処理は DCompHelper.cpp に隔離している.
+//	  dcomp.h が内部で include する d2d1.h が旧DirectX SDKの同名ヘッダーと
+//	  衝突するため、Global.h を include するこのファイルに直接持ち込めない ).
+//---------------------------.
+HRESULT DirectX11::CreateCompositionSwapChain( const int No )
+{
+	// ウィンドウサイズの取得.
+	RECT rc;
+	GetClientRect( m_hWnd[No], &rc );
+
+	IDXGISwapChain* pSwapChain = nullptr;
+	HRESULT hr = CreateDCompositionSwapChainForHwnd(
+		m_pDevice11, m_hWnd[No],
+		static_cast<UINT>( rc.right - rc.left ), static_cast<UINT>( rc.bottom - rc.top ),
+		&pSwapChain, &m_pDCompDevice, &m_pDCompTarget, &m_pDCompVisual );
+	if ( FAILED( hr ) ) {
+		PushError( "DirectComposition 合成スワップチェーン 作成 : 失敗", hr );
+		return E_FAIL;
+	}
+	m_pSwapChain[No] = pSwapChain;
+	return S_OK;
+}
 //---------------------------.
 // ラスタライザステート設定.
 //---------------------------.

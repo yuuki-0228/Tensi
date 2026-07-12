@@ -36,9 +36,6 @@ bool CWeed::Init()
 	m_WeedState.AnimState.AnimPlayMax	= 1;
 	m_ObjectTag							= EObjectTag::Weed;
 
-	const RECT& Rect = WindowManager::GetTaskBarRect();
-	m_WeedState.RenderArea.w = static_cast<float>( Rect.top );
-
 	InitCollision();
 	return true;
 }
@@ -109,6 +106,12 @@ void CWeed::SetWeedData( const SWeedData& t )
 	m_IsDisp				= t.IsDisp;
 	m_Transform				= t.Transform;
 	m_WeedState.Transform	= t.Transform;
+
+	// X座標が属するモニターの地面Y座標へ補正する
+	const float GroundY = WindowManager::GetGroundY( m_Transform.Position.x ) + 10.0f;
+	m_Transform.Position.y			= GroundY;
+	m_WeedState.Transform.Position.y = GroundY;
+	m_WeedState.RenderArea.w		= GroundY;
 }
 
 //---------------------------.
@@ -118,14 +121,17 @@ void CWeed::Fill( const D3DXPOSITION3& Pos )
 {
 	if ( m_IsDisp ) return;
 
-	// タスクバーのサイズを取得.
-	const RECT& Rect = WindowManager::GetTaskBarRect();
+	// X座標が属するモニターの地面Y座標(ゲーム座標系)を取得.
+	const float GroundY = WindowManager::GetGroundY( Pos.x );
 
 	// 雑草の位置の設定.
 	m_IsDisp				= true;
 	m_Transform.Position	= Pos;
-	m_Transform.Position.y	= static_cast<float>( Rect.top ) + 10.0f;
+	m_Transform.Position.y	= GroundY + 10.0f;
 	m_WeedState.Transform	= m_Transform;
+
+	// 地面より下を描画しないようにする( モニター毎の地面Y座標に合わせる ).
+	m_WeedState.RenderArea.w = GroundY;
 }
 
 //---------------------------.

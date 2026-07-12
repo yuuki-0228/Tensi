@@ -5,6 +5,43 @@
 #include <psapi.h>
 #include <shlobj.h>
 
+namespace {
+	// モニター列挙コールバック用データ.
+	struct SMonitorEnumData {
+		std::vector<WindowManager::SMonitorArea>	Areas;
+		RECT										AddRect;
+	};
+
+	// モニター列挙コールバック.
+	BOOL CALLBACK MonitorEnumProc( HMONITOR hMonitor, HDC /*hdc*/, LPRECT /*lpRect*/, LPARAM lParam )
+	{
+		auto* pData = reinterpret_cast<SMonitorEnumData*>( lParam );
+
+		MONITORINFO mi;
+		mi.cbSize = sizeof( MONITORINFO );
+		if ( GetMonitorInfo( hMonitor, &mi ) == FALSE ) return TRUE;
+
+		WindowManager::SMonitorArea area;
+
+		// 物理範囲をゲーム座標系に変換.
+		area.Monitor		= mi.rcMonitor;
+		area.Monitor.left	+= pData->AddRect.left;
+		area.Monitor.top	+= pData->AddRect.top;
+		area.Monitor.right	+= pData->AddRect.right;
+		area.Monitor.bottom	+= pData->AddRect.bottom;
+
+		// ワークエリアをゲーム座標系に変換.
+		area.Work			= mi.rcWork;
+		area.Work.left		+= pData->AddRect.left;
+		area.Work.top		+= pData->AddRect.top;
+		area.Work.right		+= pData->AddRect.right;
+		area.Work.bottom	+= pData->AddRect.bottom;
+
+		pData->Areas.push_back( area );
+		return TRUE;
+	}
+}
+
 WindowManager::WindowManager()
 	: m_hDesktop				( NULL )
 	, m_hMyWindow				( NULL )
@@ -31,6 +68,9 @@ WindowManager::WindowManager()
 	, m_IsWindowUpdate			( false )
 	, m_IsDesktopIconUpdate		( false )
 	, m_IsTaskBarUpdate			( false )
+	, m_DesktopDragRect			()
+	, m_IsDragSelect			( false )
+	, m_DragStartPos			( INIT_FLOAT2 )
 {
 }
 
@@ -117,6 +157,9 @@ void WindowManager::Update()
 	pI->m_IsWindowUpdate		= false;
 	pI->m_IsDesktopIconUpdate	= false;
 	pI->m_IsTaskBarUpdate		= false;
+
+	// デスクトップドラッグ選択矩形の更新.
+	DesktopDragSelectUpdate();
 }
 
 //---------------------------.
@@ -685,6 +728,51 @@ void WindowManager::WindowListUpdate()
 }
 
 //---------------------------.
+// デスクトップのドラッグ選択矩形の更新.
+//---------------------------.
+void WindowManager::DesktopDragSelectUpdate()
+{
+	WindowManager* pI = GetInstance();
+
+	const D3DXPOSITION2& MousePos = Input::GetMousePosition();
+
+	// LMBを押した瞬間: デスクトップ上かどうかを確認.
+	if ( KeyInput::IsKeyDown( VK_LBUTTON ) ) {
+		// 他のアプリウィンドウの上でない = デスクトップ上.
+		if ( GetMouseOverTheWindow() == NULL ) {
+			pI->m_IsDragSelect		= true;
+			pI->m_DragStartPos		= MousePos;
+			pI->m_DesktopDragRect	= { 0, 0, 0, 0 };
+		} else {
+			pI->m_IsDragSelect		= false;
+			pI->m_DesktopDragRect	= { 0, 0, 0, 0 };
+		}
+	}
+
+	// ドラッグ中: 矩形を更新.
+	if ( KeyInput::IsKeyPress( VK_LBUTTON ) && pI->m_IsDragSelect ) {
+		const LONG x1 = static_cast<LONG>( min( pI->m_DragStartPos.x, MousePos.x ) );
+		const LONG y1 = static_cast<LONG>( min( pI->m_DragStartPos.y, MousePos.y ) );
+		const LONG x2 = static_cast<LONG>( max( pI->m_DragStartPos.x, MousePos.x ) );
+		const LONG y2 = static_cast<LONG>( max( pI->m_DragStartPos.y, MousePos.y ) );
+
+		// 最小ドラッグ距離を超えた場合のみ有効な矩形にする.
+		constexpr LONG MIN_DRAG = 5;
+		if ( x2 - x1 >= MIN_DRAG || y2 - y1 >= MIN_DRAG ) {
+			pI->m_DesktopDragRect = { x1, y1, x2, y2 };
+		} else {
+			pI->m_DesktopDragRect = { 0, 0, 0, 0 };
+		}
+	}
+
+	// LMBを離した瞬間: ドラッグ状態をリセット.
+	if ( KeyInput::IsKeyUp( VK_LBUTTON ) ) {
+		pI->m_IsDragSelect		= false;
+		pI->m_DesktopDragRect	= { 0, 0, 0, 0 };
+	}
+}
+
+//---------------------------.
 // デスクトップのアイコンの位置の更新.
 //---------------------------.
 void WindowManager::DesktopIconUpdate()
@@ -746,6 +834,60 @@ void WindowManager::TaskBarUpdate()
 	ZeroMemory( &pI->m_TaskBar, sizeof( pI->m_TaskBar ) );
 	pI->m_TaskBar.cbSize = sizeof( pI->m_TaskBar );
 	SHAppBarMessage( ABM_GETTASKBARPOS, &pI->m_TaskBar );
+}
+
+//---------------------------.
+// モニターの物理範囲とワークエリアの両方を取得（ゲーム座標系）.
+//---------------------------.
+WindowManager::MonitorAreaList WindowManager::GetMonitorAreas()
+{
+	WindowManager* pI = GetInstance();
+
+	SMonitorEnumData Data;
+	Data.AddRect = pI->m_AddWindowRect;
+	EnumDisplayMonitors( NULL, NULL, MonitorEnumProc, reinterpret_cast<LPARAM>( &Data ) );
+	return Data.Areas;
+}
+
+//---------------------------.
+// モニターのワークエリアリストを取得（ゲーム座標系）.
+//---------------------------.
+WindowManager::MonitorList WindowManager::GetMonitorWorkAreas()
+{
+	const MonitorAreaList Areas = GetMonitorAreas();
+	MonitorList Result;
+	Result.reserve( Areas.size() );
+	for ( const auto& a : Areas ) Result.push_back( a.Work );
+	return Result;
+}
+
+//---------------------------.
+// 指定したX座標が属するモニターの地面Y座標(ワークエリア下端)を取得(ゲーム座標系).
+//---------------------------.
+float WindowManager::GetGroundY( const float X )
+{
+	const MonitorAreaList Areas = GetMonitorAreas();
+	if ( Areas.empty() ) return 0.0f;
+
+	// Xを含むモニターのワークエリア下端を返す.
+	for ( const auto& area : Areas ) {
+		if ( X >= static_cast<float>( area.Work.left ) && X < static_cast<float>( area.Work.right ) ) {
+			return static_cast<float>( area.Work.bottom );
+		}
+	}
+
+	// 該当するモニターが無い場合(モニター間の隙間等)は中心が最も近いモニターを使う.
+	const SMonitorArea* pNearest = &Areas[0];
+	float NearestDist = std::abs( X - ( Areas[0].Work.left + Areas[0].Work.right ) / 2.0f );
+	for ( const auto& area : Areas ) {
+		const float Center = ( area.Work.left + area.Work.right ) / 2.0f;
+		const float Dist	= std::abs( X - Center );
+		if ( Dist < NearestDist ) {
+			NearestDist = Dist;
+			pNearest	 = &area;
+		}
+	}
+	return static_cast<float>( pNearest->Work.bottom );
 }
 
 #endif

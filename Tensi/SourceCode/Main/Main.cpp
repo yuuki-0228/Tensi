@@ -62,10 +62,10 @@ CMain::CMain()
 
 CMain::~CMain()
 {
-	DeleteDC(		m_hSubDc	);
-	DeleteDC(		m_hDc		);
-	DeleteObject(	m_hSubWnd	);
-	DeleteObject(	m_hWnd		);
+	ReleaseDC(		m_hSubWnd,	m_hSubDc	);
+	ReleaseDC(		m_hWnd,		m_hDc		);
+	DestroyWindow(	m_hSubWnd	);
+	DestroyWindow(	m_hWnd		);
 
 	// デスクトップを再描画
 	SystemParametersInfo( SPI_SETDESKWALLPAPER, 0, NULL, SPIF_SENDCHANGE );
@@ -325,8 +325,49 @@ HRESULT CMain::InitWindow( HINSTANCE hInstance )
 	}
 	WindowManager::SetWnd( m_hWnd );
 
-	// WorkerWをサブウィンドウとして登録.
-	m_hSubWnd = FindWorkerW();
+	// デスクトップ壁紙の上・デスクトップアイコンの下のレイヤーに描画するための
+	// 親ウィンドウ( 壁紙レイヤーの WorkerW もしくは Progman )を取得する.
+	// 自プロセスのウィンドウを WS_CHILD でその配下に配置することで
+	// 壁紙の上・アイコンの下に正しく描画できる.
+	HWND hWorkerW = FindWorkerW();
+
+	// 親ウィンドウのクライアント座標系での仮想スクリーン原点を求める.
+	// ( マルチモニター環境では仮想スクリーン原点が (0,0) とは限らないため ).
+	POINT SubWndPos = { dispx, dispy };
+	if ( hWorkerW != NULL ) ScreenToClient( hWorkerW, &SubWndPos );
+
+	m_hSubWnd = CreateWindowEx(
+		WS_EX_NOREDIRECTIONBITMAP,									// 拡張機能( GDIリダイレクトサーフェス無し・DirectComposition 直接合成 ).
+		wAppName.c_str(),											// アプリ名.
+		NULL,														// ウィンドウタイトル.
+		WS_CHILD | WS_VISIBLE | WS_CLIPSIBLINGS | WS_CLIPCHILDREN,	// ウィンドウ種類(既定).
+		SubWndPos.x, SubWndPos.y,									// 表示位置x,y座標.
+		sizex,														// ウィンドウ幅.
+		sizey,														// ウィンドウ高さ.
+		hWorkerW,													// 親ウィンドウハンドル.
+		nullptr,													// メニュー設定.
+		hInstance,													// インスタンス番号.
+		nullptr);													// ウィンドウ作成時に発生するイベントに渡すデータ.
+	if ( !m_hSubWnd ) {
+		ErrorMessage( "サブウィンドウ作成失敗" );
+		m_hSubWnd = hWorkerW;	// フォールバック: WorkerWを直接使用.
+	} else {
+		// Z-order の設定.
+		HWND hDefView = FindWindowEx( hWorkerW, NULL, L"SHELLDLL_DefView", NULL );
+		if ( hDefView != NULL ) {
+			// 親が Progman ( アイコン層と同居 )の場合:
+			// SHELLDLL_DefView の直下 = 壁紙の上・アイコンの下 に差し込む.
+			SetWindowPos( m_hSubWnd, hDefView, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE | SWP_NOACTIVATE );
+		}
+		else {
+			// 親が壁紙レイヤーの WorkerW の場合: 兄弟内では最前面に置く.
+			// WorkerW 全体がアイコン層(SHELLDLL_DefView)より下にあるため、
+			// 最前面にしても「アイコンより下」は維持される.
+			// ( Wallpaper Engine 等の壁紙アプリも同じ WorkerW 配下に入るため、
+			//   HWND_BOTTOM だと壁紙アプリの裏に隠れて見えなくなる ).
+			SetWindowPos( m_hSubWnd, HWND_TOP, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE | SWP_NOACTIVATE );
+		}
+	}
 	WindowManager::SetSubWnd( m_hSubWnd );
 
 	// DCの取得.
@@ -543,25 +584,51 @@ void CMain::ClickUpdate()
 
 //---------------------------.
 // WorkerWの取得
+// デスクトップ壁紙の上、デスクトップアイコンの下のレイヤーに描画するための
+// 親ウィンドウ( 壁紙レイヤーの WorkerW もしくは Progman )を取得する.
+// Win10 / Win11( 24H2以降のウィンドウ階層変更を含む )対応.
 //---------------------------.
 HWND CMain::FindWorkerW()
 {
+	// 1) Progman を取得( デスクトップ管理ウィンドウ ).
 	HWND hProgman = FindWindow( L"Progman", NULL );
-	if ( hProgman == NULL ) {
-		return NULL;
+	if ( hProgman == NULL ) return NULL;
+
+	// 2) Progman に壁紙レイヤーの WorkerW を生成させるメッセージを送信.
+	//    Windows 10          : (0x052C, 0,   0  ) で生成される.
+	//    Windows 11 22H2以降 : (0x052C, 0xD, 0x1) が追加で必要.
+	DWORD_PTR dwResult = 0;
+	SendMessageTimeout( hProgman, 0x052C, 0,   0,   SMTO_NORMAL, 1000, &dwResult );
+	SendMessageTimeout( hProgman, 0x052C, 0xD, 0x1, SMTO_NORMAL, 1000, &dwResult );
+
+	// 3) Win11 24H2以降: SHELLDLL_DefView( アイコン層 )は Progman の直下に残り、
+	//    壁紙レイヤーの WorkerW は「Progman の子」として DefView の下に作られる.
+	//    この場合はその子 WorkerW が目的の親ウィンドウ.
+	if ( FindWindowEx( hProgman, NULL, L"SHELLDLL_DefView", NULL ) != NULL ) {
+		HWND hChildWorker = FindWindowEx( hProgman, NULL, L"WorkerW", NULL );
+		if ( hChildWorker != NULL ) return hChildWorker;
+
+		// 子 WorkerW が生成されないビルドでは Progman を親にする.
+		// ( InitWindow 側で SHELLDLL_DefView の直下に Z-order を差し込む ).
+		return hProgman;
 	}
 
-	// Progmanの子ウィンドウを列挙し、WorkerWを探す
-	HWND hWorkerW = NULL;
-	EnumWindows( []( HWND hwnd, LPARAM lParam ) -> BOOL {
-		HWND hShellDefView = FindWindowEx( hwnd, NULL, L"SHELLDLL_DefView", NULL );
-		if ( hShellDefView != NULL ) {
-			HWND* phWorkerW = ( HWND* ) lParam;
-			*phWorkerW = FindWindowEx( NULL, hwnd, L"WorkerW", NULL );
+	// 4) Win10: 0x052C 送信後、SHELLDLL_DefView はトップレベルの WorkerW 内に移動する.
+	//    その WorkerW の Z-order 直後( 背面側 )にある WorkerW が壁紙レイヤー.
+	HWND hIconContainer = NULL;
+	EnumWindows( []( HWND hWnd, LPARAM lParam ) -> BOOL {
+		if ( FindWindowEx( hWnd, NULL, L"SHELLDLL_DefView", NULL ) != NULL ) {
+			*(HWND*)lParam = hWnd;
 			return FALSE;
 		}
 		return TRUE;
-	}, ( LPARAM ) &hWorkerW );
+	}, ( LPARAM )&hIconContainer );
 
-	return hWorkerW;
+	if ( hIconContainer != NULL ) {
+		HWND hBgWorker = FindWindowEx( NULL, hIconContainer, L"WorkerW", NULL );
+		if ( hBgWorker != NULL ) return hBgWorker;
+	}
+
+	// 5) 最終手段: Progman を直接使用( 常に存在する ).
+	return hProgman;
 }

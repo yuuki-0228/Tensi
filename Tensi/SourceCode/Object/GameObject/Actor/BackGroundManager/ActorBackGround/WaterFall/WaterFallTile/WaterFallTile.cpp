@@ -38,10 +38,6 @@ bool CWaterFallTile::Init()
 	m_WaterFallState.AnimState.PatternNo.y	= WATERFALL_PATTERN_NO;
 	m_SplashState.AnimState.PatternNo.y		= SPLASH_PATTERN_NO;
 
-	const RECT& Rect = WindowManager::GetTaskBarRect();
-	m_WaterFallState.RenderArea.w	= static_cast<float>( Rect.top );
-	m_SplashState.RenderArea.w		= m_WaterFallState.RenderArea.w;
-
 	InitCollision();
 	return true;
 }
@@ -85,6 +81,11 @@ void CWaterFallTile::Setting( const D3DXPOSITION3& Pos, const bool IsWater )
 	m_WaterFallState.Transform.Position = Pos;
 	m_SplashState.Transform.Position	= Pos;
 	m_SplashState.IsDisp				= IsWater;
+
+	// 地面より下を描画しないようにする( モニター毎の地面Y座標に合わせる ).
+	const float GroundY = WindowManager::GetGroundY( Pos.x );
+	m_WaterFallState.RenderArea.w	= GroundY;
+	m_SplashState.RenderArea.w		= GroundY;
 }
 
 //---------------------------.

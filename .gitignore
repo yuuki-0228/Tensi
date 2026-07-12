@@ -6,5 +6,5 @@ Tensi/x64/
 Tensi/Debug/
 Tensi/Release/
 
-/Data/$Log.txt
-/Data/Config/Random.json
+Tensi/Data/$Log.txt
+Tensi/Data/Parameter/Config/Random.json

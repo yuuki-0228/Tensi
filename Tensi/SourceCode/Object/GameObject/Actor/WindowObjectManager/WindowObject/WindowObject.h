@@ -84,6 +84,8 @@ private:
 
 	// 他ウィンドウの当たり判定.
 	void WindowCollision();
+	// デスクトップのドラッグ選択矩形との当たり判定.
+	void DesktopDragSelectCollision();
 	// 中に入っているウィンドウとの当たり判定.
 	void InWindowCollision();
 	// スクリーンの当たり判定.
@@ -100,6 +102,9 @@ private:
 
 	// 着地.
 	void Landing( const RECT& HitWnd );
+
+	// モニターのワークエリアリストを更新.
+	void UpdateMonitorWorkAreas();
 
 protected:
 	CSprite*					m_pSprite;			// 画像.
@@ -124,6 +129,7 @@ protected:
 	bool						m_IsInWndSmall;		// 中に入ってるウィンドウが最小化されているか.
 	bool						m_IsTrashCan;		// ごみ箱に移動させるか.
 	bool						m_IsDisp;			// 表示されるか.
+	WindowManager::MonitorList	m_MonitorWorkAreas;	// モニターごとのワークエリア.
 
 private:
 	D3DXPOSITION3				m_AddCenterPosition;// 中心座標に変換するため用の座標.

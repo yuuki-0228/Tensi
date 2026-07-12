@@ -30,6 +30,14 @@ public:
 	using WndRectMap	= std::unordered_map<HWND, RECT>;
 	using WndNameMap	= std::unordered_map<HWND, std::string>;
 	using WndZOrderMap	= std::unordered_map<HWND, int>;
+	using MonitorList	= std::vector<RECT>;
+
+	// モニターの範囲情報.
+	struct SMonitorArea {
+		RECT Monitor;	// モニターの物理的な範囲.
+		RECT Work;		// タスクバーを除いたワークエリア.
+	};
+	using MonitorAreaList = std::vector<SMonitorArea>;
 
 public:
 	WindowManager();
@@ -53,6 +61,17 @@ public:
 	static RECT GetTaskBarRect();
 	// タスクバーのウィンドウハンドルの取得.
 	static HWND GetTaskBarWnd();
+
+	// モニターのワークエリアリストを取得（ゲーム座標系）.
+	//	ワークエリア = タスクバーなどを除いた実際の使用可能領域.
+	static MonitorList GetMonitorWorkAreas();
+
+	// モニターの物理範囲とワークエリアの両方を取得（ゲーム座標系）.
+	static MonitorAreaList GetMonitorAreas();
+
+	// 指定したX座標(ゲーム座標系)が属するモニターの地面Y座標(ワークエリア下端)を取得.
+	//	該当するモニターが無い場合は中心が最も近いモニターの値を返す.
+	static float GetGroundY( const float X );
 
 	// ウィンドウの情報の補正値の取得.
 	static RECT GetAddWindowRect() { return GetInstance()->m_AddWindowRect; }
@@ -80,6 +99,9 @@ public:
 	// デスクトップのアイコンの位置リストの取得.
 	//	<アイコンの位置, アイコン名>.
 	static IconList	GetDesktopIconList();
+	// デスクトップのドラッグ中の青い選択矩形を取得（ゲーム坐標系）.
+	//	ドラッグ中でない場合はサイズ0のRECTを返す.
+	static RECT GetDesktopDragSelectRect() { return GetInstance()->m_DesktopDragRect; }
 
 	// ウィンドウの情報の取得.
 	static RECT GetWindowSize( const HWND& hWnd );
@@ -167,6 +189,8 @@ private:
 	
 	// タスクバーの更新.
 	static void TaskBarUpdate();
+	// デスクトップのドラッグ選択矩形の更新.
+	static void DesktopDragSelectUpdate();
 
 private:
 	HWND			m_hDesktop;					// デスクトップのハンドル.
@@ -194,6 +218,9 @@ private:
 	bool			m_IsWindowUpdate;			// ウィンドウリストを更新したか.
 	bool			m_IsDesktopIconUpdate;		// デスクトップのアイコンの位置を更新したか.
 	bool			m_IsTaskBarUpdate;			// タスクバーの更新をしたか.
+	RECT			m_DesktopDragRect;			// ドラッグ中の青い選択矩形.
+	bool			m_IsDragSelect;				// デスクトップをドラッグ選択中か.
+	D3DXPOSITION2	m_DragStartPos;				// ドラッグ開始座標.
 };
 
 #endif

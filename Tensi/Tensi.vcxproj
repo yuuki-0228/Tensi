@@ -141,6 +141,14 @@
     <ClCompile Include="SourceCode\Utility\Log\Log.cpp" />
     <ClCompile Include="SourceCode\Object\Collision\Sphere\Sphere.cpp" />
     <ClCompile Include="SourceCode\Common\DirectX\DirectX11.cpp" />
+    <ClCompile Include="SourceCode\Common\DirectX\DCompHelper.cpp">
+      <!-- dcomp.h が内部で include する d2d1.h は、プロジェクト全体の IncludePath で
+           旧DirectX SDK( $(DXSDK_DIR)Include )が Windows SDK より優先されているため、
+           そのままでは互換性の無い旧SDK側が解決されてビルドが壊れる.
+           このファイルだけ Windows SDK のパスを /I で明示的に先頭へ追加し、
+           旧DirectX SDKより優先させる( 他ファイルの IncludePath 設定には影響しない ). -->
+      <AdditionalIncludeDirectories>C:\Program Files (x86)\Windows Kits\10\Include\10.0.26100.0\um;C:\Program Files (x86)\Windows Kits\10\Include\10.0.26100.0\shared;C:\Program Files (x86)\Windows Kits\10\Include\10.0.26100.0\ucrt;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ClCompile>
     <ClCompile Include="SourceCode\Common\DirectX\DirectX9.cpp" />
     <ClCompile Include="SourceCode\Common\EffectManager\Effect\Effect.cpp" />
     <ClCompile Include="SourceCode\Main\Main.cpp" />
@@ -297,6 +305,7 @@
     <ClInclude Include="SourceCode\Utility\Log\Log.h" />
     <ClInclude Include="SourceCode\Object\Collision\Sphere\Sphere.h" />
     <ClInclude Include="SourceCode\Common\DirectX\DirectX11.h" />
+    <ClInclude Include="SourceCode\Common\DirectX\DCompHelper.h" />
     <ClInclude Include="SourceCode\Common\DirectX\DirectX9.h" />
     <ClInclude Include="SourceCode\Common\EffectManager\Effect\Effect.h" />
     <ClInclude Include="SourceCode\Effekseer\include\Effekseer.h" />

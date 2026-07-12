@@ -59,10 +59,6 @@ bool CFlower::Init()
 	m_pWateringAnim = std::make_unique<CWateringEffectManager>();
 	m_pWateringAnim->Init();
 
-	const RECT& Rect = WindowManager::GetTaskBarRect();
-	m_FlowerState.RenderArea.w	= static_cast<float>( Rect.top );
-	m_LeafState.RenderArea.w	= m_FlowerState.RenderArea.w;
-
 	InitCollision();
 	return true;
 }
@@ -142,6 +138,14 @@ void CFlower::SetFlowerData( const SFlowerData& Data )
 	m_FlowerState.AnimState.PatternNo.y = Data.FlowerType;
 	m_LeafState.AnimState.PatternNo.y	= Data.FlowerType;
 
+	// X座標が属するモニターの地面Y座標へ補正する
+	const float GroundY = WindowManager::GetGroundY( m_Transform.Position.x ) + 5.0f;
+	m_Transform.Position.y			= GroundY;
+	m_FlowerState.Transform.Position.y = GroundY;
+	m_LeafState.Transform.Position.y	= GroundY;
+	m_FlowerState.RenderArea.w		= GroundY;
+	m_LeafState.RenderArea.w		= GroundY;
+
 	// 枯れている場合見た目の変更
 	if ( m_FlowerSaveData.IsWither ) {
 		m_FlowerState.AnimState.PatternNo.x	= SPRITE_WITHER_FLOWER_NO;
@@ -170,8 +174,8 @@ void CFlower::Fill( const int Type, const D3DXCOLOR3& Color, const D3DXPOSITION3
 {
 	if ( m_IsDisp ) return;
 
-	// タスクバーのサイズを取得.
-	const RECT& Rect = WindowManager::GetTaskBarRect();
+	// X座標が属するモニターの地面Y座標(ゲーム座標系)を取得.
+	const float GroundY = WindowManager::GetGroundY( Pos.x );
 
 	// 日時を保存
 	m_FlowerSaveData.FillDay		= TimeManager::GetTime();
@@ -181,9 +185,13 @@ void CFlower::Fill( const int Type, const D3DXCOLOR3& Color, const D3DXPOSITION3
 	m_IsDisp					= true;
 	m_FlowerSaveData.IsWither	= false;
 	m_Transform.Position		= Pos;
-	m_Transform.Position.y		= static_cast<float>( Rect.top ) + 5.0f;
+	m_Transform.Position.y		= GroundY + 5.0f;
 	m_FlowerState.Transform		= m_Transform;
 	m_LeafState.Transform		= m_Transform;
+
+	// 地面より下を描画しないようにする( モニター毎の地面Y座標に合わせる ).
+	m_FlowerState.RenderArea.w	= GroundY;
+	m_LeafState.RenderArea.w	= GroundY;
 
 	// 花の種類の設定.
 	m_FlowerState.AnimState.PatternNo.y = Type;

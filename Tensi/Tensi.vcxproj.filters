@@ -141,6 +141,9 @@
     <ClCompile Include="SourceCode\Common\DirectX\DirectX11.cpp">
       <Filter>Source\DirectX</Filter>
     </ClCompile>
+    <ClCompile Include="SourceCode\Common\DirectX\DCompHelper.cpp">
+      <Filter>Source\DirectX</Filter>
+    </ClCompile>
     <ClCompile Include="SourceCode\Common\Sprite\Sprite.cpp">
       <Filter>Source\Sprite</Filter>
     </ClCompile>
@@ -327,6 +330,9 @@
       <Filter>Source\Main</Filter>
     </ClInclude>
     <ClInclude Include="SourceCode\Common\DirectX\DirectX9.h">
+      <Filter>Source\DirectX</Filter>
+    </ClInclude>
+    <ClInclude Include="SourceCode\Common\DirectX\DCompHelper.h">
       <Filter>Source\DirectX</Filter>
     </ClInclude>
     <ClInclude Include="SourceCode\Common\DirectX\DirectX11.h">

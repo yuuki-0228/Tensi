@@ -65,12 +65,8 @@ void CWindowObject::WindowObjectInit()
 	// 画像の取得.
 	m_AddCenterPosition = m_pSprite->GetSpriteState().AddCenterPos;
 
-	// タスクバーの情報を取得.
-	const RECT& TaskBar = WindowManager::GetTaskBarRect();
-
-	// ウィンドウのサイズを当たり判定に対応したサイズに更新.
-	m_WndRect.top		= static_cast<LONG>( m_CeilingPosY	);
-	m_WndRect.bottom	= static_cast<LONG>( TaskBar.top	);
+	// モニターごとのワークエリアを取得・設定.
+	UpdateMonitorWorkAreas();
 
 	// ウィンドウの情報の補正値の取得.
 	m_AddWndRect = WindowManager::GetAddWindowRect();
@@ -84,18 +80,19 @@ void CWindowObject::WindowObjectInit()
 //---------------------------.
 void CWindowObject::WindowObjectUpdate()
 {
-	Grab();						// 掴む.
-	GrabMoveUpdate();			// 掴んでいる時の更新.
-	Separate();					// 掴んでいる物を離す.
-	PushGravity();				// 重力の追加.
-	CreateMoveVector();			// 移動ベクトルの作成.
-	Move();						// 移動.
+	Grab();							// 掴む.
+	GrabMoveUpdate();				// 掴んでいる時の更新.
+	Separate();						// 掴んでいる物を離す.
+	PushGravity();					// 重力の追加.
+	CreateMoveVector();				// 移動ベクトルの作成.
+	Move();							// 移動.
 
-	WindowCollision();			// 他ウィンドウとの当たり判定.
-	InWindowCollision();		// 中に入っているウィンドウとの当たり判定.
-	ScreenCollision();			// スクリーンから出ないようにする当たり判定.
+	WindowCollision();				// 他ウィンドウとの当たり判定.
+	DesktopDragSelectCollision();	// デスクトップのドラッグ選択矩形との当たり判定.
+	InWindowCollision();			// 中に入っているウィンドウとの当たり判定.
+	ScreenCollision();				// スクリーンから出ないようにする当たり判定.
 
-	TeleportTrashCanCheck();	// ごみ箱に移動できるかの確認.
+	TeleportTrashCanCheck();		// ごみ箱に移動できるかの確認.
 }
 
 //---------------------------.
@@ -380,6 +377,89 @@ void CWindowObject::WindowCollision()
 }
 
 //---------------------------.
+// デスクトップのドラッグ選択矩形との当たり判定.
+//---------------------------.
+void CWindowObject::DesktopDragSelectCollision()
+{
+	if ( m_SpriteState.IsDisp == false	) return;
+	if ( m_IsGrab						) return;
+
+	const RECT DragRect = WindowManager::GetDesktopDragSelectRect();
+
+	// ドラッグ選択矩形が有効でない場合は処理しない.
+	if ( DragRect.right - DragRect.left <= 0 && DragRect.bottom - DragRect.top <= 0 ) return;
+
+	const D3DXPOSITION3& CPos = m_SpriteState.Transform.Position + m_AddCenterPosition;
+
+	// オブジェクトの中心がドラッグ矩形の内側にいるか確認.
+	const bool IsInside =
+		( CPos.x > static_cast<float>( DragRect.left   ) ) &&
+		( CPos.x < static_cast<float>( DragRect.right  ) ) &&
+		( CPos.y > static_cast<float>( DragRect.top    ) ) &&
+		( CPos.y < static_cast<float>( DragRect.bottom ) );
+
+	if ( IsInside ) {
+		// 内側から外に出ないようにする当たり判定.
+		if (		CPos.y - m_CollSize / 2.0f < static_cast<float>( DragRect.top    ) ) HitUp(    DragRect, false );
+		else if (	CPos.y + m_CollSize / 2.0f > static_cast<float>( DragRect.bottom ) ) HitDown(  DragRect, false );
+		if (		CPos.x - m_CollSize / 2.0f < static_cast<float>( DragRect.left   ) ) HitLeft(  DragRect, false );
+		else if (	CPos.x + m_CollSize / 2.0f > static_cast<float>( DragRect.right  ) ) HitRight( DragRect, false );
+		return;
+	}
+
+	// 外側: ドラッグ矩形に当たっているか確認.
+	const bool OverlapX =
+		( CPos.x - m_CollSize / 2.0f < static_cast<float>( DragRect.right	) ) &&
+		( CPos.x + m_CollSize / 2.0f > static_cast<float>( DragRect.left	) );
+	const bool OverlapY =
+		( CPos.y - m_CollSize / 2.0f < static_cast<float>( DragRect.bottom	) ) &&
+		( CPos.y + m_CollSize / 2.0f > static_cast<float>( DragRect.top		) );
+	if ( !OverlapX || !OverlapY ) return;
+
+	// 前回の座標で位置関係を取得 (WindowCollisionと同じロジック).
+	const D3DXPOSITION3& OldPos = m_SpriteState.Transform.OldPosition + m_AddCenterPosition;
+	const RECT&			 w		= DragRect;
+
+	EDirection Dire = EDire::None;
+	if (		w.left	<= OldPos.x && OldPos.x <= w.right	&&	w.bottom	<= OldPos.y ) Dire = EDirection::Up;
+	else if (	w.left	<= OldPos.x && OldPos.x <= w.right	&&	w.top		>= OldPos.y ) Dire = EDirection::Down;
+	else if (	w.top	<= OldPos.y && OldPos.y <= w.bottom &&	w.right		<= OldPos.x ) Dire = EDirection::Left;
+	else if (	w.top	<= OldPos.y && OldPos.y <= w.bottom &&	w.left		>= OldPos.x ) Dire = EDirection::Right;
+	else if (	w.right	<= OldPos.x && w.bottom	<= OldPos.y ) {
+		const float DistanceR = OldPos.x - w.right;
+		const float DistanceD = OldPos.y - w.bottom;
+		if ( DistanceR > DistanceD )	Dire = EDirection::Left;
+		else							Dire = EDirection::Up;
+	}
+	else if (	w.right	<= OldPos.x && w.top	>= OldPos.y ) {
+		const float DistanceR = OldPos.x - w.right;
+		const float DistanceU = w.top	 - OldPos.y;
+		if ( DistanceR > DistanceU )	Dire = EDirection::Left;
+		else							Dire = EDirection::Down;
+	}
+	else if (	w.left	>= OldPos.x && w.bottom	<= OldPos.y ) {
+		const float DistanceL = w.left	 - OldPos.x;
+		const float DistanceD = OldPos.y - w.bottom;
+		if ( DistanceL > DistanceD )	Dire = EDirection::Right;
+		else							Dire = EDirection::Up;
+	}
+	else if (	w.left	>= OldPos.x && w.top	>= OldPos.y ) {
+		const float DistanceL = w.left	- OldPos.x;
+		const float DistanceU = w.top	- OldPos.y;
+		if ( DistanceL > DistanceU )	Dire = EDirection::Right;
+		else							Dire = EDirection::Down;
+	}
+
+	switch ( Dire ) {
+	case EDirection::Up:	HitUp(	  w );	break;
+	case EDirection::Down:	HitDown(  w );	break;
+	case EDirection::Left:	HitLeft(  w );	break;
+	case EDirection::Right:	HitRight( w );	break;
+	default:								break;
+	}
+}
+
+//---------------------------.
 // 中に入っているウィンドウとの当たり判定.
 //---------------------------.
 void CWindowObject::InWindowCollision()
@@ -441,12 +521,107 @@ void CWindowObject::ScreenCollision()
 	if ( m_SpriteState.IsDisp	== false ) return;
 	if ( m_InWndHandle			!= NULL  ) return;
 
-	// スクリーンから出ていないか確認.
 	const D3DXPOSITION3& CPos = m_SpriteState.Transform.Position + m_AddCenterPosition;
-	if (		CPos.y - m_CollSize / 2.0f	< m_WndRect.top		) HitUp(	m_WndRect, false );
-	else if (	CPos.y + m_CollSize / 2.0f	> m_WndRect.bottom	) HitDown(	m_WndRect, false );
-	if (		CPos.x - m_CollSize / 2.0f	< m_WndRect.left	) HitLeft(	m_WndRect, false );
-	else if (	CPos.x + m_CollSize / 2.0f	> m_WndRect.right	) HitRight( m_WndRect, false );
+
+	// 現在いるモニターのワークエリアを探す.
+	const RECT* pMonitor = nullptr;
+	for ( const auto& area : m_MonitorWorkAreas ) {
+		if ( CPos.x >= static_cast<float>( area.left   ) &&
+			 CPos.x <  static_cast<float>( area.right  ) &&
+			 CPos.y >= static_cast<float>( area.top    ) &&
+			 CPos.y <  static_cast<float>( area.bottom ) )
+		{
+			pMonitor = &area;
+			break;
+		}
+	}
+	// モニター外（モニター間の隙間など）の場合は全体のバウンディングボックスで代用.
+	if ( pMonitor == nullptr ) pMonitor = &m_WndRect;
+
+	// 上下の当たり判定.
+	if      ( CPos.y - m_CollSize / 2.0f < static_cast<float>( pMonitor->top    ) ) HitUp(   *pMonitor, false );
+	else if ( CPos.y + m_CollSize / 2.0f > static_cast<float>( pMonitor->bottom ) ) HitDown( *pMonitor, false );
+
+	// 左右の当たり判定（隣接モニターがある辺は壁なし）.
+	if ( CPos.x - m_CollSize / 2.0f < static_cast<float>( pMonitor->left ) ) {
+		// 左に隣接するモニターがあるか確認.
+		bool HasAdjacentMonitor = false;
+		for ( const auto& area : m_MonitorWorkAreas ) {
+			if ( &area == pMonitor ) continue;
+			if ( area.right == pMonitor->left &&
+				 area.top   <  pMonitor->bottom &&
+				 area.bottom > pMonitor->top )
+			{
+				HasAdjacentMonitor = true;
+				break;
+			}
+		}
+		if ( HasAdjacentMonitor == false ) HitLeft( *pMonitor, false );
+	}
+	else if ( CPos.x + m_CollSize / 2.0f > static_cast<float>( pMonitor->right ) ) {
+		// 右に隣接するモニターがあるか確認.
+		bool HasAdjacentMonitor = false;
+		for ( const auto& area : m_MonitorWorkAreas ) {
+			if ( &area == pMonitor ) continue;
+			if ( area.left  == pMonitor->right &&
+				 area.top   <  pMonitor->bottom &&
+				 area.bottom > pMonitor->top )
+			{
+				HasAdjacentMonitor = true;
+				break;
+			}
+		}
+		if ( HasAdjacentMonitor == false ) HitRight( *pMonitor, false );
+	}
+}
+
+//---------------------------.
+// モニターのワークエリアリストを更新.
+//---------------------------.
+void CWindowObject::UpdateMonitorWorkAreas()
+{
+	// 天井の余白（モニター上端よりも上に持たせる隙間）.
+	constexpr LONG CEILING_MARGIN = 640;
+
+	// モニターの詳細情報を取得.
+	const WindowManager::MonitorAreaList MonitorAreas = WindowManager::GetMonitorAreas();
+	m_MonitorWorkAreas.clear();
+	m_MonitorWorkAreas.reserve( MonitorAreas.size() );
+
+	for ( const auto& area : MonitorAreas ) {
+		RECT FinalArea = area.Work;
+
+		// 天井判定:
+		//   タスクバーが上にある場合 → ワークエリアの上端（タスクバー下端）をそのまま天井にする.
+		//   タスクバーが上にない場合 → モニター上端より CEILING_MARGIN 分上を天井にする.
+		if ( area.Work.top > area.Monitor.top ) {
+			FinalArea.top = area.Work.top;
+		}
+		else {
+			FinalArea.top = area.Monitor.top - CEILING_MARGIN;
+		}
+
+		// 左右の壁判定:
+		//   タスクバーが左右にある場合はワークエリアの左右端がタスクバー分内側になる.
+		FinalArea.left  = area.Work.left;
+		FinalArea.right = area.Work.right;
+
+		// 地面判定:
+		//   タスクバーが下にある場合はワークエリアの下端がタスクバー分上になる.
+		FinalArea.bottom = area.Work.bottom;
+
+		m_MonitorWorkAreas.push_back( FinalArea );
+	}
+
+	// m_WndRect を全モニターのバウンディングボックスに更新（フォールバック用）.
+	if ( m_MonitorWorkAreas.empty() ) return;
+	m_WndRect = m_MonitorWorkAreas[0];
+	for ( const auto& area : m_MonitorWorkAreas ) {
+		m_WndRect.left		= min( m_WndRect.left,   area.left   );
+		m_WndRect.top		= min( m_WndRect.top,    area.top    );
+		m_WndRect.right		= max( m_WndRect.right,  area.right  );
+		m_WndRect.bottom	= max( m_WndRect.bottom, area.bottom );
+	}
 }
 
 //---------------------------.

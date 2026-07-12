@@ -26,7 +26,11 @@ bool CWaterFall::Init()
 	m_ImageSize	= pWaterFall->GetSpriteState().Disp.w;
 
 	SaveDataManager::SetSaveData()->WaterFallTransform = &m_Transform;
-	SaveDataManager::PushLoadFunction( [this]() { CreateWaterFall(); } );
+	SaveDataManager::PushLoadFunction( [this]() {
+		// X座標が属するモニターの地面Y座標へ補正する
+		m_Transform.Position.y = WindowManager::GetGroundY( m_Transform.Position.x ) + 3.0f;
+		CreateWaterFall();
+	} );
 	return true;
 }
 
@@ -57,11 +61,8 @@ void CWaterFall::Setting()
 	m_Transform.Position.x  = Random::GetRand( 0.0f , Wnd_W - m_ImageSize * Const::WaterFall.WATER_FALL_W );
 	m_Transform.Position.x += m_ImageSize / 2.0f;
 
-	// タスクバーのサイズを取得.
-	const RECT& Rect = WindowManager::GetTaskBarRect();
-
-	// 設置場所の設定
-	m_Transform.Position.y = static_cast<float>( Rect.top ) + 3.0f;
+	// X座標が属するモニターの地面Y座標(ゲーム座標系)を設置場所にする.
+	m_Transform.Position.y = WindowManager::GetGroundY( m_Transform.Position.x ) + 3.0f;
 
 	// 滝を作る.
 	CreateWaterFall();
