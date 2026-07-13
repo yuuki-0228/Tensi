@@ -59,10 +59,22 @@ HRESULT SoundManager::Create()
 {
 	SoundManager* pI = GetInstance();
 
-	if ( FAILED( CoInitialize( NULL ) ) ) return E_FAIL;
-	if ( FAILED( CoCreateInstance( __uuidof( MMDeviceEnumerator ), NULL, CLSCTX_INPROC_SERVER, __uuidof( IMMDeviceEnumerator ), ( void** )&pI->m_pEnumerator ) ) ) return E_FAIL;
-	pI->m_pEnumerator->GetDefaultAudioEndpoint( eRender, eConsole, &pI->m_pDevice );
-	pI->m_pDevice->Activate( __uuidof( IAudioMeterInformation ), CLSCTX_ALL, NULL, ( void** )&pI->m_pMeterInfo );
+	if ( FAILED( CoInitialize( NULL ) ) ) {
+		Log::PushLog( "CoInitialize : 失敗（サウンドメーターが無効化されています）" );
+		return S_OK;
+	}
+	if ( FAILED( CoCreateInstance( __uuidof( MMDeviceEnumerator ), NULL, CLSCTX_INPROC_SERVER, __uuidof( IMMDeviceEnumerator ), ( void** )&pI->m_pEnumerator ) ) || pI->m_pEnumerator == NULL ) {
+		Log::PushLog( "MMDeviceEnumerator create : 失敗 (SoundMeterが無効)" );
+		return S_OK;
+	}
+	if ( FAILED( pI->m_pEnumerator->GetDefaultAudioEndpoint( eRender, eConsole, &pI->m_pDevice ) ) || pI->m_pDevice == NULL ) {
+		Log::PushLog( "GetDefaultAudioEndpoint : 失敗 (オーディオデバイスがありません )" );
+		return S_OK;
+	}
+	if ( FAILED( pI->m_pDevice->Activate( __uuidof( IAudioMeterInformation ), CLSCTX_ALL, NULL, ( void** )&pI->m_pMeterInfo ) ) ) {
+		Log::PushLog( "IAudioMeterInformation activate : 失敗" );
+		pI->m_pMeterInfo = NULL;
+	}
 	return S_OK;
 }
 
@@ -159,7 +171,8 @@ HRESULT SoundManager::SoundLoad( HWND hWnd )
 //----------------------------.
 float SoundManager::GetPeakValue()
 {
-	float Value;
+	float Value = 0.0f;
+	if ( GetInstance()->m_pMeterInfo == NULL ) return Value;
 	GetInstance()->m_pMeterInfo->GetPeakValue( &Value );
 	return Value;
 }

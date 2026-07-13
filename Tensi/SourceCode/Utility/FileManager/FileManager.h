@@ -41,6 +41,35 @@ namespace FileManager {
 	// json形式でjsonファイルを開く.
 	json JsonLoad( const std::string& FilePath );
 
+	// jsonから安全に値を取得する。
+	template<class T>
+	T JsonGet( const json& Json, const T& Default )
+	{
+		try {
+			if ( Json.is_null() ) return Default;
+			return Json.get<T>();
+		}
+		catch ( ... ) {
+			return Default;
+		}
+	}
+	template<class T>
+	T JsonGet( const json& Json, const char* Key, const T& Default )
+	{
+		if ( Json.is_object() == false ) return Default;
+		const auto itr = Json.find( Key );
+		if ( itr == Json.end() ) return Default;
+		return JsonGet( *itr, Default );
+	}
+	template<class T>
+	T JsonGet( const json& Json, const char* Key1, const char* Key2, const T& Default )
+	{
+		if ( Json.is_object() == false ) return Default;
+		const auto itr = Json.find( Key1 );
+		if ( itr == Json.end() ) return Default;
+		return JsonGet( *itr, Key2, Default );
+	}
+
 	// json形式をjsonファイルで書き込む.
 	HRESULT JsonSave( const std::string& FilePath, const json& Data );
 

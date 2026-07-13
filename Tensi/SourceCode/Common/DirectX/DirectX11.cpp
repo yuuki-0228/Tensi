@@ -245,10 +245,12 @@ void DirectX11::ClearBackBuffer( int No )
 		pI->m_pBackBuffer_DSTexDSV[No] );
 
 	// デプスステンシルバックバッファ.
-	pI->m_pContext11->ClearDepthStencilView(
-		pI->m_pBackBuffer_DSTexDSV[No],
-		D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL,
-		1.0f, 0 );
+	if ( pI->m_pBackBuffer_DSTexDSV[No] != nullptr ) {
+		pI->m_pContext11->ClearDepthStencilView(
+			pI->m_pBackBuffer_DSTexDSV[No],
+			D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL,
+			1.0f, 0 );
+	}
 }
 
 //---------------------------.
@@ -457,22 +459,22 @@ HRESULT DirectX11::CreateDeviceAndSwapChain()
 		}
 	
 		// フルスクリーンや一部の機能を無効化する.
-		if ( WndSetting["IsFullScreenLock"] ) {
+		if ( FileManager::JsonGet( WndSetting, "IsFullScreenLock", false ) ) {
 			// ALT + Enterでフルスクリーンを無効化する.
 			IDXGIFactory* pFactory = nullptr;
 			// 上で作ったIDXGISwapChainを使う.
 			m_pSwapChain[i]->GetParent( __uuidof( IDXGIFactory ), (void**) &pFactory );
 			// 余計な機能を無効にする設定をする.
-			pFactory->MakeWindowAssociation( m_hWnd[i], DXGI_MWA_NO_WINDOW_CHANGES | DXGI_MWA_NO_ALT_ENTER );
+			if ( pFactory != nullptr ) pFactory->MakeWindowAssociation( m_hWnd[i], DXGI_MWA_NO_WINDOW_CHANGES | DXGI_MWA_NO_ALT_ENTER );
 			SAFE_RELEASE( pFactory );
 		}
 	}
 
 	// 背景の色の設定.
 	m_InitBackColor = Color4::RGBA(
-		static_cast<float>( WndSetting["BackColor"]["R"] ),
-		static_cast<float>( WndSetting["BackColor"]["G"] ),
-		static_cast<float>( WndSetting["BackColor"]["B"] )
+		FileManager::JsonGet( WndSetting, "BackColor", "R", 1.0f ),
+		FileManager::JsonGet( WndSetting, "BackColor", "G", 1.0f ),
+		FileManager::JsonGet( WndSetting, "BackColor", "B", 1.0f )
 	);
 	m_BackColor = m_InitBackColor;
 	return S_OK;
@@ -1286,44 +1288,66 @@ HRESULT DirectX11::CreateDepthStencilBackBufferRTV()
 {
 	DirectX11* pI = GetInstance();
 
-	// デプス(深さor深度)ステンシルビュー用のテクスチャを作成.
-	D3D11_TEXTURE2D_DESC descDepth;
-	descDepth.Width					= m_WndWidth;				// 幅.
-	descDepth.Height				= m_WndHeight;				// 高さ.
-	descDepth.MipLevels				= 1;						// ミップマップレベル:1.
-	descDepth.ArraySize				= 1;						// 配列数:1.
-	descDepth.Format				= DXGI_FORMAT_D32_FLOAT;	// 32ビットフォーマット.
-	descDepth.SampleDesc.Count		= 1;						// マルチサンプルの数.
-	descDepth.SampleDesc.Quality	= 0;						// マルチサンプルのクオリティ.
-	descDepth.Usage					= D3D11_USAGE_DEFAULT;		// 使用方法:デフォルト.
-	descDepth.BindFlags				= D3D11_BIND_DEPTH_STENCIL;	// 深度(ステンシルとして使用).
-	descDepth.CPUAccessFlags		= 0;						// CPUからはアクセスしない.
-	descDepth.MiscFlags				= 0;						// その他の設定なし.
-
-	// そのテクスチャに対してデプスステンシル(DSTex)を作成.
 	for ( int i = 0; i < m_WindowNum; ++i ) {
-		auto result = m_pDevice11->CreateTexture2D(
-			&descDepth,
-			nullptr,
-			&m_pBackBuffer_DSTex[i] );	// (out)デプスステンシル用テクスチャ.
-		if( FAILED( result ) )
-		{
-			PushError( "デプスステンシル作成 : 失敗", result );
-			return E_FAIL;
+		// 各スワップチェーンの実際のバックバッファのサイズを一致させる。
+		//	m_WndWidth / m_WndHeight は、実際に作成されたバッファのサイズと
+		//	異なる場合がある（コンポジション・スワップチェーン、DPI、ドライバによる調整など）。
+		//	サイズが無効または不一致の場合、一部のPCではエラーが発生する。
+		UINT Width  = ( m_WndWidth  != 0 ) ? m_WndWidth  : 1;
+		UINT Height = ( m_WndHeight != 0 ) ? m_WndHeight : 1;
+
+		ID3D11Texture2D* pBackBuffer_Tex = nullptr;
+		if ( SUCCEEDED( m_pSwapChain[i]->GetBuffer( 0, __uuidof( ID3D11Texture2D ), (LPVOID*)&pBackBuffer_Tex ) ) ) {
+			D3D11_TEXTURE2D_DESC BufferDesc = {};
+			pBackBuffer_Tex->GetDesc( &BufferDesc );
+			SAFE_RELEASE( pBackBuffer_Tex );
+			if ( BufferDesc.Width  != 0 ) Width  = BufferDesc.Width;
+			if ( BufferDesc.Height != 0 ) Height = BufferDesc.Height;
 		}
 
-		// そのテクスチャに対してデプスステンシルビュー(DSV)を作成.
-		result = m_pDevice11->CreateDepthStencilView(
-			m_pBackBuffer_DSTex[i],
-			nullptr,
-			&m_pBackBuffer_DSTexDSV[i] );	// (out)DSV.
-		if( FAILED( result ) )
-		{
-			PushError( "デプスステンシルビュー 作成 : 失敗", result );
-			return E_FAIL;
+		D3D11_TEXTURE2D_DESC descDepth;
+		descDepth.Width					= Width;						// Width.
+		descDepth.Height				= Height;						// Height.
+		descDepth.MipLevels				= 1;							// Mip levels.
+		descDepth.ArraySize				= 1;							// Array size.
+		descDepth.Format				= DXGI_FORMAT_D32_FLOAT;		// Set per attempt below.
+		descDepth.SampleDesc.Count		= 1;							// Multi sample count.
+		descDepth.SampleDesc.Quality	= 0;							// Multi sample quality.
+		descDepth.Usage					= D3D11_USAGE_DEFAULT;			// Usage.
+		descDepth.BindFlags				= D3D11_BIND_DEPTH_STENCIL;		// Use as depth stencil.
+		descDepth.CPUAccessFlags		= 0;							// No CPU access.
+		descDepth.MiscFlags				= 0;							// No misc flags.
+
+		// Some GPU / driver combinations reject a format : try fallbacks.
+		constexpr DXGI_FORMAT DepthFormats[] = {
+			DXGI_FORMAT_D32_FLOAT, DXGI_FORMAT_D24_UNORM_S8_UINT, DXGI_FORMAT_D16_UNORM
+		};
+		HRESULT result = E_FAIL;
+		for ( const auto& Format : DepthFormats ) {
+			descDepth.Format = Format;
+			result = m_pDevice11->CreateTexture2D( &descDepth, nullptr, &m_pBackBuffer_DSTex[i] );
+			if ( SUCCEEDED( result ) ) break;
+			m_pBackBuffer_DSTex[i] = nullptr;
 		}
 
-		// レンダーターゲットビューとデプスステンシルビューをパイプラインにセット.
+		if ( SUCCEEDED( result ) ) {
+			result = m_pDevice11->CreateDepthStencilView(
+				m_pBackBuffer_DSTex[i],
+				nullptr,
+				&m_pBackBuffer_DSTexDSV[i] );
+			if ( FAILED( result ) ) m_pBackBuffer_DSTexDSV[i] = nullptr;
+		}
+
+		if ( m_pBackBuffer_DSTexDSV[i] == nullptr ) {
+			std::ostringstream ss;
+			ss	<< "DepthStencil create failed ( window " << i << " : "
+				<< Width << " x " << Height << " ), continue without depth."
+				<< " HRESULT : 0x" << std::hex << static_cast<unsigned long>( result );
+			Log::PushLog( ss.str() );
+			SAFE_RELEASE( m_pBackBuffer_DSTex[i] );
+		}
+
+		// レンダリングターゲットビューと深度・ステンシルビューを設定
 		pI->m_pContext11->OMSetRenderTargets(
 			1,
 			&m_pBackBuffer_TexRTV[i],

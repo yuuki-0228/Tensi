@@ -146,8 +146,10 @@
            旧DirectX SDK( $(DXSDK_DIR)Include )が Windows SDK より優先されているため、
            そのままでは互換性の無い旧SDK側が解決されてビルドが壊れる.
            このファイルだけ Windows SDK のパスを /I で明示的に先頭へ追加し、
-           旧DirectX SDKより優先させる( 他ファイルの IncludePath 設定には影響しない ). -->
-      <AdditionalIncludeDirectories>C:\Program Files (x86)\Windows Kits\10\Include\10.0.26100.0\um;C:\Program Files (x86)\Windows Kits\10\Include\10.0.26100.0\shared;C:\Program Files (x86)\Windows Kits\10\Include\10.0.26100.0\ucrt;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+           旧DirectX SDKより優先させる( 他ファイルの IncludePath 設定には影響しない ).
+           ※SDKバージョンやインストール先を直書きするとビルド環境依存になるため、
+             MSBuild が解決する $(WindowsSDK_IncludePath) を使用する. -->
+      <AdditionalIncludeDirectories>$(WindowsSDK_IncludePath);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <ClCompile Include="SourceCode\Common\DirectX\DirectX9.cpp" />
     <ClCompile Include="SourceCode\Common\EffectManager\Effect\Effect.cpp" />
@@ -455,6 +457,12 @@
       <AdditionalLibraryDirectories>
       </AdditionalLibraryDirectories>
       <SubSystem>Windows</SubSystem>
+      <!-- D3DX( 旧DirectX SDKランタイム )のDLLを遅延読み込みにする.
+           未インストールPCでは通常「d3dx11_43.dll が見つからない」という
+           起動不能エラーになるため、WinMain 冒頭の CheckDirectXRuntime で
+           分かりやすいメッセージを出してから終了できるようにする. -->
+      <DelayLoadDLLs>d3dx9_43.dll;d3dx10_43.dll;d3dx11_43.dll;D3DCompiler_43.dll;%(DelayLoadDLLs)</DelayLoadDLLs>
+      <AdditionalDependencies>delayimp.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
       <Command>
@@ -485,6 +493,12 @@
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
+      <!-- D3DX( 旧DirectX SDKランタイム )のDLLを遅延読み込みにする.
+           未インストールPCでは通常「d3dx11_43.dll が見つからない」という
+           起動不能エラーになるため、WinMain 冒頭の CheckDirectXRuntime で
+           分かりやすいメッセージを出してから終了できるようにする. -->
+      <DelayLoadDLLs>d3dx9_43.dll;d3dx10_43.dll;d3dx11_43.dll;D3DCompiler_43.dll;%(DelayLoadDLLs)</DelayLoadDLLs>
+      <AdditionalDependencies>delayimp.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
       <Command>
@@ -525,6 +539,12 @@
       <AdditionalLibraryDirectories>
       </AdditionalLibraryDirectories>
       <SubSystem>Windows</SubSystem>
+      <!-- D3DX( 旧DirectX SDKランタイム )のDLLを遅延読み込みにする.
+           未インストールPCでは通常「d3dx11_43.dll が見つからない」という
+           起動不能エラーになるため、WinMain 冒頭の CheckDirectXRuntime で
+           分かりやすいメッセージを出してから終了できるようにする. -->
+      <DelayLoadDLLs>d3dx9_43.dll;d3dx10_43.dll;d3dx11_43.dll;D3DCompiler_43.dll;%(DelayLoadDLLs)</DelayLoadDLLs>
+      <AdditionalDependencies>delayimp.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
       <Message>
@@ -548,6 +568,12 @@
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <SubSystem>Windows</SubSystem>
+      <!-- D3DX( 旧DirectX SDKランタイム )のDLLを遅延読み込みにする.
+           未インストールPCでは通常「d3dx11_43.dll が見つからない」という
+           起動不能エラーになるため、WinMain 冒頭の CheckDirectXRuntime で
+           分かりやすいメッセージを出してから終了できるようにする. -->
+      <DelayLoadDLLs>d3dx9_43.dll;d3dx10_43.dll;d3dx11_43.dll;D3DCompiler_43.dll;%(DelayLoadDLLs)</DelayLoadDLLs>
+      <AdditionalDependencies>delayimp.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <ImageHasSafeExceptionHandlers>
       </ImageHasSafeExceptionHandlers>
     </Link>

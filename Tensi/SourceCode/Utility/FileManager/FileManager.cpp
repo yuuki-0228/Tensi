@@ -96,7 +96,13 @@ json FileManager::JsonLoad( const std::string& FilePath )
 	if ( !i ) return Out;
 
 	// json型に変更.
-	i >> Out;
+	try {
+		i >> Out;
+	}
+	catch ( ... ) {
+		Log::PushLog( "Json parse error : " + FilePath );
+		Out = json();
+	}
 
 	// ファイルを閉じる.
 	i.close();
@@ -259,7 +265,13 @@ json FileManager::EFile::EJsonLoad( const std::string& FilePath )
 	if ( !i ) return Out;
 
 	// json型に変更.
-	i >> Out;
+	try {
+		i >> Out;
+	}
+	catch ( ... ) {
+		Log::PushLog( "Json parse error : " + FilePath );
+		Out = json();
+	}
 
 	// ファイルを閉じる.
 	mb.DestroyFile();

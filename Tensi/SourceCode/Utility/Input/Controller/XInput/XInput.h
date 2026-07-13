@@ -3,7 +3,10 @@
 #include "..\..\..\..\Common\DirectX\DirectX11.h"
 #include "..\..\KeyBind.h"
 
-#pragma comment( lib, "xinput.lib" )
+// Use xinput9_1_0.lib : that DLL ships with Windows itself.
+//	( "xinput.lib" resolves to the old DirectX SDK import library ->
+//	  xinput1_3.dll, which is missing on PCs without the DX runtime ).
+#pragma comment( lib, "xinput9_1_0.lib" )
 
 namespace{
 	// ƒgƒŠƒK[“ü—Í”ÍˆÍ.

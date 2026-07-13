@@ -35,7 +35,7 @@ HRESULT Log::OpenLogText()
 {
 	// ログを停止するか取得.
 	json WndSetting			= FileManager::JsonLoad( WINDOW_SETTING_FILE_PATH );
-	GetInstance()->m_Stop	= WndSetting["IsLogStop"];
+	GetInstance()->m_Stop	= FileManager::JsonGet( WndSetting, "IsLogStop", false );
 	if ( GetInstance()->m_Stop ) return S_OK;
 
 	// ファイルを開く.

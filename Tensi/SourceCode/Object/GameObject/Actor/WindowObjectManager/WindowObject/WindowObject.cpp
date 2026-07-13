@@ -88,7 +88,7 @@ void CWindowObject::WindowObjectUpdate()
 	Move();							// 移動.
 
 	WindowCollision();				// 他ウィンドウとの当たり判定.
-	DesktopDragSelectCollision();	// デスクトップのドラッグ選択矩形との当たり判定.
+//	DesktopDragSelectCollision();	// デスクトップのドラッグ選択矩形との当たり判定.
 	InWindowCollision();			// 中に入っているウィンドウとの当たり判定.
 	ScreenCollision();				// スクリーンから出ないようにする当たり判定.
 
@@ -384,78 +384,65 @@ void CWindowObject::DesktopDragSelectCollision()
 	if ( m_SpriteState.IsDisp == false	) return;
 	if ( m_IsGrab						) return;
 
-	const RECT DragRect = WindowManager::GetDesktopDragSelectRect();
+	const RECT w = WindowManager::GetDesktopDragSelectRect();
+	if ( w.right - w.left <= 0 && w.bottom - w.top <= 0 ) return;
 
-	// ドラッグ選択矩形が有効でない場合は処理しない.
-	if ( DragRect.right - DragRect.left <= 0 && DragRect.bottom - DragRect.top <= 0 ) return;
-
+	// ボックス通しが当たっているか調べる.
 	const D3DXPOSITION3& CPos = m_SpriteState.Transform.Position + m_AddCenterPosition;
+	if ( ( CPos.x - m_CollSize / 2.0f < w.right	 ) && ( CPos.x + m_CollSize / 2.0f	> w.left ) &&
+		 ( CPos.y - m_CollSize / 2.0f < w.bottom ) && ( CPos.y + m_CollSize / 2.0f	> w.top  ) )
+	{
+		// 前回の座標で位置関係を取得.
+		const D3DXPOSITION3& OldPos = m_SpriteState.Transform.OldPosition + m_AddCenterPosition;
+		EDirection Dire	= EDire::None;
+		if (		w.left	<= OldPos.x && OldPos.x <= w.right	&&	w.bottom	<= OldPos.y ) Dire = EDirection::Up;
+		else if (	w.left	<= OldPos.x	&& OldPos.x <= w.right	&&	w.top		>= OldPos.y ) Dire = EDirection::Down;
+		else if (	w.top	<= OldPos.y	&& OldPos.y <= w.bottom	&&	w.right		<= OldPos.x ) Dire = EDirection::Left;
+		else if (	w.top	<= OldPos.y && OldPos.y <= w.bottom	&&	w.left		>= OldPos.x ) Dire = EDirection::Right;
+		else if (	w.right	<= OldPos.x && w.bottom	<= OldPos.y ) {
+			const float DistanceR = OldPos.x - w.right;
+			const float DistanceD = OldPos.y - w.bottom;
+			if ( DistanceR > DistanceD ) Dire = EDirection::Left;
+			else						 Dire = EDirection::Up;
+		}
+		else if (	w.right	<= OldPos.x	&& w.top	>= OldPos.y ) {
+			const float DistanceR = OldPos.x - w.right;
+			const float DistanceU = w.top	 - OldPos.y;
+			if ( DistanceR > DistanceU ) Dire = EDirection::Left;
+			else						 Dire = EDirection::Down;
+		}
+		else if (	w.left	>= OldPos.x && w.bottom	<= OldPos.y ) {
+			const float DistanceL = w.left	 - OldPos.x;
+			const float DistanceD = OldPos.y - w.bottom;
+			if ( DistanceL > DistanceD ) Dire = EDirection::Right;
+			else						 Dire = EDirection::Up;
+		}
+		else if (	w.left	>= OldPos.x && w.top	>= OldPos.y ) {
+			const float DistanceL = w.left	- OldPos.x;
+			const float DistanceU = w.top	- OldPos.y;
+			if ( DistanceL > DistanceU ) Dire = EDirection::Right;
+			else						 Dire = EDirection::Down;
+		}
+		if ( Dire == EDire::None ) {
+			const float DistTop		= CPos.y - static_cast<float>( w.top    );
+			const float DistBottom	= static_cast<float>( w.bottom ) - CPos.y;
+			const float DistLeft	= CPos.x - static_cast<float>( w.left   );
+			const float DistRight	= static_cast<float>( w.right  ) - CPos.x;
+			const float MinDist		= min( min( DistTop, DistBottom ), min( DistLeft, DistRight ) );
+			if      ( MinDist == DistTop    ) Dire = EDirection::Up;
+			else if ( MinDist == DistBottom ) Dire = EDirection::Down;
+			else if ( MinDist == DistLeft   ) Dire = EDirection::Left;
+			else                              Dire = EDirection::Right;
+		}
 
-	// オブジェクトの中心がドラッグ矩形の内側にいるか確認.
-	const bool IsInside =
-		( CPos.x > static_cast<float>( DragRect.left   ) ) &&
-		( CPos.x < static_cast<float>( DragRect.right  ) ) &&
-		( CPos.y > static_cast<float>( DragRect.top    ) ) &&
-		( CPos.y < static_cast<float>( DragRect.bottom ) );
-
-	if ( IsInside ) {
-		// 内側から外に出ないようにする当たり判定.
-		if (		CPos.y - m_CollSize / 2.0f < static_cast<float>( DragRect.top    ) ) HitUp(    DragRect, false );
-		else if (	CPos.y + m_CollSize / 2.0f > static_cast<float>( DragRect.bottom ) ) HitDown(  DragRect, false );
-		if (		CPos.x - m_CollSize / 2.0f < static_cast<float>( DragRect.left   ) ) HitLeft(  DragRect, false );
-		else if (	CPos.x + m_CollSize / 2.0f > static_cast<float>( DragRect.right  ) ) HitRight( DragRect, false );
-		return;
-	}
-
-	// 外側: ドラッグ矩形に当たっているか確認.
-	const bool OverlapX =
-		( CPos.x - m_CollSize / 2.0f < static_cast<float>( DragRect.right	) ) &&
-		( CPos.x + m_CollSize / 2.0f > static_cast<float>( DragRect.left	) );
-	const bool OverlapY =
-		( CPos.y - m_CollSize / 2.0f < static_cast<float>( DragRect.bottom	) ) &&
-		( CPos.y + m_CollSize / 2.0f > static_cast<float>( DragRect.top		) );
-	if ( !OverlapX || !OverlapY ) return;
-
-	// 前回の座標で位置関係を取得 (WindowCollisionと同じロジック).
-	const D3DXPOSITION3& OldPos = m_SpriteState.Transform.OldPosition + m_AddCenterPosition;
-	const RECT&			 w		= DragRect;
-
-	EDirection Dire = EDire::None;
-	if (		w.left	<= OldPos.x && OldPos.x <= w.right	&&	w.bottom	<= OldPos.y ) Dire = EDirection::Up;
-	else if (	w.left	<= OldPos.x && OldPos.x <= w.right	&&	w.top		>= OldPos.y ) Dire = EDirection::Down;
-	else if (	w.top	<= OldPos.y && OldPos.y <= w.bottom &&	w.right		<= OldPos.x ) Dire = EDirection::Left;
-	else if (	w.top	<= OldPos.y && OldPos.y <= w.bottom &&	w.left		>= OldPos.x ) Dire = EDirection::Right;
-	else if (	w.right	<= OldPos.x && w.bottom	<= OldPos.y ) {
-		const float DistanceR = OldPos.x - w.right;
-		const float DistanceD = OldPos.y - w.bottom;
-		if ( DistanceR > DistanceD )	Dire = EDirection::Left;
-		else							Dire = EDirection::Up;
-	}
-	else if (	w.right	<= OldPos.x && w.top	>= OldPos.y ) {
-		const float DistanceR = OldPos.x - w.right;
-		const float DistanceU = w.top	 - OldPos.y;
-		if ( DistanceR > DistanceU )	Dire = EDirection::Left;
-		else							Dire = EDirection::Down;
-	}
-	else if (	w.left	>= OldPos.x && w.bottom	<= OldPos.y ) {
-		const float DistanceL = w.left	 - OldPos.x;
-		const float DistanceD = OldPos.y - w.bottom;
-		if ( DistanceL > DistanceD )	Dire = EDirection::Right;
-		else							Dire = EDirection::Up;
-	}
-	else if (	w.left	>= OldPos.x && w.top	>= OldPos.y ) {
-		const float DistanceL = w.left	- OldPos.x;
-		const float DistanceU = w.top	- OldPos.y;
-		if ( DistanceL > DistanceU )	Dire = EDirection::Right;
-		else							Dire = EDirection::Down;
-	}
-
-	switch ( Dire ) {
-	case EDirection::Up:	HitUp(	  w );	break;
-	case EDirection::Down:	HitDown(  w );	break;
-	case EDirection::Left:	HitLeft(  w );	break;
-	case EDirection::Right:	HitRight( w );	break;
-	default:								break;
+		// 位置関係を見て当たり判定の動作を変更.
+		switch ( Dire ) {
+		case EDirection::Up:	HitUp( w );		break;
+		case EDirection::Down:	HitDown( w );	break;
+		case EDirection::Left:	HitLeft( w );	break;
+		case EDirection::Right:	HitRight( w );	break;
+		default:								break;
+		}
 	}
 }
 

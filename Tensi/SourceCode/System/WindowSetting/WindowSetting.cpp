@@ -38,29 +38,29 @@ void CWindowSetting::Init()
 {
 	// åªç›ÇÃê›íËÇéÊìæÇ∑ÇÈ.
 	json WndData = FileManager::JsonLoad( WINDOW_SETTING_FILE_PATH );
-	m_Color.x				= WndData["BackColor"]["R"];
-	m_Color.y				= WndData["BackColor"]["G"];
-	m_Color.z				= WndData["BackColor"]["B"];
-	m_Size.x				= WndData["Size"]["w"];
-	m_Size.y				= WndData["Size"]["h"];
-	m_Pos.x					= WndData["Pos"]["x"];
-	m_Pos.y					= WndData["Pos"]["y"];
-	m_AppName				= WndData["Name"]["App"];
-	m_WndName				= WndData["Name"]["Wnd"];
-	m_IsDispCenter			= WndData["IsDispCenter"];
-	m_IsDispMouseCursor		= WndData["IsDispMouseCursor"];
-	m_IsFPSRender			= WndData["IsFPSRender"];
-	m_IsFullScreenLock		= WndData["IsFullScreenLock"];
-	m_IsInputNotActiveStop	= WndData["IsInputNotActiveStop"];
-	m_IsSizeLock			= WndData["IsSizeLock"];
-	m_IsStartFullScreen		= WndData["IsStartFullScreen"];
-	m_IsMaxLock				= WndData["IsMaxLock"];
-	m_IsMinLock				= WndData["IsMinLock"];
-	m_IsPopUpWnd			= WndData["IsPopUpWnd"];
-	m_IsShowOnTop			= WndData["IsShowOnTop"];
-	m_IsLogStop				= WndData["IsLogStop"];
-	m_IsDispCloseMessage	= WndData["IsDispCloseMessage"];
-	m_Version				= WndData["Version"];
+	m_Color.x				= FileManager::JsonGet( WndData, "BackColor", "R", 1.0f );
+	m_Color.y				= FileManager::JsonGet( WndData, "BackColor", "G", 1.0f );
+	m_Color.z				= FileManager::JsonGet( WndData, "BackColor", "B", 1.0f );
+	m_Size.x				= FileManager::JsonGet( WndData, "Size", "w", FWND_W );
+	m_Size.y				= FileManager::JsonGet( WndData, "Size", "h", FWND_H );
+	m_Pos.x					= FileManager::JsonGet( WndData, "Pos", "x", 0.0f );
+	m_Pos.y					= FileManager::JsonGet( WndData, "Pos", "y", 0.0f );
+	m_AppName				= FileManager::JsonGet( WndData, "Name", "App", std::string() );
+	m_WndName				= FileManager::JsonGet( WndData, "Name", "Wnd", std::string() );
+	m_IsDispCenter			= FileManager::JsonGet( WndData, "IsDispCenter", false );
+	m_IsDispMouseCursor		= FileManager::JsonGet( WndData, "IsDispMouseCursor", true );
+	m_IsFPSRender			= FileManager::JsonGet( WndData, "IsFPSRender", false );
+	m_IsFullScreenLock		= FileManager::JsonGet( WndData, "IsFullScreenLock", false );
+	m_IsInputNotActiveStop	= FileManager::JsonGet( WndData, "IsInputNotActiveStop", false );
+	m_IsSizeLock			= FileManager::JsonGet( WndData, "IsSizeLock", false );
+	m_IsStartFullScreen		= FileManager::JsonGet( WndData, "IsStartFullScreen", false );
+	m_IsMaxLock				= FileManager::JsonGet( WndData, "IsMaxLock", false );
+	m_IsMinLock				= FileManager::JsonGet( WndData, "IsMinLock", false );
+	m_IsPopUpWnd			= FileManager::JsonGet( WndData, "IsPopUpWnd", false );
+	m_IsShowOnTop			= FileManager::JsonGet( WndData, "IsShowOnTop", false );
+	m_IsLogStop				= FileManager::JsonGet( WndData, "IsLogStop", false );
+	m_IsDispCloseMessage	= FileManager::JsonGet( WndData, "IsDispCloseMessage", true );
+	m_Version				= FileManager::JsonGet( WndData, "Version", std::string( "1.0.0" ) );
 
 	// ï`âÊèàóùÇÃê›íË.
 	m_RenderFunc = [&] () {

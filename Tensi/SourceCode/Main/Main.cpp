@@ -20,6 +20,7 @@
 #include "..\Utility\MenuManager\MenuManager.h"
 #include "..\System\SystemWindowManager\SystemWindowManager.h"
 #include <dwmapi.h>
+#include <shlobj.h>
 
 // ImGUiで使用.
 extern LRESULT ImGui_ImplWin32_WndProcHandler( HWND, UINT, WPARAM, LPARAM );
@@ -110,8 +111,8 @@ void CMain::Update( const float& DeltaTime )
 	// 更新処理.
 	DirectX11::CheckActiveWindow();
 	ImGuiManager::SetingNewFrame();
-	WindowManager::Update();
 	Input::Update();
+	WindowManager::Update();
 	SceneManager::Update( DeltaTime );
 	CameraManager::Update( DeltaTime );
 	Light::Update();
@@ -179,7 +180,7 @@ HRESULT CMain::Create()
 
 	// フルスクリーンで起動するか.
 	json WndSetting = FileManager::JsonLoad( WINDOW_SETTING_FILE_PATH );
-	if ( WndSetting["IsStartFullScreen"] ) {
+	if ( FileManager::JsonGet( WndSetting, "IsStartFullScreen", false ) ) {
 		// フルスクリーンに設定.
 		DirectX11::SetFullScreen( true );
 	}
@@ -189,30 +190,31 @@ HRESULT CMain::Create()
 
 	// ユーザー名の取得.
 #ifndef _DEBUG
-	char UserName[256];
-	DWORD Size = sizeof( UserName );
-	if ( GetUserNameA( UserName, &Size ) == 0 ) {
-		//取得に失敗した
-		puts( "ユーザー名の取得に失敗しました。" );
+	// 既知のフォルダ API と exe ファイルのパスを用いて、起動ショートカットを登録
+	//	（「C:\Users\<name>」のようなハードコードされたパスは、ユーザープロファイルが移動または
+	//	名前変更された場合や、標準以外のシステムドライブでは正常に動作しません）。
+	WCHAR ModulePath[MAX_PATH] = {};
+	if ( GetModuleFileNameW( nullptr, ModulePath, MAX_PATH ) != 0 ) {
+		PWSTR pStartupDir = nullptr;
+		if ( SUCCEEDED( SHGetKnownFolderPath( FOLDERID_Startup, 0, nullptr, &pStartupDir ) ) ) {
+			const std::wstring ShortcutPath = std::wstring( pStartupDir ) + L"\\Slime.lnk";
+			const std::wstring WorkDir		= std::filesystem::path( ModulePath ).parent_path().wstring();
+			WindowManager::CreateShortcut(
+				ShortcutPath.c_str(),
+				ModulePath,
+				NULL,
+				NULL,
+				WorkDir.c_str() );
+		}
+		if ( pStartupDir != nullptr ) CoTaskMemFree( pStartupDir );
 	}
-
-	// ショートカットの作成.
-	const std::string WorkFile		= std::filesystem::current_path().string();
-	const std::string ExePath		= WorkFile + "\\Slime.exe";
-	const std::string ShortcutPath	= "C:\\Users\\" + std::string( UserName ) + "\\AppData\\Roaming\\Microsoft\\Windows\\Start Menu\\Programs\\Startup\\Slime.lnk";
-	WindowManager::CreateShortcut(
-		StringConversion::to_wString( ShortcutPath ).c_str(),
-		StringConversion::to_wString( ExePath ).c_str(),
-		NULL,
-		NULL,
-		StringConversion::to_wString( WorkFile ).c_str() );
 #endif // #ifndef _DEBUG.
 	
 	// バージョンファイル( ファイル名は固定で、バージョンは中身に文字データとして保存する ).
 	//	※ std::string をそのまま BinarySave すると文字列ではなくオブジェクトの生メモリ
 	//	   ( 内部ポインタや未初期化領域 )が書き込まれ、毎回ファイル差分が出てしまうため、
 	//	   決定的な形式( [サイズ][文字列データ] )になる std::vector<char> で読み書きする.
-	const std::string appv = WndSetting["Version"];
+	const std::string appv = FileManager::JsonGet( WndSetting, "Version", std::string() );
 	const std::string fp   = PARAMETER_FILE_PATH + std::string( "v.bin" );
 
 	// 保存されているバージョンの読み込み( ファイルが無い場合は空のまま ).
@@ -279,11 +281,11 @@ HRESULT CMain::InitWindow( HINSTANCE hInstance )
 	json WndSetting = FileManager::JsonLoad( WINDOW_SETTING_FILE_PATH );
 	
 	// アプリ名/ウィンドウ名を取得.
-	const std::wstring wAppName = StringConversion::to_wString( WndSetting["Name"]["App"], ECodePage::UTF8 );
-	const std::wstring wWndName = StringConversion::to_wString( WndSetting["Name"]["Wnd"], ECodePage::UTF8 );
+	const std::wstring wAppName = StringConversion::to_wString( FileManager::JsonGet( WndSetting, "Name", "App", std::string( "Tensi" ) ), ECodePage::UTF8 );
+	const std::wstring wWndName = StringConversion::to_wString( FileManager::JsonGet( WndSetting, "Name", "Wnd", std::string( "Tensi" ) ), ECodePage::UTF8 );
 
 	// FPSを描画するか.
-	m_IsFPSRender = WndSetting["IsFPSRender"];
+	m_IsFPSRender = FileManager::JsonGet( WndSetting, "IsFPSRender", false );
 
 	// ウィンドウの定義.
 	WNDCLASSEX wc;
@@ -321,10 +323,10 @@ HRESULT CMain::InitWindow( HINSTANCE hInstance )
 	rect.bottom = sizey + dispy;									// 下.
 	dwStyle		= WS_OVERLAPPEDWINDOW;								// ウィンドウ種別.
 	dwExStyle	= WS_EX_LAYERED | WS_EX_TOOLWINDOW;					// ウィンドウ拡張機能.
-	if ( WndSetting["IsSizeLock"]	) dwStyle ^= WS_THICKFRAME;		// サイズの変更を禁止するか.
-	if ( WndSetting["IsMaxLock"]	) dwStyle ^= WS_MAXIMIZEBOX;	// 拡大化を禁止するか.
-	if ( WndSetting["IsMinLock"]	) dwStyle ^= WS_MINIMIZEBOX;	// 拡大化を禁止するか.
-	if ( WndSetting["IsPopUpWnd"]	) dwStyle  = WS_POPUP;			// 枠無しウィンドウ.
+	if ( FileManager::JsonGet( WndSetting, "IsSizeLock", false )	) dwStyle ^= WS_THICKFRAME;		// サイズの変更を禁止するか.
+	if ( FileManager::JsonGet( WndSetting, "IsMaxLock", false )	) dwStyle ^= WS_MAXIMIZEBOX;	// 拡大化を禁止するか.
+	if ( FileManager::JsonGet( WndSetting, "IsMinLock", false )	) dwStyle ^= WS_MINIMIZEBOX;	// 拡大化を禁止するか.
+	if ( FileManager::JsonGet( WndSetting, "IsPopUpWnd", false )	) dwStyle  = WS_POPUP;			// 枠無しウィンドウ.
 
 	if ( AdjustWindowRect(
 		&rect,	// (in)画面サイズが入った矩形構造体.(out)計算結果.
@@ -405,13 +407,14 @@ HRESULT CMain::InitWindow( HINSTANCE hInstance )
 
 	// タスクレイの作成.
 	NOTIFYICONDATA nid;
+	ZeroMemory( &nid, sizeof( nid ) );
 	nid.cbSize				= sizeof( NOTIFYICONDATA );				// この構造体のバイト数.
 	nid.hWnd				= m_hWnd;								// ウィンドウハンドル.
 	nid.uID					= 0;									// 複数のアイコンを表示したときの識別ID.
 	nid.uFlags				= NIF_MESSAGE | NIF_ICON | NIF_TIP;		// この構造体のどのメンバが有効かを示すフラグ.
 	nid.uCallbackMessage	= WM_NOTIFYICON;						// WM_USER以降の定数.
 	nid.hIcon				= LoadIcon( hInstance, _T( "ICON" ) );	// タスクレイのアイコン.
-	_tcscpy( nid.szTip, wAppName.c_str() );							// タスクレイに表示する文字.
+	_tcsncpy_s( nid.szTip, wAppName.c_str(), _TRUNCATE );							// タスクレイに表示する文字.
 	int ret = ( int ) Shell_NotifyIcon( NIM_ADD, &nid );			// テクスレイの開始.
 
 	// ウィンドウの表示.
@@ -424,7 +427,7 @@ HRESULT CMain::InitWindow( HINSTANCE hInstance )
 	SetWindowPos( m_hWnd, HWND_BOTTOM, 0, 0, 0, 0, ( SWP_NOMOVE | SWP_NOSIZE | SWP_SHOWWINDOW ) );
 
 	// マウスカーソルを表示するか.
-	if ( WndSetting["IsDispMouseCursor"] == false ) {
+	if ( FileManager::JsonGet( WndSetting, "IsDispMouseCursor", true ) == false ) {
 		DirectX11::SetIsDispMouseCursor( false );
 		ShowCursor( FALSE );
 	}
@@ -453,7 +456,7 @@ LRESULT CALLBACK CMain::MsgProc(
 	{
 		// ウィンドウの設定の取得.
 		json WndSetting = FileManager::JsonLoad( WINDOW_SETTING_FILE_PATH );
-		if ( WndSetting["IsDispCloseMessage"] == false ) break;
+		if ( FileManager::JsonGet( WndSetting, "IsDispCloseMessage", true ) == false ) break;
 		
 		// キー別の処理.
 		switch ( static_cast<char>( wParam ) ) {
@@ -510,6 +513,7 @@ LRESULT CALLBACK CMain::MsgProc(
 	case WM_DESTROY:
 		// タスクレイを非表示にする.
 		NOTIFYICONDATA nid;
+		ZeroMemory( &nid, sizeof( nid ) );
 		nid.cbSize	= sizeof( NOTIFYICONDATA );
 		nid.hWnd	= hWnd;
 		nid.uID		= 0;

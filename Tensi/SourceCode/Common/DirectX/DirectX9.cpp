@@ -45,13 +45,13 @@ HRESULT DirectX9::Create( HWND hWnd )
 	// デバイス作成(HALモード:描画と頂点処理をGPUで行う).
 	if( FAILED( pD3d9->CreateDevice(
 		D3DADAPTER_DEFAULT, D3DDEVTYPE_HAL, hWnd,
-		D3DCREATE_HARDWARE_VERTEXPROCESSING,
+		D3DCREATE_HARDWARE_VERTEXPROCESSING | D3DCREATE_MULTITHREADED,
 		&d3dpp, &pI->m_pDevice9 ) ) )
 	{
 		// デバイス作成(HALモード:描画はGPU、頂点処理をCPUで行う).
 		if( FAILED( pD3d9->CreateDevice(
 			D3DADAPTER_DEFAULT, D3DDEVTYPE_HAL, hWnd,
-			D3DCREATE_SOFTWARE_VERTEXPROCESSING,
+			D3DCREATE_SOFTWARE_VERTEXPROCESSING | D3DCREATE_MULTITHREADED,
 			&d3dpp, &pI->m_pDevice9 ) ) )
 		{
 			//Log::PushLog( "HALモードでDIRECT3Dデバイス作成できません。REFモードで再試行します" );
@@ -62,13 +62,13 @@ HRESULT DirectX9::Create( HWND hWnd )
 			// デバイス作成(REFモード:描画はCPU、頂点処理をGPUで行う).
 			if( FAILED( pD3d9->CreateDevice(
 				D3DADAPTER_DEFAULT, D3DDEVTYPE_REF, hWnd,
-				D3DCREATE_HARDWARE_VERTEXPROCESSING,
+				D3DCREATE_HARDWARE_VERTEXPROCESSING | D3DCREATE_MULTITHREADED,
 				&d3dpp, &pI->m_pDevice9 ) ) )
 			{
 				// デバイス作成(REFモード:描画と頂点処理をCPUで行う).
 				auto result = pD3d9->CreateDevice(
 					D3DADAPTER_DEFAULT, D3DDEVTYPE_REF, hWnd,
-					D3DCREATE_SOFTWARE_VERTEXPROCESSING,
+					D3DCREATE_SOFTWARE_VERTEXPROCESSING | D3DCREATE_MULTITHREADED,
 					&d3dpp, &pI->m_pDevice9 );
 				if( FAILED( result ) )
 				{
