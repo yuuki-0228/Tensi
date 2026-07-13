@@ -657,18 +657,9 @@ void WindowManager::WindowListUpdate()
 		if ( hCheckWnd == pI->m_hMyWindow		) continue;
 		if ( hCheckWnd == pI->m_hMySubWindow	) continue;
 
-		// ウィンドウ名を取得.
-		WCHAR szName[256];
-		GetWindowTextW( hCheckWnd, szName, 256 );
-
-		// デスクトップウィンドウマネージャーの確認.
-		int IsCloaked;
-		DwmGetWindowAttribute( hCheckWnd, DWMWA_CLOAKED, &IsCloaked, sizeof( int ) );
-		if ( IsCloaked != 0 ) continue;
-
-		// ウィンドウを調べる.
-		if ( ( wcslen( szName ) <= 0 ) ||
-			!IsWindowVisible( hCheckWnd ) ||
+		// 対象外のウィンドウを除外する( 安価な判定から順に行う ).
+		if ( !IsWindowVisible( hCheckWnd ) ||
+			 IsIconic( hCheckWnd ) ||
 			( GetParent( hCheckWnd ) != NULL ) ||
 			( GetWindow( hCheckWnd, GW_OWNER ) != NULL ) ||
 			( GetWindowLongPtrW( hCheckWnd, GWL_EXSTYLE ) & WS_EX_TOOLWINDOW ) )
@@ -676,8 +667,17 @@ void WindowManager::WindowListUpdate()
 			continue;
 		}
 
-		// 縮小化中か調べる.
-		if ( IsIconic( hCheckWnd ) ) continue;
+		// ウィンドウ名を取得.
+		//	( GetWindowText は相手ウィンドウへメッセージを送るため、除外判定の後に行う ).
+		WCHAR szName[256];
+		GetWindowTextW( hCheckWnd, szName, 256 );
+		if ( wcslen( szName ) <= 0 ) continue;
+
+		// デスクトップウィンドウマネージャーの確認.
+		//	( 失敗時に未初期化のまま判定しないよう 0 で初期化しておく ).
+		int IsCloaked = 0;
+		DwmGetWindowAttribute( hCheckWnd, DWMWA_CLOAKED, &IsCloaked, sizeof( int ) );
+		if ( IsCloaked != 0 ) continue;
 
 		// ウィンドウの情報を追加する.
 		RECT NoShadowRect;
@@ -728,6 +728,45 @@ void WindowManager::WindowListUpdate()
 }
 
 //---------------------------.
+// マウス直下がデスクトップの何も無い場所( Windowsの範囲選択が始まる場所 )か取得.
+//	Windows の青い範囲選択が表示されるのは「デスクトップの空き部分を直接クリックした時」
+//	だけのため、クリックが実際に届くウィンドウを WindowFromPoint で調べて判定する.
+//	以下は全て対象外( false )になる:
+//	・他アプリのウィンドウ / タスクバー / ポップアップメニュー / 通知等の上.
+//	・このゲームのクリック可能な部分( スライム等 )の上.
+//	・デスクトップのアイコンの上( 範囲選択ではなくアイコンのドラッグになるため ).
+//---------------------------.
+bool WindowManager::GetIsMouseOnEmptyDesktop()
+{
+	WindowManager* pI = GetInstance();
+	if ( pI->m_hDesktop == NULL ) return false;
+
+	// カーソル直下の( クリックが実際に届く )ウィンドウを取得.
+	//	クリック透過中の自ウィンドウや非表示のウィンドウは返らない.
+	POINT ScreenPos;
+	if ( GetCursorPos( &ScreenPos ) == FALSE ) return false;
+	const HWND hHit = WindowFromPoint( ScreenPos );
+	if ( hHit == NULL ) return false;
+
+	// 自分のウィンドウ( クリック可能状態のスライム等 )の上なら対象外.
+	if ( hHit == pI->m_hMyWindow || hHit == pI->m_hMySubWindow ) return false;
+
+	// デスクトップ( アイコンレイヤー )のツリー以外なら対象外.
+	//	( 他アプリのウィンドウ / タスクバー / メニュー等はここで弾かれる ).
+	if ( GetAncestor( hHit, GA_ROOT ) != GetAncestor( pI->m_hDesktop, GA_ROOT ) ) return false;
+
+	// アイコンの上では範囲選択ではなくアイコンのドラッグになるため対象外.
+	//	LVM_HITTEST は別プロセスのリストビューのため、確保済みのリモートメモリ経由で行う.
+	LVHITTESTINFO HitTest = {};
+	HitTest.pt = ScreenPos;
+	ScreenToClient( pI->m_hDesktop, &HitTest.pt );
+	if ( WriteProcessMemory( pI->m_DProcessHandle, pI->m_DProcessMemory, &HitTest, sizeof( HitTest ), NULL ) == FALSE ) return false;
+	const LRESULT HitIndex = SendMessage( pI->m_hDesktop, LVM_HITTEST, 0, ( LPARAM )pI->m_DProcessMemory );
+	if ( HitIndex != -1 ) return false;
+
+	return true;
+}
+//---------------------------.
 // デスクトップのドラッグ選択矩形の更新.
 //---------------------------.
 void WindowManager::DesktopDragSelectUpdate()
@@ -736,10 +775,12 @@ void WindowManager::DesktopDragSelectUpdate()
 
 	const D3DXPOSITION2& MousePos = Input::GetMousePosition();
 
-	// LMBを押した瞬間: デスクトップ上かどうかを確認.
+	// LMBを押した瞬間: Windowsの範囲選択が実際に始まる場所かを確認.
 	if ( KeyInput::IsKeyDown( VK_LBUTTON ) ) {
-		// 他のアプリウィンドウの上でない = デスクトップ上.
-		if ( GetMouseOverTheWindow() == NULL ) {
+		// デスクトップの何も無い場所を直接クリックした時のみ範囲選択になる.
+		//	( 他アプリのウィンドウ上 / スライム等のクリック可能部分の上 /
+		//	  アイコンの上 / タスクバーやメニューの上は範囲選択にならない ).
+		if ( GetIsMouseOnEmptyDesktop() ) {
 			pI->m_IsDragSelect		= true;
 			pI->m_DragStartPos		= MousePos;
 			pI->m_DesktopDragRect	= { 0, 0, 0, 0 };
@@ -834,6 +875,9 @@ void WindowManager::TaskBarUpdate()
 	ZeroMemory( &pI->m_TaskBar, sizeof( pI->m_TaskBar ) );
 	pI->m_TaskBar.cbSize = sizeof( pI->m_TaskBar );
 	SHAppBarMessage( ABM_GETTASKBARPOS, &pI->m_TaskBar );
+
+	// フレーム内では再取得しない( Update でフラグがリセットされる ).
+	pI->m_IsTaskBarUpdate = true;
 }
 
 //---------------------------.

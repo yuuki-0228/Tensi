@@ -80,7 +80,19 @@ void CMain::Update( const float& DeltaTime )
 	if ( m_IsWindowInit == false ) WindowInit();
 
 	// 最前面で固定し続ける.
-	if ( m_IsWindowTop ) SetWindowPos( m_hWnd, HWND_TOPMOST, 0, 0, 0, 0, ( SWP_NOMOVE | SWP_NOSIZE | SWP_SHOWWINDOW ) );
+	//	毎フレーム SetWindowPos を呼ぶと Zオーダー変更通知が大量に発生して負荷になるため、
+	//	最前面フラグが外れた時と一定間隔の再アサートのみ行う.
+	//	( SWP_NOACTIVATE を付けてフォーカスを奪わないようにする ).
+	if ( m_IsWindowTop ) {
+		constexpr float TOPMOST_REASSERT_INTERVAL = 1.0f;	// 再アサート間隔(秒).
+		static float TopmostWait = 0.0f;
+		TopmostWait -= DeltaTime;
+		const bool IsTopmost = ( GetWindowLong( m_hWnd, GWL_EXSTYLE ) & WS_EX_TOPMOST ) != 0;
+		if ( IsTopmost == false || TopmostWait <= 0.0f ) {
+			SetWindowPos( m_hWnd, HWND_TOPMOST, 0, 0, 0, 0, ( SWP_NOMOVE | SWP_NOSIZE | SWP_NOACTIVATE | SWP_SHOWWINDOW ) );
+			TopmostWait = TOPMOST_REASSERT_INTERVAL;
+		}
+	}
 #ifdef _DEBUG
 	// 最前面で固定を解除.
 	if ( KeyInput::IsANDKeyDown( 'W', 'T' ) ) {
@@ -113,6 +125,10 @@ void CMain::Update( const float& DeltaTime )
 	SceneManager::Render();
 	FPSRender();
 
+	// クリック透過判定用にカーソル位置のバックバッファの色をコピーしておく.
+	//	( 次フレームの ClickUpdate で読み取る ).
+	const D3DXVECTOR2 MousePos = Input::GetMousePosition();
+	DirectX11::CopyCursorPixel( static_cast<int>( MousePos.x ), static_cast<int>( MousePos.y ) );
 	DirectX11::Present( 0 );
 
 	// サブウィンドウのバックバッファをクリアにする.
@@ -126,9 +142,6 @@ void CMain::Update( const float& DeltaTime )
 
 	// 画面に表示.
 	DirectX11::Present( 1 );
-
-	// TODO: もう一度呼ぶとちらつきが起きない?
-	DirectX11::Present( 0 );
 
 	// 操作のログを出力.
 	Input::KeyLogOutput();
@@ -195,13 +208,29 @@ HRESULT CMain::Create()
 		StringConversion::to_wString( WorkFile ).c_str() );
 #endif // #ifndef _DEBUG.
 	
+	// バージョンファイル( ファイル名は固定で、バージョンは中身に文字データとして保存する ).
+	//	※ std::string をそのまま BinarySave すると文字列ではなくオブジェクトの生メモリ
+	//	   ( 内部ポインタや未初期化領域 )が書き込まれ、毎回ファイル差分が出てしまうため、
+	//	   決定的な形式( [サイズ][文字列データ] )になる std::vector<char> で読み書きする.
 	const std::string appv = WndSetting["Version"];
-	const std::string fp   = PARAMETER_FILE_PATH + appv + std::string( ".bin" );
+	const std::string fp   = PARAMETER_FILE_PATH + std::string( "v.bin" );
+
+	// 保存されているバージョンの読み込み( ファイルが無い場合は空のまま ).
+	std::string SavedVersion;
+	std::vector<char> VersionData;
+	if ( SUCCEEDED( FileManager::BinaryLoad( fp.c_str(), VersionData ) ) ) {
+		SavedVersion.assign( VersionData.begin(), VersionData.end() );
+	}
 #ifdef _DEBUG
-	// バージョンファイルの作成
-	FileManager::BinarySave( fp.c_str(), appv );
+	// バージョンファイルの作成.
+	//	内部のバージョンが同じ場合は書き込まない( 不要なファイル差分を出さないため ).
+	if ( SavedVersion != appv ) {
+		const std::vector<char> NewVersionData( appv.begin(), appv.end() );
+		FileManager::BinarySave( fp.c_str(), NewVersionData );
+	}
 #else
-	if ( FileManager::FileCheck( fp ) == false ) {
+	// ファイルが無い、またはバージョンが一致しない場合は警告.
+	if ( SavedVersion != appv ) {
 		InfoMessage( "古いバージョンのデータです.." );
 	}
 #endif
@@ -458,12 +487,14 @@ LRESULT CALLBACK CMain::MsgProc(
 		int		Num = DragQueryFile( hDrop, -1, NULL, 0 );
 		for ( int i = 0; i < Num; ++i ) {
 			// 移動後のファイルパスを作成.
-			TCHAR DropPath[100];
+			TCHAR DropPath[MAX_PATH];	// 長いファイルパスが切り捨てられないように MAX_PATH にする.
 			DragQueryFile( hDrop, i, DropPath, sizeof( DropPath ) / sizeof( TCHAR ) );
-			std::string sDropPath = StringConversion::to_String( DropPath );
-			size_t		Num = sDropPath.find( "Desktop\\" );
+			// ファイル名部分だけを使って移動先を作る.
+			//	( 以前の「パスから "Desktop\" 以降を切り出す」方式は、
+			//	  デスクトップ以外からのドロップで壊れたパスになるため ).
+			const std::wstring FileName = std::filesystem::path( DropPath ).filename().wstring();
 			std::filesystem::create_directories( "Data\\DropFile" );
-			std::string FilePath = "Data\\DropFile\\" + sDropPath.erase( 0, Num + sizeof( "Desktop\\" ) - 1 );
+			std::string FilePath = "Data\\DropFile\\" + StringConversion::to_String( FileName );
 
 			// ファイルを一時的に移動させファイルパスを保存する.
 			MoveFile( DropPath, StringConversion::to_wString( FilePath ).c_str() );
@@ -509,20 +540,20 @@ LRESULT CALLBACK CMain::MsgProc(
 //---------------------------.
 void CMain::WindowInit()
 {
-	// ウィンドウにガラス効果を付与する.
+	// メインウィンドウにガラス効果を付与する.
+	//	バックバッファのアルファ値が DWM に反映されるようになり、
+	//	アルファ0でクリアした部分が透明になる.
 	MARGINS Margins = { -1 };
-	DwmExtendFrameIntoClientArea( m_hWnd,	 &Margins );
-	DwmExtendFrameIntoClientArea( m_hSubWnd, &Margins );
-	
-	// サブウィンドウの透明効果を無効にする.
-	LONG SublStyle = GetWindowLong( m_hSubWnd, GWL_EXSTYLE );
-	SublStyle ^= WS_EX_LAYERED;
-	SetWindowLong( m_hSubWnd, GWL_EXSTYLE, SublStyle );
+	DwmExtendFrameIntoClientArea( m_hWnd, &Margins );
 
-	// ウィンドウの透明効果を無効にする.
+	// メインウィンドウの WS_EX_LAYERED を外す.
+	//	※ XOR( ^= )だと状態によって逆に付与してしまうため、必ずクリアする.
 	LONG MainlStyle = GetWindowLong( m_hWnd, GWL_EXSTYLE );
-	MainlStyle ^= WS_EX_LAYERED;
+	MainlStyle &= ~WS_EX_LAYERED;
 	SetWindowLong( m_hWnd, GWL_EXSTYLE, MainlStyle );
+
+	// サブウィンドウは DirectComposition( プリマルチプライドアルファ )で
+	// 透過合成されるため、ガラス効果や WS_EX_LAYERED の操作は不要.
 
 	// ウィンドウの初期化を行った.
 	m_IsWindowInit = true;
@@ -563,25 +594,26 @@ void CMain::FPSRender()
 //---------------------------.
 void CMain::ClickUpdate()
 {
-	// マウスの座標の取得.
-	const D3DXVECTOR2 Pos = Input::GetMousePosition();
-
 	// メインウィンドウのマウスの下のカラーの取得.
-	COLORREF MainColor = GetPixel( m_hDc, static_cast<int>( Pos.x ), static_cast<int>( Pos.y ) );
-	
-	// 真っ黒の場合クリック判定を無くす.
-	if ( GetRValue( MainColor ) == 0 && GetGValue( MainColor ) == 0 && GetBValue( MainColor ) == 0 ) {
-		LONG lStyle  = GetWindowLong( m_hWnd, GWL_EXSTYLE );
-		lStyle		|= WS_EX_TRANSPARENT | WS_EX_LAYERED | WS_EX_TOOLWINDOW;
-		SetWindowLong( m_hWnd, GWL_EXSTYLE, lStyle );
-	}
-	else {
-		LONG lStyle  = GetWindowLong( m_hWnd, GWL_EXSTYLE );
-		lStyle		&= WS_EX_TRANSPARENT & WS_EX_LAYERED | WS_EX_TOOLWINDOW;
-		SetWindowLong( m_hWnd, GWL_EXSTYLE, lStyle );
-	}
-}
+	//	前フレームの Present 前にコピーしておいたバックバッファの色を読む.
+	//	( GDI の GetPixel は DWM との同期待ちが発生して重いため使用しない ).
+	COLORREF MainColor = DirectX11::GetCursorPixel();
 
+	// 真っ黒( 透明部分 )の場合クリック判定を無くす.
+	const bool IsClickThrough =
+		( GetRValue( MainColor ) == 0 && GetGValue( MainColor ) == 0 && GetBValue( MainColor ) == 0 );
+
+	// 変更後の拡張スタイルを計算する.
+	//	WS_EX_TOPMOST や WS_EX_ACCEPTFILES( D&D受付 )等の関係無いビットは変更しない.
+	const LONG lStyle	= GetWindowLong( m_hWnd, GWL_EXSTYLE );
+	LONG NewStyle		= lStyle;
+	if ( IsClickThrough )	NewStyle |=  ( WS_EX_TRANSPARENT | WS_EX_LAYERED );
+	else					NewStyle &= ~( WS_EX_TRANSPARENT | WS_EX_LAYERED );
+	NewStyle |= WS_EX_TOOLWINDOW;
+
+	// 変更がある場合のみ適用する( 毎フレームの SetWindowLong による通知を避ける ).
+	if ( NewStyle != lStyle ) SetWindowLong( m_hWnd, GWL_EXSTYLE, NewStyle );
+}
 //---------------------------.
 // WorkerWの取得
 // デスクトップ壁紙の上、デスクトップアイコンの下のレイヤーに描画するための

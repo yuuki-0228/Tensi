@@ -56,7 +56,7 @@ constexpr float		INIT_FLOAT3[3]	= { INIT_FLOAT, INIT_FLOAT, INIT_FLOAT };
 constexpr float		INIT_FLOAT4[4]	= { INIT_FLOAT, INIT_FLOAT, INIT_FLOAT, INIT_FLOAT };
 
 // ÉGÉâÅ[óp.
-constexpr int		ERROR_INT		= std::numeric_limits<int>::infinity();
+constexpr int		ERROR_INT		= ( std::numeric_limits<int>::max )();
 constexpr int		ERROR_INT2[2]	= { ERROR_INT, ERROR_INT };
 constexpr int		ERROR_INT3[3]	= { ERROR_INT, ERROR_INT, ERROR_INT };
 constexpr int		ERROR_INT4[4]	= { ERROR_INT, ERROR_INT, ERROR_INT, ERROR_INT };

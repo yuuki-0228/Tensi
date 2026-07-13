@@ -2,7 +2,7 @@
 #include "..\..\FileManager\FileManager.h"
 
 namespace {
-	constexpr char FILE_PATH[] = "Data\\Parameter\\d\\m.bin";
+	constexpr char FILE_PATH[] = "Data\\Parameter\\Data\\m.bin";
 }
 
 CCommonSaveData::CCommonSaveData()

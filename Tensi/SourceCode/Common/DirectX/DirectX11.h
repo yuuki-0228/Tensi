@@ -31,6 +31,12 @@ public:
 	// 表示.
 	static void Present( int No );
 
+	// クリック透過判定用: カーソル位置のバックバッファの色をコピー/取得.
+	//	GDI の GetPixel は DWM との同期待ちが発生して重いため、
+	//	Present 前に 1x1 だけステージングテクスチャへコピーし、次フレームに読み取る.
+	static void		CopyCursorPixel( const int x, const int y );
+	static COLORREF	GetCursorPixel();
+
 	// デバイスを取得.
 	static ID3D11Device* GetDevice() { return GetInstance()->m_pDevice11; }
 	// デバイスコンテキストを取得.
@@ -155,6 +161,8 @@ private:
 	IUnknown*								m_pDCompTarget;				// DComp ターゲット.
 	IUnknown*								m_pDCompVisual;				// DComp ビジュアル.
 
+	// クリック透過判定用のカーソル位置の色コピー先( 1x1 ステージングテクスチャ ).
+	ID3D11Texture2D*						m_pCursorPixelTex;
 	// 深度(Z)テスト設定.
 	ID3D11DepthStencilState*				m_pDepthStencilStateOn;		// 有効設定.
 	ID3D11DepthStencilState*				m_pDepthStencilStateOff;	// 無効設定.

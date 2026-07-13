@@ -119,6 +119,7 @@ DirectX11::DirectX11()
 	, m_pDCompDevice			( nullptr )
 	, m_pDCompTarget			( nullptr )
 	, m_pDCompVisual			( nullptr )
+	, m_pCursorPixelTex			( nullptr )
 	, m_pDepthStencilStateOn	( nullptr )
 	, m_pDepthStencilStateOff	( nullptr )
 	, m_pAlphaBlendOn			( nullptr )
@@ -208,6 +209,7 @@ void DirectX11::Release()
 		SAFE_RELEASE( pI->m_pBackBuffer_TexRTV[i]	);
 		SAFE_RELEASE( pI->m_pSwapChain[i]			);
 	}
+	SAFE_RELEASE( pI->m_pCursorPixelTex			);
 	SAFE_RELEASE( pI->m_pDCompVisual			);
 	SAFE_RELEASE( pI->m_pDCompTarget			);
 	SAFE_RELEASE( pI->m_pDCompDevice			);	SAFE_RELEASE( pI->m_pContext11				);
@@ -476,6 +478,65 @@ HRESULT DirectX11::CreateDeviceAndSwapChain()
 	return S_OK;
 }
 
+//---------------------------.
+// クリック透過判定用: カーソル位置のバックバッファの色をコピー.
+//	メインウィンドウ( swapchain 0 )の Present 直前に呼ぶこと.
+//	( DISCARD モデルは Present 後のバックバッファの内容が不定になるため ).
+//---------------------------.
+void DirectX11::CopyCursorPixel( const int x, const int y )
+{
+	DirectX11* pI = GetInstance();
+
+	// 初回にステージングテクスチャを作成する.
+	if ( pI->m_pCursorPixelTex == nullptr ) {
+		D3D11_TEXTURE2D_DESC Desc = {};
+		Desc.Width				= 1;
+		Desc.Height				= 1;
+		Desc.MipLevels			= 1;
+		Desc.ArraySize			= 1;
+		Desc.Format				= DXGI_FORMAT_B8G8R8A8_UNORM;
+		Desc.SampleDesc.Count	= 1;
+		Desc.Usage				= D3D11_USAGE_STAGING;
+		Desc.CPUAccessFlags		= D3D11_CPU_ACCESS_READ;
+
+		// 初期値は黒( 透過扱い ).
+		const UINT32 Black = 0xFF000000;
+		D3D11_SUBRESOURCE_DATA Init = { &Black, sizeof( UINT32 ), sizeof( UINT32 ) };
+		if ( FAILED( pI->m_pDevice11->CreateTexture2D( &Desc, &Init, &pI->m_pCursorPixelTex ) ) ) return;
+	}
+
+	// 画面外の場合は前回の値を保持する.
+	if ( x < 0 || y < 0 ||
+		 x >= static_cast<int>( pI->m_WndWidth ) || y >= static_cast<int>( pI->m_WndHeight ) ) return;
+
+	// バックバッファのカーソル位置 1x1 をコピーする.
+	ID3D11Texture2D* pBackBuffer = nullptr;
+	if ( FAILED( pI->m_pSwapChain[0]->GetBuffer( 0, __uuidof( ID3D11Texture2D ), (void**)&pBackBuffer ) ) ) return;
+
+	D3D11_BOX Box = {
+		static_cast<UINT>( x ),		static_cast<UINT>( y ),		0,
+		static_cast<UINT>( x ) + 1,	static_cast<UINT>( y ) + 1,	1 };
+	pI->m_pContext11->CopySubresourceRegion( pI->m_pCursorPixelTex, 0, 0, 0, 0, pBackBuffer, 0, &Box );
+	SAFE_RELEASE( pBackBuffer );
+}
+
+//---------------------------.
+// クリック透過判定用: コピーしたカーソル位置の色を取得( COLORREF ).
+//	前フレームでコピー済みのため Map で GPU を待つことはほぼ無い.
+//---------------------------.
+COLORREF DirectX11::GetCursorPixel()
+{
+	DirectX11* pI = GetInstance();
+	if ( pI->m_pCursorPixelTex == nullptr ) return RGB( 0, 0, 0 );
+
+	D3D11_MAPPED_SUBRESOURCE Mapped = {};
+	if ( FAILED( pI->m_pContext11->Map( pI->m_pCursorPixelTex, 0, D3D11_MAP_READ, 0, &Mapped ) ) ) return RGB( 0, 0, 0 );
+	const UINT32 Bgra = *static_cast<const UINT32*>( Mapped.pData );
+	pI->m_pContext11->Unmap( pI->m_pCursorPixelTex, 0 );
+
+	// B8G8R8A8 から COLORREF( 0x00BBGGRR )へ変換.
+	return RGB( ( Bgra >> 16 ) & 0xFF, ( Bgra >> 8 ) & 0xFF, Bgra & 0xFF );
+}
 //---------------------------.
 // サブウィンドウ用: DirectComposition 合成スワップチェイン作成.
 //	Win11 24H2以降、壁紙レイヤー( WorkerW )配下のウィンドウは通常の

@@ -96,10 +96,6 @@ void BackGroundManager::Update( const float& DeltaTime )
 {
 	BackGroundManager* pI = GetInstance();
 
-	if ( DebugKeyInput::IsKeyDown( 'I' ) ) {
-		pI->m_pWeedManager->Fill( 50 );
-	}
-
 	pI->m_pWaterFall->Update( DeltaTime );
 	pI->m_pWeedManager->Update( DeltaTime );
 	pI->m_pFlowerManager->Update( DeltaTime );
@@ -158,5 +154,3 @@ void BackGroundManager::SubRender()
 //	pI->m_pTree->SubRender();
 //	pI->m_pHouse->SubRender();
 }
-
-

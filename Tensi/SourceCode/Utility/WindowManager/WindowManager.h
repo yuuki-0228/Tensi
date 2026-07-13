@@ -81,6 +81,11 @@ public:
 	// マウスが他のウィンドウの上にあるか取得.
 	static bool GetIsMouseOverTheWindow();
 
+	// マウス直下がデスクトップの何も無い場所( Windowsの範囲選択が始まる場所 )か取得.
+	//	他アプリのウィンドウ / タスクバー / メニュー / 自ゲームのクリック可能部分 /
+	//	デスクトップのアイコンの上は全て false になる.
+	static bool GetIsMouseOnEmptyDesktop();
+
 	// 指定した座標が他のウィンドウの上にある場合そのウィンドウのハンドルを取得(上にない場合:NULL).
 	static HWND GetPointOverTheWindow( const D3DXPOSITION3& Pos );
 	static HWND GetPointOverTheWindow( const D3DXPOSITION2& Pos );

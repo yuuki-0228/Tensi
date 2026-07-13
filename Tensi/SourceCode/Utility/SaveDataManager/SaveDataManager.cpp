@@ -4,8 +4,8 @@
 #include "..\..\Utility\TimeManager\TimeManager.h"
 
 namespace {
-	constexpr char FILE_PATH[]		 = "Data\\Parameter\\d\\m.bin";
-	constexpr char LOGIN_FILE_PATH[] = "Data\\Parameter\\d\\l.bin";
+	constexpr char FILE_PATH[]		 = "Data\\Parameter\\Data\\m.bin";
+	constexpr char LOGIN_FILE_PATH[] = "Data\\Parameter\\Data\\l.bin";
 
 }
 
