@@ -160,6 +160,7 @@
     <ClCompile Include="SourceCode\Utility\Input\KeyLog\KeyLog.cpp" />
     <ClCompile Include="SourceCode\Utility\Input\Controller\XInput\XInput.cpp" />
     <ClCompile Include="SourceCode\Utility\Input\Input.cpp" />
+    <ClCompile Include="SourceCode\Utility\Input\MouseSpeedGuard\MouseSpeedGuard.cpp" />
     <ClCompile Include="SourceCode\Utility\Input\Key\DebugKeyInput.cpp" />
     <ClCompile Include="SourceCode\Utility\Bool\BitFlagManager\BitFlagManager.cpp" />
     <ClCompile Include="SourceCode\Utility\Bool\Bool.cpp" />
@@ -356,6 +357,7 @@
     <ClInclude Include="SourceCode\Utility\Input\Controller\XInput\XInput.h" />
     <ClInclude Include="SourceCode\Utility\Input\KeyBind.h" />
     <ClInclude Include="SourceCode\Utility\Input\Input.h" />
+    <ClInclude Include="SourceCode\Utility\Input\MouseSpeedGuard\MouseSpeedGuard.h" />
     <ClInclude Include="SourceCode\Utility\Input\Key\DebugKeyInput.h" />
     <ClInclude Include="SourceCode\Utility\Bool\Bool.h" />
     <ClInclude Include="SourceCode\Utility\Bool\BitFlagManager\BitFlagManager.h" />

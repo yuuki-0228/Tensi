@@ -95,6 +95,9 @@ public:
 
 	// ウィンドウの名前からハンドルを取得.
 	static HWND GetFindWindow( const std::string& Name );
+
+	// ゴミがこのウインドウハンドルを取得
+	static HWND GetTrashCanWindow();
 	// デスクトップのアイコン名からアイコンインデックスを取得.
 	static ICOINDEX GetFindDesktopIcon( const std::string& Name );
 

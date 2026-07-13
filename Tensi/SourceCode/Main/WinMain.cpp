@@ -1,6 +1,7 @@
 #include "Main.h"
 #include "..\Global.h"
 #include "..\Common\DirectX\DirectX11.h"
+#include "..\Utility\Input\MouseSpeedGuard\MouseSpeedGuard.h"
 #include <filesystem>
 #include <string>
 #include <crtdbg.h>	//_ASSERT_EXPR()で必要.
@@ -93,6 +94,9 @@ INT WINAPI WinMain(
 
 	// Environment dependent setup and checks.
 	MoveCurrentDirectoryToExePath();
+
+	// マウス速度復元の監視プロセスとして起動された場合は、監視処理のみ行い終了する.
+	if ( MouseSpeedGuard::RunWatchdogIfRequested( lpCmdLine ) ) return 0;
 	EnableDpiAwareness();
 	if ( CheckDirectXRuntime() == false ) return 0;
 

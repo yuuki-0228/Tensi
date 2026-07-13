@@ -4,6 +4,7 @@
 #include <dwmapi.h>
 #include <psapi.h>
 #include <shlobj.h>
+#include <shellapi.h>
 
 namespace {
 	// モニター列挙コールバック用データ.
@@ -254,6 +255,42 @@ HWND WindowManager::GetFindWindow( const std::string& Name )
 	// ウィンドウリストを更新していない場合更新する.
 	if ( pI->m_IsWindowUpdate == false ) WindowListUpdate();
 	return pI->m_WindowFindMap[Name];
+}
+
+//---------------------------.
+// ゴミがこのウインドウハンドルを取得
+//---------------------------.
+HWND WindowManager::GetTrashCanWindow()
+{
+	WindowManager* pI = GetInstance();
+
+	static const std::string ShellName = []() -> std::string {
+		LPITEMIDLIST pIDL = nullptr;
+		if ( FAILED( SHGetSpecialFolderLocation( NULL, CSIDL_BITBUCKET, &pIDL ) ) ) return std::string();
+		SHFILEINFOW Info = {};
+		const DWORD_PTR Ret = SHGetFileInfoW(
+			reinterpret_cast<LPCWSTR>( pIDL ), 0, &Info, sizeof( Info ), SHGFI_PIDL | SHGFI_DISPLAYNAME );
+		CoTaskMemFree( pIDL );
+		if ( Ret == 0 ) return std::string();
+		return StringConversion::to_String( Info.szDisplayName );
+	}();
+
+	const std::string Candidates[] = { ShellName, "\x82\xB2\x82\xDD\x94\xA0", "Recycle Bin" };
+	if ( pI->m_IsWindowUpdate == false ) WindowListUpdate();
+
+	for ( const auto& [Name, hWnd] : pI->m_WindowFindMap ) {
+		for ( const auto& Candidate : Candidates ) {
+			if ( Candidate.empty() ) continue;
+
+			// Win10
+			if ( Name == Candidate ) return hWnd;
+
+			// Win11.
+			const std::string Prefix = Candidate + " - ";
+			if ( Name.compare( 0, Prefix.size(), Prefix ) == 0 ) return hWnd;
+		}
+	}
+	return NULL;
 }
 
 //---------------------------.

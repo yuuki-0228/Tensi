@@ -135,6 +135,7 @@
     <ClCompile Include="SourceCode\Common\Fog\Fog.cpp" />
     <ClCompile Include="SourceCode\Utility\Input\Key\DebugKeyInput.cpp" />
     <ClCompile Include="SourceCode\Utility\Input\Input.cpp" />
+    <ClCompile Include="SourceCode\Utility\Input\MouseSpeedGuard\MouseSpeedGuard.cpp" />
     <ClCompile Include="SourceCode\Utility\Input\Key\KeyInput.cpp" />
     <ClCompile Include="SourceCode\Utility\Input\KeyLog\KeyLog.cpp" />
     <ClCompile Include="SourceCode\Utility\Input\Controller\XInput\XInput.cpp" />
@@ -300,6 +301,7 @@
     <ClInclude Include="SourceCode\Common\Fog\Fog.h" />
     <ClInclude Include="SourceCode\Utility\Input\Key\DebugKeyInput.h" />
     <ClInclude Include="SourceCode\Utility\Input\Input.h" />
+    <ClInclude Include="SourceCode\Utility\Input\MouseSpeedGuard\MouseSpeedGuard.h" />
     <ClInclude Include="SourceCode\Utility\Input\KeyBind.h" />
     <ClInclude Include="SourceCode\Utility\Input\Key\KeyInput.h" />
     <ClInclude Include="SourceCode\Utility\Input\KeyLog\KeyLog.h" />

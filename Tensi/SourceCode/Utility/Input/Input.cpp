@@ -6,6 +6,7 @@
 #include "..\Random\Random.h"
 #include "..\FileManager\FileManager.h"
 #include "..\..\Scene\FadeManager\FadeManager.h"
+#include "MouseSpeedGuard\MouseSpeedGuard.h"
 
 namespace {
 	constexpr char KEY_BIND_FILE_PATH[]			= "Data\\Parameter\\Config\\KeyBind.json";	// キーバインドの保存場所.
@@ -36,13 +37,15 @@ Input::Input()
 	json WndSetting		= FileManager::JsonLoad( WINDOW_SETTING_FILE_PATH );
 	m_IsNotActiveStop	= FileManager::JsonGet( WndSetting, "IsInputNotActiveStop", false );
 
-	// 開始時のマウス速度の取得.
-	SystemParametersInfo( SPI_GETMOUSESPEED, NULL, &m_StartMouseSpeed, NULL );
+	// 開始時のマウス速度の取得と復元保証の開始.
+	//	※前回異常終了していた場合は保存していた速度に自動で復元される.
+	m_StartMouseSpeed = MouseSpeedGuard::Start();
 }
 
 Input::~Input()
 {
-	ResetMouseSpeed();
+	// マウス速度を元に戻し、復元保証を終了する.
+	MouseSpeedGuard::Stop();
 }
 
 //----------------------------.

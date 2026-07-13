@@ -198,7 +198,7 @@ void CWindowObject::TeleportTrashCanCheck()
 	if ( m_IsTrashCan == false ) return;
 
 	// ごみ箱のウィンドウハンドルを取得.
-	const HWND& hWnd = WindowManager::GetFindWindow( "ごみ箱" );
+	const HWND& hWnd = WindowManager::GetTrashCanWindow();
 
 	// ごみ箱が見つかったか.
 	if ( hWnd == NULL ) return;
