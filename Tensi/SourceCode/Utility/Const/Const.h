@@ -1,5 +1,5 @@
 #pragma once
-#include "..\\..\\SystemSetting.h"
+#include "..\..\SystemSetting.h"
 #ifdef ENABLE_CONST
 #include "..\..\Global.h"
 #include <vector>
@@ -8,7 +8,20 @@
 *	定数関数
 *	「creator」によって自動で作成されています
 */
-namespace ConstStructs {
+class Const
+{
+private:
+	struct stConstGameWindow {
+		D3DXVECTOR2		SIZE;		// ウィンドウのサイズ(幅,高さ)
+		float			FPS;		// フレームレート
+		std::string		APP_NAME;	// アプリ名
+		std::string		WND_NAME;	// ウィンドウ名
+		std::string		VERSION;	// バージョン
+
+		void Load();
+		stConstGameWindow() { Load(); }
+	} GameWindowData;
+
 	struct stConstFlower {
 		float		COME_OUT_ANIM_ALPHA_SPEED;	// 雑草が抜けた時の透明になっていくアニメーションの速度(秒)
 		int			DELETE_DAY;	// 水やりしていない日が何日続いたら消滅するか
@@ -21,31 +34,31 @@ namespace ConstStructs {
 		int			WATER_OK_NUM;	// 水やりができたことにする回数
 		int			WITHER_DAY;	// 水やりしていない日が何日続いたら枯れるか
 
-		void Load() const;
+		void Load();
 		stConstFlower() { Load(); }
-	};
+	} FlowerData; 
 
 	struct stConstFreeCamera {
 		float		MOVE_SPEED;	// カメラの移動速度
 		float		ROTATION_SPEED;	// カメラの回転速度
 
-		void Load() const;
+		void Load();
 		stConstFreeCamera() { Load(); }
-	};
+	} FreeCameraData; 
 
 	struct stConstSystem {
 		float		AUTO_SAVE_TIME;	// オートセーブを行う間隔(秒)
 
-		void Load() const;
+		void Load();
 		stConstSystem() { Load(); }
-	};
+	} SystemData; 
 
 	struct stConstWaterFall {
 		int			WATER_FALL_W;	// 滝の幅
 
-		void Load() const;
+		void Load();
 		stConstWaterFall() { Load(); }
-	};
+	} WaterFallData; 
 
 	struct stConstWateringCan {
 		float		FALL_MAX_VECTOR;	// 落下速度の加速を終了する移動ベクトルの値
@@ -64,9 +77,9 @@ namespace ConstStructs {
 		float		WATER_VEC_ROT_MAX;	// アニメーションのベクトルの最大の回転
 		float		WATER_VEC_ROT_MIN;	// アニメーションのベクトルの最小の回転
 
-		void Load() const;
+		void Load();
 		stConstWateringCan() { Load(); }
-	};
+	} WateringCanData; 
 
 	struct stConstWeed {
 		float		COME_OUT_ANIM_ALPHA_SPEED;	// 雑草が抜けた時の透明になっていくアニメーションの速度(秒)
@@ -74,20 +87,28 @@ namespace ConstStructs {
 		float		COME_OUT_HEIGHT;	// 雑草が抜けたことにする上に移動した高さ
 		float		SKIP_SHAKE_SPEED;	// 葉っぱを揺らさないマウスの移動差分値(以下)
 
-		void Load() const;
+		void Load();
 		stConstWeed() { Load(); }
-	};
+	} WeedData; 
 
-}
+public:
+	Const();
+	~Const();
 
-namespace Const{
-	const static ConstStructs::stConstFlower Flower;
-	const static ConstStructs::stConstFreeCamera FreeCamera;
-	const static ConstStructs::stConstSystem System;
-	const static ConstStructs::stConstWaterFall WaterFall;
-	const static ConstStructs::stConstWateringCan WateringCan;
-	const static ConstStructs::stConstWeed Weed;
-	void Load();
-}
+	// 読み込み
+	static void Load();
 
+	// 定数の取得
+	static inline stConstGameWindow GameWindow() { return GetInstance()->GameWindowData; }
+	static inline stConstFlower Flower() { return GetInstance()->FlowerData; }
+	static inline stConstFreeCamera FreeCamera() { return GetInstance()->FreeCameraData; }
+	static inline stConstSystem System() { return GetInstance()->SystemData; }
+	static inline stConstWaterFall WaterFall() { return GetInstance()->WaterFallData; }
+	static inline stConstWateringCan WateringCan() { return GetInstance()->WateringCanData; }
+	static inline stConstWeed Weed() { return GetInstance()->WeedData; }
+
+private:
+	// インスタンスの取得.
+	static Const* GetInstance();
+};
 #endif

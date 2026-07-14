@@ -178,13 +178,6 @@ public:
 	static void SetWnd( HWND hWnd ) { GetInstance()->m_hMyWindow = hWnd; }
 	static void SetSubWnd( HWND hWnd ) { GetInstance()->m_hMySubWindow = hWnd; }
 
-	// アプリのショートカットを作成する.
-	static bool CreateShortcut(
-		LPCTSTR pszLink,				LPCTSTR pszFile,
-		LPCTSTR pszDescription = NULL,	LPCTSTR pszArgs		= NULL,
-		LPCTSTR pszWorkingDir  = NULL,	LPCTSTR pszIconPath	= NULL,
-		int nIcon = 0, int nShowCmd = SW_SHOWNORMAL );
-
 private:
 	// インスタンスの取得.
 	static WindowManager* GetInstance();

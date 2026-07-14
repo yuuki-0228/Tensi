@@ -90,7 +90,7 @@ namespace {
 //-----------------.
 int ConstCreate::main()
 {
-	fprintf( stderr, "1>Const.h\n" );
+	PrintOutput( "1>Const.h\n" );
 
 	std::vector<std::pair<std::pair<std::string, std::string>, json>> jsonList;
 	auto FileLoad = [&]( const std::filesystem::directory_entry& Entry )
@@ -116,7 +116,7 @@ int ConstCreate::main()
 	}
 
 	h( jsonList );
-	fprintf( stderr, "1>Const.cpp\n" );
+	PrintOutput( "1>Const.cpp\n" );
 	cpp( jsonList );
 
 	return S_OK;
@@ -440,6 +440,6 @@ void ConstCreate::result()
 {
 	auto h   = "1>Creator -> " + std::filesystem::absolute( H_PATH	 ).string() + "\n";
 	auto cpp = "1>Creator -> " + std::filesystem::absolute( CPP_PATH ).string() + "\n";
-	fprintf( stderr, h.c_str()		);
-	fprintf( stderr, cpp.c_str()	);
+	PrintOutput( h );
+	PrintOutput( cpp );
 }

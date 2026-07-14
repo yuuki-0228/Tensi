@@ -2,6 +2,9 @@
 #ifdef ENABLE_FONT
 #include "..\..\DirectX\DirectX11.h"
 #include "..\..\..\Utility\StringConversion\StringConversion.h"
+#ifndef _DEBUG
+#include <encrypt/file.h>
+#endif
 
 namespace {
 	const int FONT_BMP_SIZE	= 256;
@@ -12,6 +15,10 @@ CFontCreate::CFontCreate( const std::string& FilePath, const std::string& FileNa
 	, m_pContext	( nullptr )
 	, m_wFilePath	()
 	, m_wFileName	()
+#ifndef _DEBUG
+	, m_hFontMem	( nullptr )
+	, m_pFontMemBuf	( nullptr )
+#endif
 {
 	m_pDevice	= DirectX11::GetDevice();
 	m_pContext	= DirectX11::GetContext();
@@ -27,7 +34,20 @@ CFontCreate::CFontCreate( const std::string& FilePath, const std::string& FileNa
 CFontCreate::~CFontCreate()
 {
 	// 利用可能にしたフォントを破棄する.
+#ifdef _DEBUG
 	RemoveFontResourceEx( m_wFilePath.c_str(), FR_PRIVATE, nullptr );
+#else
+	// メモリに読み込んだフォントを破棄する.
+	if ( m_hFontMem != nullptr ) {
+		RemoveFontMemResourceEx( m_hFontMem );
+		m_hFontMem = nullptr;
+	}
+	// メモリ復号済みバッファを解放する.
+	if ( m_pFontMemBuf != nullptr ) {
+		delete[] static_cast<char*>( m_pFontMemBuf );
+		m_pFontMemBuf = nullptr;
+	}
+#endif
 }
 
 //-----------------------------------.
@@ -166,10 +186,29 @@ HRESULT CFontCreate::CreateFontTexture2D( const char* c, ID3D11ShaderResourceVie
 //-----------------------------------.
 int CFontCreate::FontAvailable()
 {
+#ifdef _DEBUG
 	return AddFontResourceEx( 
 		m_wFilePath.c_str(),	// フォントリソース名.
 		FR_PRIVATE,				// プロセス終了時にインストールしたフォントを削除.
 		nullptr );				// フォント構造体.
+#else
+	// リリース時は暗号化されたフォントファイルを復号し、メモリから読み込む.
+	std::string s = StringConversion::to_String( m_wFilePath );
+	std::string es = encrypt::GetEncryptionFilePath( s );
+	auto rf = encrypt::GetRestoreFile( StringConversion::to_wString( es ) );
+	if ( rf.first == nullptr ) return 0;
+
+	// 破棄までバッファを保持する必要があるためバッファを保持する.
+	m_pFontMemBuf = rf.first;
+
+	DWORD numFonts = 0;
+	m_hFontMem = AddFontMemResourceEx(
+		m_pFontMemBuf,	// メモリ復号済みフォントデータ.
+		rf.second,		// フォントデータのサイズ.
+		nullptr,		// 予約(NULL指定).
+		&numFonts );	// (out)読み込まれたフォント数.
+	return static_cast<int>( numFonts );
+#endif
 }
 
 //-----------------------------------.

@@ -6,11 +6,11 @@
 /************************************************
 *	メニュークラス.
 **/
-class MenuManager
+class WindowsMenuManager
 {
 public:
-	MenuManager();
-	~MenuManager();
+	WindowsMenuManager();
+	~WindowsMenuManager();
 
 	// 初期化.
 	static HRESULT Init( const HWND& hWnd );
@@ -22,7 +22,7 @@ public:
 
 private:
 	// インスタンスの取得.
-	static MenuManager* GetInstance();
+	static WindowsMenuManager* GetInstance();
 
 private:
 	HWND	m_hWnd;				// ウィンドウハンドル.

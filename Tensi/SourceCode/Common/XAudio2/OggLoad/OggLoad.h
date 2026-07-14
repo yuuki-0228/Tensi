@@ -15,6 +15,15 @@
 class COggLoad
 {
 public:
+#ifndef _DEBUG
+	// メモリ上から読み込むための情報(リリース時のみ使用).
+	struct SOggMemFile {
+		const char*		Data;	// 復号済みデータ.
+		size_t			Size;	// データのサイズ.
+		size_t			Pos;	// 現在の読み込み位置.
+	};
+#endif
+
 	COggLoad();
 	~COggLoad();
 
@@ -69,5 +78,9 @@ private:
 	BYTE*			m_SeWaveBuffer;		// SEファイルの読み込み用バッファー.
 	WAVEFORMATEX*	m_WaveFormat;		// WAVEFORMATEX構造体.		
 	DWORD			m_Size;				// Wavファイルのサイズを入れる変数.	
+#ifndef _DEBUG
+	SOggMemFile		m_OggMemFile;		// メモリ読み込み情報(リリース時のみ使用).
+	char*			m_pMemBuffer;		// メモリ復号済みバッファ(リリース時のみ使用).
+#endif
 };
 #endif // ENABLE_SOUND

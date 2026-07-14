@@ -101,8 +101,8 @@ void CollisionRenderer::Render()
 		Box2DRender();		// ƒ{ƒbƒNƒX2D‚Ì•`‰æ.
 		Sphere2DRender();	// ‰~2D‚Ì•`‰æ.
 #endif
-#endif // #ifdef _DEBUG.
 	}
+#endif // #ifdef _DEBUG.
 }
 
 #ifdef ENABLE_MESH

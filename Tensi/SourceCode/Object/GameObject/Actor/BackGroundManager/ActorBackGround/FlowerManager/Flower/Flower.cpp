@@ -157,12 +157,12 @@ void CFlower::SetFlowerData( const SFlowerData& Data )
 	m_FlowerSaveData.IsWatering = TimeManager::GetIsSameDay( Now, Data.WateringDay );
 
 	// 水やりしていない期間が一定期間経過した場合枯れる.
-	if ( TimeManager::GetTimediff( Now, Data.WateringDay ).tm_mday >= Const::Flower.WITHER_DAY ) {
+	if ( TimeManager::GetTimediff( Now, Data.WateringDay ).tm_mday >= Const::Flower().WITHER_DAY ) {
 		Wither();
 	}
 	
 	// 枯れていて一定期間経過した場合消滅する.
-	if ( TimeManager::GetTimediff( Now, Data.WitherDay ).tm_mday >= Const::Flower.DELETE_DAY ) {
+	if ( TimeManager::GetTimediff( Now, Data.WitherDay ).tm_mday >= Const::Flower().DELETE_DAY ) {
 		m_IsDisp = false;
 	}
 }
@@ -296,7 +296,7 @@ void CFlower::MouseTouchReactionUpdate()
 	// アニメーションを行わないか.
 	const D3DXPOSITION3& MousePos	 = Input::GetMousePosition3();
 	const D3DXPOSITION3& OldMousePos = Input::GetMouseOldPosition3();
-	if ( std::abs( MousePos.x - OldMousePos.x ) <= Const::Flower.SKIP_SHAKE_SPEED ) return;
+	if ( std::abs( MousePos.x - OldMousePos.x ) <= Const::Flower().SKIP_SHAKE_SPEED ) return;
 
 	Reaction();
 }
@@ -308,16 +308,16 @@ void CFlower::ReactionAnimUpdate()
 {
 	if ( m_IsReactionAnim == false ) return;
 
-	m_ReactionAnimCnt += Math::DEGREE_MAX * Const::Flower.REACTION_ANIM_SPEED * m_DeltaTime;
+	m_ReactionAnimCnt += Math::DEGREE_MAX * Const::Flower().REACTION_ANIM_SPEED * m_DeltaTime;
 	if ( m_ReactionAnimCnt >= Math::DEGREE_MAX ) {
 		m_ReactionAnimCnt	= Math::DEGREE_MIN;
 		m_IsReactionAnim	= false;
 	}
 
 	m_FlowerState.Transform.Scale.x = STransform::NORMAL_SCALE +
-		std::sinf( Math::ToRadian( m_ReactionAnimCnt ) ) * Const::Flower.REACTION_ANIM_SCALE;
+		std::sinf( Math::ToRadian( m_ReactionAnimCnt ) ) * Const::Flower().REACTION_ANIM_SCALE;
 	m_FlowerState.Transform.Scale.y = STransform::NORMAL_SCALE +
-		std::sinf( Math::ToRadian( m_ReactionAnimCnt ) ) * Const::Flower.REACTION_ANIM_SCALE;
+		std::sinf( Math::ToRadian( m_ReactionAnimCnt ) ) * Const::Flower().REACTION_ANIM_SCALE;
 }
 
 //---------------------------.
@@ -349,8 +349,8 @@ void CFlower::WateringAnimUpdate()
 	m_pWateringAnim->Play( pos );
 
 	m_WateringAnimCnt = Random::GetRand(
-		Const::Flower.WATERING_ANIM_COOL_TIME_MIN,
-		Const::Flower.WATERING_ANIM_COOL_TIME_MAX
+		Const::Flower().WATERING_ANIM_COOL_TIME_MIN,
+		Const::Flower().WATERING_ANIM_COOL_TIME_MAX
 	);
 }
 
@@ -365,7 +365,7 @@ void CFlower::PlayerBallCollision( CActor* pActor, const EObjectTag Tag )
 
 	const D3DXPOSITION3& Pos	= pActor->GetPosition();
 	const D3DXPOSITION3& OldPos = pActor->GetTransform().OldPosition;
-	if ( std::abs( Pos.x - OldPos.x ) <= Const::Flower.SKIP_SHAKE_SPEED ) return;
+	if ( std::abs( Pos.x - OldPos.x ) <= Const::Flower().SKIP_SHAKE_SPEED ) return;
 
 	Reaction();
 }
@@ -384,7 +384,7 @@ void CFlower::WaterCollision( CActor* pActor, const EObjectTag Tag )
 		m_pCollisions->GetCollision<CSphere2D>() ) == false ) return;
 
 	m_WateringCnt++;
-	if ( m_WateringCnt >= Const::Flower.WATER_OK_NUM ) {
+	if ( m_WateringCnt >= Const::Flower().WATER_OK_NUM ) {
 		m_FlowerSaveData.IsWatering  = true;
 		m_FlowerSaveData.WateringDay = TimeManager::GetTime();
 	}

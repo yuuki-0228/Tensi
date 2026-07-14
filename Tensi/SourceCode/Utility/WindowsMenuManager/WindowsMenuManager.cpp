@@ -1,9 +1,9 @@
-#include "MenuManager.h"
+#include "WindowsMenuManager.h"
 #ifdef ENABLE_WINDOWS_MENU
 #include "..\..\Object\GameObject\Actor\WindowObjectManager\WindowObject\WindowObject.h"
 #include "..\..\Object\GameObject\Actor\WindowObjectManager\WindowObjectManager.h"
 
-MenuManager::MenuManager()
+WindowsMenuManager::WindowsMenuManager()
 	: m_hWnd			( NULL )
 	, m_hMenu			( NULL )
 	, m_IsDispBall		( false )
@@ -13,7 +13,7 @@ MenuManager::MenuManager()
 {
 }
 
-MenuManager::~MenuManager()
+WindowsMenuManager::~WindowsMenuManager()
 {
 	// メニューの破棄.
 	DestroyMenu( m_hMenu );
@@ -22,18 +22,18 @@ MenuManager::~MenuManager()
 //---------------------------.
 // インスタンスの取得.
 //---------------------------.
-MenuManager* MenuManager::GetInstance()
+WindowsMenuManager* WindowsMenuManager::GetInstance()
 {
-	static std::unique_ptr<MenuManager> pInstance = std::make_unique<MenuManager>();
+	static std::unique_ptr<WindowsMenuManager> pInstance = std::make_unique<WindowsMenuManager>();
 	return pInstance.get();
 }
 
 //---------------------------.
 // 初期化.
 //---------------------------.
-HRESULT MenuManager::Init( const HWND& hWnd )
+HRESULT WindowsMenuManager::Init( const HWND& hWnd )
 {
-	MenuManager* pI = GetInstance();
+	WindowsMenuManager* pI = GetInstance();
 
 	// ウィンドウハンドルの保存.
 	pI->m_hWnd	= hWnd;
@@ -68,9 +68,9 @@ HRESULT MenuManager::Init( const HWND& hWnd )
 //---------------------------.
 // メニューの表示.
 //---------------------------.
-void MenuManager::Disp()
+void WindowsMenuManager::Disp()
 {
-	MenuManager* pI = GetInstance();
+	WindowsMenuManager* pI = GetInstance();
 
 	// マウスカーソル座標取得.
 	POINT Pos;
@@ -84,9 +84,9 @@ void MenuManager::Disp()
 //---------------------------.
 // メニューの選択.
 //---------------------------.
-void MenuManager::SelectMenu( const WORD No )
+void WindowsMenuManager::SelectMenu( const WORD No )
 {
-	MenuManager* pI = GetInstance();
+	WindowsMenuManager* pI = GetInstance();
 
 	switch ( No ) {
 	case 0:

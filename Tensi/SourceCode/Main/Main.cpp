@@ -17,10 +17,10 @@
 #include "..\Utility\FileManager\DragAndDrop\DragAndDrop.h"
 #include "..\Utility\Message\Message.h"
 #include "..\Utility\WindowManager\WindowManager.h"
-#include "..\Utility\MenuManager\MenuManager.h"
+#include "..\Utility\WindowsShortCutManager\WindowsShortCutManager.h"
+#include "..\Utility\WindowsMenuManager\WindowsMenuManager.h"
 #include "..\System\SystemWindowManager\SystemWindowManager.h"
 #include <dwmapi.h>
-#include <shlobj.h>
 
 // ImGUiで使用.
 extern LRESULT ImGui_ImplWin32_WndProcHandler( HWND, UINT, WPARAM, LPARAM );
@@ -186,7 +186,7 @@ HRESULT CMain::Create()
 #endif
 #ifdef ENABLE_WINDOWS_MENU
 	// メニューの初期化.
-	if ( FAILED( MenuManager::Init( m_hWnd ) ) ) return E_FAIL;
+	if ( FAILED( WindowsMenuManager::Init( m_hWnd ) ) ) return E_FAIL;
 #endif
 
 	// 深度を無くす.
@@ -202,26 +202,23 @@ HRESULT CMain::Create()
 	// リソースの読み込み.
 	m_pLoadManager->LoadResource( m_hWnd );
 
-	// ユーザー名の取得.
 #ifndef _DEBUG
+	// ユーザー名の取得.
 	// 既知のフォルダ API と exe ファイルのパスを用いて、起動ショートカットを登録
 	//	（「C:\Users\<name>」のようなハードコードされたパスは、ユーザープロファイルが移動または
 	//	名前変更された場合や、標準以外のシステムドライブでは正常に動作しません）。
-	WCHAR ModulePath[MAX_PATH] = {};
-	if ( GetModuleFileNameW( nullptr, ModulePath, MAX_PATH ) != 0 ) {
-		PWSTR pStartupDir = nullptr;
-		if ( SUCCEEDED( SHGetKnownFolderPath( FOLDERID_Startup, 0, nullptr, &pStartupDir ) ) ) {
-			const std::wstring ShortcutPath = std::wstring( pStartupDir ) + L"\\Slime.lnk";
-			const std::wstring WorkDir		= std::filesystem::path( ModulePath ).parent_path().wstring();
-			WindowManager::CreateShortcut(
-				ShortcutPath.c_str(),
+		WCHAR ModulePath[MAX_PATH] = {};
+		if ( GetModuleFileNameW( nullptr, ModulePath, MAX_PATH ) != 0 ) {
+			const std::wstring WorkDir = std::filesystem::path( ModulePath ).parent_path().wstring();
+			// スタートアップフォルダにショートカットを作成し、有効化する.
+			WindowsShortCutManager::CreateStartupShortcut(
+				L"Slime.lnk",
 				ModulePath,
+				true,
 				NULL,
 				NULL,
 				WorkDir.c_str() );
 		}
-		if ( pStartupDir != nullptr ) CoTaskMemFree( pStartupDir );
-	}
 #endif // #ifndef _DEBUG.
 	
 	// バージョンファイル( ファイル名は固定で、バージョンは中身に文字データとして保存する ).
@@ -553,11 +550,11 @@ LRESULT CALLBACK CMain::MsgProc(
 		break;
 	case WM_NOTIFYICON:
 		// メニューの表示.
-		if ( wParam == 0 && lParam == WM_RBUTTONDOWN ) MenuManager::Disp();
+		if ( wParam == 0 && lParam == WM_RBUTTONDOWN ) WindowsMenuManager::Disp();
 		break;
 	case WM_COMMAND:
 		// メニューの選択.
-		MenuManager::SelectMenu( LOWORD( wParam ) );
+		WindowsMenuManager::SelectMenu( LOWORD( wParam ) );
 		break;
 	case WM_SIZE:
 		break;

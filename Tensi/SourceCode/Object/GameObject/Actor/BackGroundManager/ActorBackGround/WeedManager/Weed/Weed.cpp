@@ -192,7 +192,7 @@ void CWeed::Shake( const D3DXPOSITION3& Pos, const D3DXPOSITION3& OldPos )
 	if ( m_WeedState.AnimState.IsAnimationX ) return;
 
 	// —h‚ê”»’è‚ð‹N‚±‚³‚È‚¢‚©.
-	if ( std::abs( Pos.x - OldPos.x ) <= Const::Weed.SKIP_SHAKE_SPEED ) return;
+	if ( std::abs( Pos.x - OldPos.x ) <= Const::Weed().SKIP_SHAKE_SPEED ) return;
 
 	// ‰E‚©‚çG‚ê‚ç‚ê‚½
 	if ( Pos.x <= OldPos.x ) {
@@ -262,7 +262,7 @@ void CWeed::GrabUpdate()
 	const D3DXPOSITION3& CPos		= *Pos + m_AddCenterPosition;
 
 	// ŽG‘‚ª”²‚¯‚é‚©
-	if ( CPos.y - MousePos.y >= Const::Weed.COME_OUT_HEIGHT ) {
+	if ( CPos.y - MousePos.y >= Const::Weed().COME_OUT_HEIGHT ) {
 		m_IsComeOut = true;
 		m_IsGrab	= false;
 		Input::ResetMouseSpeed();
@@ -279,8 +279,8 @@ void CWeed::ComeOutAnimUptate()
 {
 	if ( m_IsComeOut == false ) return;
 
-	m_WeedState.Transform.Position.y -= Const::Weed.COME_OUT_ANIM_MOVE_SPEED * m_DeltaTime;
-	m_WeedState.Color.w -= Const::Weed.COME_OUT_ANIM_ALPHA_SPEED * m_DeltaTime;
+	m_WeedState.Transform.Position.y -= Const::Weed().COME_OUT_ANIM_MOVE_SPEED * m_DeltaTime;
+	m_WeedState.Color.w -= Const::Weed().COME_OUT_ANIM_ALPHA_SPEED * m_DeltaTime;
 
 	if ( m_WeedState.Color.w < Color::ALPHA_MIN )
 	{
@@ -301,7 +301,7 @@ void CWeed::ScaleUpdate()
 		const D3DXPOSITION3& CPos		= m_WeedState.Transform.Position + m_AddCenterPosition;
 
 		// ˆø‚Á’£‚è—Ê‚ð 0.0~1.0 ‚ÌŠ„‡‚Ö•ÏŠ·‚·‚é.
-		float Ratio = ( CPos.y - MousePos.y ) / Const::Weed.COME_OUT_HEIGHT;
+		float Ratio = ( CPos.y - MousePos.y ) / Const::Weed().COME_OUT_HEIGHT;
 		Ratio = max( 0.0f, min( Ratio, 1.0f ) );
 
 		// ˆø‚Á’£‚è—Ê‚É‰ž‚¶‚½Šgk‚ð’Ç]æ‚ÉÝ’è‚·‚é.

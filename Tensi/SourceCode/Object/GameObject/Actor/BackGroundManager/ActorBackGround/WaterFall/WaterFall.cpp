@@ -58,7 +58,7 @@ void CWaterFall::Setting()
 	// 表示する位置の設定.
 	const RECT& Size		= WindowManager::GetMyWndSize();
 	const float Wnd_W		= static_cast< float >( Size.right - Size.left );
-	m_Transform.Position.x  = Random::GetRand( 0.0f , Wnd_W - m_ImageSize * Const::WaterFall.WATER_FALL_W );
+	m_Transform.Position.x  = Random::GetRand( 0.0f , Wnd_W - m_ImageSize * Const::WaterFall().WATER_FALL_W);
 	m_Transform.Position.x += m_ImageSize / 2.0f;
 
 	// X座標が属するモニターの地面Y座標(ゲーム座標系)を設置場所にする.
@@ -79,7 +79,7 @@ void CWaterFall::CreateWaterFall()
 	bool			isFirst = true;
 	while ( SetPos.y > 0.0f )
 	{
-		for ( int i = 0; i < Const::WaterFall.WATER_FALL_W; ++i ) {
+		for ( int i = 0; i < Const::WaterFall().WATER_FALL_W; ++i ) {
 			m_WaterFallTileList.emplace_back( std::make_unique<CWaterFallTile>() );
 			m_WaterFallTileList.back()->Init();
 			m_WaterFallTileList.back()->Setting( SetPos, isFirst );

@@ -9,6 +9,7 @@ Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64
 		Release|x64 = Release|x64
+		Creator|x64 = Creator|x64
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
 		{F10DF26A-C002-4E3D-9DC6-B0F031CB220F}.Debug|x64.ActiveCfg = Debug|x64
@@ -19,6 +20,8 @@ Global
 		{F10DF26A-C002-4E3D-9DC6-B0F031CB220F}.Release|x64.Build.0 = Release|x64
 		{F10DF26A-C002-4E3D-9DC6-B0F031CB220F}.Release|x86.ActiveCfg = Release|Win32
 		{F10DF26A-C002-4E3D-9DC6-B0F031CB220F}.Release|x86.Build.0 = Release|Win32
+		{F10DF26A-C002-4E3D-9DC6-B0F031CB220F}.Creator|x64.ActiveCfg = Creator|x64
+		{F10DF26A-C002-4E3D-9DC6-B0F031CB220F}.Creator|x64.Build.0 = Creator|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -32,14 +32,14 @@ void CWateringEffect::Update( const float& DeltaTime )
 
 	auto* pColor = &m_SpriteState.Color;
 	if ( m_IsDispAnim ) {
-		pColor->w += Const::Flower.WATERING_ANIM_EFFECT_ALPHA_SPEED * DeltaTime;
+		pColor->w += Const::Flower().WATERING_ANIM_EFFECT_ALPHA_SPEED * DeltaTime;
 		if ( pColor->w >= Color::ALPHA_MAX ) {
 			pColor->w	 = Color::ALPHA_MAX;
 			m_IsDispAnim = false;
 		}
 	}
 	else {
-		pColor->w -= Const::Flower.WATERING_ANIM_EFFECT_ALPHA_SPEED * DeltaTime;
+		pColor->w -= Const::Flower().WATERING_ANIM_EFFECT_ALPHA_SPEED * DeltaTime;
 		if ( pColor->w <= Color::ALPHA_MIN ) {
 			pColor->w = Color::ALPHA_MIN;
 			m_IsDisp		= false;

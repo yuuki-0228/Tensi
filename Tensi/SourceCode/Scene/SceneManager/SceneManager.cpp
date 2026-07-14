@@ -74,7 +74,7 @@ void SceneManager::Update( const float& DeltaTime )
 
 	// オートセーブ
 	pI->m_AutoSaveCnt += DeltaTime;
-	if ( pI->m_AutoSaveCnt >= Const::System.AUTO_SAVE_TIME ) {
+	if ( pI->m_AutoSaveCnt >= Const::System().AUTO_SAVE_TIME ) {
 		pI->m_AutoSaveCnt = INIT_FLOAT;
 		SaveDataManager::Save();
 	}

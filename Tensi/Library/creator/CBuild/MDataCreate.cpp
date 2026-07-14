@@ -83,7 +83,7 @@ namespace {
 //-----------------.
 int MDataCreate::main()
 {
-	fprintf( stderr, "1>MasterDatas.h\n" );
+	PrintOutput( "1>MasterDatas.h\n" );
 
 	std::vector<std::pair<std::string, json>> ContainerList;
 	auto ContainerLoad = [&]( const std::filesystem::directory_entry& Entry )
@@ -109,7 +109,7 @@ int MDataCreate::main()
 	}
 
 	h( ContainerList );
-	fprintf( stderr, "1>MasterDatas.cpp\n" );
+	PrintOutput( "1>MasterDatas.cpp\n" );
 	cpp( List );
 
 	return S_OK;
@@ -440,6 +440,6 @@ void MDataCreate::result()
 {
 	auto h   = "1>Creator -> " + std::filesystem::absolute( H_PATH	 ).string() + "\n";
 	auto cpp = "1>Creator -> " + std::filesystem::absolute( CPP_PATH ).string() + "\n";
-	fprintf( stderr, h.c_str()		);
-	fprintf( stderr, cpp.c_str()	);
+	PrintOutput( h );
+	PrintOutput( cpp );
 }

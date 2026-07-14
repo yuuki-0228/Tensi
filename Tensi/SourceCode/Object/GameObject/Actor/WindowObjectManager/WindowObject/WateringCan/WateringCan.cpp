@@ -199,9 +199,9 @@ void CWateringCan::HitUpUpdate()
 //---------------------------.
 void CWateringCan::HitDownUpdate()
 {
-	if ( m_MoveVector.y > Const::WateringCan.HIT_VEC_Y ) {
+	if ( m_MoveVector.y > Const::WateringCan().HIT_VEC_Y ) {
 		// 落下位置による補正の取得
-		auto rate = m_MoveVector.y / Const::WateringCan.HIT_MAX_VEC_Y;
+		auto rate = m_MoveVector.y / Const::WateringCan().HIT_MAX_VEC_Y;
 		if ( rate >= 1.0f ) rate = 1.0f;
 
 		// 水を減らす
@@ -257,23 +257,23 @@ void CWateringCan::InitTransform()
 //---------------------------.
 void CWateringCan::InitWaterData()
 {
-	m_LHitWaterData.VecRotMin		= Math::ToRadian( Const::WateringCan.WATER_VEC_ROT_MIN );
-	m_LHitWaterData.VecRotMax		= Math::ToRadian( Const::WateringCan.WATER_VEC_ROT_MAX );
-	m_RHitWaterData.VecRotMin		= Math::ToRadian( Const::WateringCan.WATER_VEC_ROT_MIN );
-	m_RHitWaterData.VecRotMax		= Math::ToRadian( Const::WateringCan.WATER_VEC_ROT_MAX );
-	m_LFullWaterData.VecRotMin		= Math::ToRadian( Const::WateringCan.WATER_VEC_ROT_MIN );
-	m_LFullWaterData.VecRotMax		= Math::ToRadian( Const::WateringCan.WATER_VEC_ROT_MAX );
-	m_RFullWaterData.VecRotMin		= Math::ToRadian( Const::WateringCan.WATER_VEC_ROT_MIN );
-	m_RFullWaterData.VecRotMax		= Math::ToRadian( Const::WateringCan.WATER_VEC_ROT_MAX );
-	m_WateringWaterData.VecRotMin	= Math::ToRadian( Const::WateringCan.WATER_VEC_ROT_MIN );
-	m_WateringWaterData.VecRotMax	= Math::ToRadian( Const::WateringCan.WATER_VEC_ROT_MAX );
+	m_LHitWaterData.VecRotMin		= Math::ToRadian( Const::WateringCan().WATER_VEC_ROT_MIN );
+	m_LHitWaterData.VecRotMax		= Math::ToRadian( Const::WateringCan().WATER_VEC_ROT_MAX );
+	m_RHitWaterData.VecRotMin		= Math::ToRadian( Const::WateringCan().WATER_VEC_ROT_MIN );
+	m_RHitWaterData.VecRotMax		= Math::ToRadian( Const::WateringCan().WATER_VEC_ROT_MAX );
+	m_LFullWaterData.VecRotMin		= Math::ToRadian( Const::WateringCan().WATER_VEC_ROT_MIN );
+	m_LFullWaterData.VecRotMax		= Math::ToRadian( Const::WateringCan().WATER_VEC_ROT_MAX );
+	m_RFullWaterData.VecRotMin		= Math::ToRadian( Const::WateringCan().WATER_VEC_ROT_MIN );
+	m_RFullWaterData.VecRotMax		= Math::ToRadian( Const::WateringCan().WATER_VEC_ROT_MAX );
+	m_WateringWaterData.VecRotMin	= Math::ToRadian( Const::WateringCan().WATER_VEC_ROT_MIN );
+	m_WateringWaterData.VecRotMax	= Math::ToRadian( Const::WateringCan().WATER_VEC_ROT_MAX );
 
-	m_LFullWaterData.PowerMin		= Const::WateringCan.FULL_ANIM_POWER_MIN;
-	m_LFullWaterData.PowerMax		= Const::WateringCan.FULL_ANIM_POWER_MAX;
-	m_RFullWaterData.PowerMin		= Const::WateringCan.FULL_ANIM_POWER_MIN;
-	m_RFullWaterData.PowerMax		= Const::WateringCan.FULL_ANIM_POWER_MAX;
-	m_WateringWaterData.PowerMin	= Const::WateringCan.WATERING_POWER_MIN;
-	m_WateringWaterData.PowerMax	= Const::WateringCan.WATERING_POWER_MAX;
+	m_LFullWaterData.PowerMin		= Const::WateringCan().FULL_ANIM_POWER_MIN;
+	m_LFullWaterData.PowerMax		= Const::WateringCan().FULL_ANIM_POWER_MAX;
+	m_RFullWaterData.PowerMin		= Const::WateringCan().FULL_ANIM_POWER_MIN;
+	m_RFullWaterData.PowerMax		= Const::WateringCan().FULL_ANIM_POWER_MAX;
+	m_WateringWaterData.PowerMin	= Const::WateringCan().WATERING_POWER_MIN;
+	m_WateringWaterData.PowerMax	= Const::WateringCan().WATERING_POWER_MAX;
 }
 
 //---------------------------.
@@ -281,7 +281,7 @@ void CWateringCan::InitWaterData()
 //---------------------------.
 void CWateringCan::FallSpeedUpdate()
 {
-	if ( m_MoveVector.y < Const::WateringCan.FALL_MAX_VECTOR ) {
+	if ( m_MoveVector.y < Const::WateringCan().FALL_MAX_VECTOR ) {
 		m_MoveVector.y += m_WaterValue;
 	}
 }
@@ -294,7 +294,7 @@ void CWateringCan::GaugeUpdate()
 	// 水ゲージを強制で表示する場合の表示時間の更新
 	if ( m_IsGaugeDisp ) {
 		m_GaugeDispTime += m_DeltaTime;
-		if ( m_GaugeDispTime > Const::WateringCan.GAUGE_DISP_TIME_MAX ) {
+		if ( m_GaugeDispTime > Const::WateringCan().GAUGE_DISP_TIME_MAX ) {
 			m_GaugeDispTime = INIT_FLOAT;
 			m_IsGaugeDisp	= false;
 		}
@@ -302,13 +302,13 @@ void CWateringCan::GaugeUpdate()
 
 	// アルファ値の設定.
 	if ( ( m_IsGrab || m_IsGaugeDisp ) && m_GaugeAlpha < Color::ALPHA_MAX ) {
-		m_GaugeAlpha += Const::WateringCan.GAUGE_DISP_ALPHA_SPEED * m_DeltaTime;
+		m_GaugeAlpha += Const::WateringCan().GAUGE_DISP_ALPHA_SPEED * m_DeltaTime;
 		if ( m_GaugeAlpha >= Color::ALPHA_MAX ) {
 			m_GaugeAlpha = Color::ALPHA_MAX;
 		}
 	}
 	else if ( ( !m_IsGrab && !m_IsGaugeDisp ) && m_GaugeAlpha > Color::ALPHA_MIN ) {
-		m_GaugeAlpha -= Const::WateringCan.GAUGE_HIDDEN_ALPHA_SPEED * m_DeltaTime;
+		m_GaugeAlpha -= Const::WateringCan().GAUGE_HIDDEN_ALPHA_SPEED * m_DeltaTime;
 		if ( m_GaugeAlpha <= Color::ALPHA_MIN ) {
 			m_GaugeAlpha = Color::ALPHA_MIN;
 		}
@@ -426,7 +426,7 @@ void CWateringCan::FullWaterPlay()
 	m_pWaterEffect->Spill( m_LFullWaterData, m_InWndHandle );
 	m_pWaterEffect->Spill( m_RFullWaterData, m_InWndHandle );
 
-	m_FullAnimCoolTime = Const::WateringCan.FULL_ANIM_COOL_TIME;
+	m_FullAnimCoolTime = Const::WateringCan().FULL_ANIM_COOL_TIME;
 }
 
 //---------------------------.
@@ -448,12 +448,12 @@ void CWateringCan::HitWaterPlay( const float rate, const float decWater )
 	D3DXVec3Normalize( &m_RHitWaterData.MoveVec, &rv );
 
 	// 水の飛び出る強さの変更
-	m_LHitWaterData.PowerMax = Const::WateringCan.HIT_WATER_POWER_MAX * rate;
-	m_RHitWaterData.PowerMax = Const::WateringCan.HIT_WATER_POWER_MAX * rate;
+	m_LHitWaterData.PowerMax = Const::WateringCan().HIT_WATER_POWER_MAX * rate;
+	m_RHitWaterData.PowerMax = Const::WateringCan().HIT_WATER_POWER_MAX * rate;
 	m_LHitWaterData.PowerMin = m_LHitWaterData.PowerMax / 2.0f;
 	m_RHitWaterData.PowerMin = m_RHitWaterData.PowerMax / 2.0f;
 
-	const int max = static_cast<int>( Const::WateringCan.HIT_WATER_NUM_MAX * decWater );
+	const int max = static_cast<int>( Const::WateringCan().HIT_WATER_NUM_MAX * decWater );
 	for ( int i = 0; i < max; i++ ) {
 		m_pWaterEffect->Spill( m_LHitWaterData, m_InWndHandle );
 		m_pWaterEffect->Spill( m_RHitWaterData, m_InWndHandle );

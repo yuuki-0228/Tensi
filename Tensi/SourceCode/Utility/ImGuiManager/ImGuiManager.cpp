@@ -4,6 +4,9 @@
 #include "..\Bool\DebugFlagWindow\DebugFlagWindow.h"
 #include "..\..\Common\DirectX\DirectX11.h"
 #include "..\..\System\SystemWindowManager\SystemWindowManager.h"
+#ifndef _DEBUG
+#include <encrypt/file.h>
+#endif
 
 namespace
 {
@@ -17,6 +20,7 @@ ImGuiManager::ImGuiManager()
 	, m_IsRender		( false )
 #else	// #ifdef _DEBUG.
 	, m_IsRender		( false )
+	, m_pImGuiFontData	( nullptr )
 #endif	// #ifdef _DEBUG.
 #ifdef ENABLE_CLASS_BOOL
 	, m_IsDispSample	( false, u8"ImGuiのサンプルを表示/非表示", "System" )
@@ -30,6 +34,13 @@ ImGuiManager::~ImGuiManager()
 	ImGui_ImplWin32_Shutdown();
 	ImGui_ImplDX11_Shutdown();
 	ImGui::DestroyContext();
+#ifndef _DEBUG
+	// メモリ読み込みしたフォントバッファを解放する.
+	if ( m_pImGuiFontData != nullptr ) {
+		delete[] m_pImGuiFontData;
+		m_pImGuiFontData = nullptr;
+	}
+#endif
 }
 
 //----------------------------.
@@ -51,10 +62,25 @@ HRESULT ImGuiManager::Init( HWND hWnd )
 	ImGui::CreateContext();
 	ImGuiIO& io = ImGui::GetIO();
 	// フォントを読み込む.
+#ifdef _DEBUG
 	ImFont* font = io.Fonts->AddFontFromFileTTF(
 		FONT_FILE_PATH, FONT_SIZE,
 		nullptr,
 		io.Fonts->GetGlyphRangesJapanese() );
+#else
+	// リリース時は暗号化されたフォントを復号し、メモリから読み込む.
+	std::string efp = encrypt::GetEncryptionFilePath( FONT_FILE_PATH );
+	auto rf = encrypt::GetRestoreFile( efp );
+	// アトラス構築まで参照されるためバッファを保持する.
+	GetInstance()->m_pImGuiFontData = rf.first;
+
+	ImFontConfig fontCfg;
+	fontCfg.FontDataOwnedByAtlas = false;	// バッファはImGuiに解放させない(自前管理).
+	ImFont* font = io.Fonts->AddFontFromMemoryTTF(
+		GetInstance()->m_pImGuiFontData, static_cast<int>( rf.second ), FONT_SIZE,
+		&fontCfg,
+		io.Fonts->GetGlyphRangesJapanese() );
+#endif
 
 	// ゲームパッドの使用を許可する.
 	io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;

@@ -8,7 +8,7 @@ namespace {
 	constexpr int _X		= 0; // Xの位置
 	constexpr int _Y		= 1; // Yの位置
 	constexpr int _Z		= 2; // Zの位置
-	constexpr int _W		= 2; // Wの位置
+	constexpr int _W		= 3; // Wの位置
 	constexpr int _FIRST	= 0; // 最初の位置
 	constexpr int _SECOND	= 1; // 次の位置
 
@@ -26,107 +26,157 @@ namespace {
 	}
 }
 
-void ConstStructs::stConstFlower::Load() const
+Const::Const()
 {
-	json j		= FileManager::JsonLoad( "Data\\Parameter\\Const\\Flower.json" );
-	auto This	= const_cast<stConstFlower*>( this );
+}
+
+Const::~Const()
+{
+}
+
+//----------------------------.
+// インスタンスの取得.
+//----------------------------.
+Const* Const::GetInstance()
+{
+	static std::unique_ptr<Const> pInstance = std::make_unique<Const>();
+	return pInstance.get();
+}
+
+//----------------------------.
+// GameWindow.
+//----------------------------.
+void Const::stConstGameWindow::Load()
+{
+	json j = FileManager::JsonLoad( "Data\\Parameter\\Config\\WindowSetting.json" );
 
 	// 初期化
-	This->COME_OUT_ANIM_ALPHA_SPEED = j["COME_OUT_ANIM_ALPHA_SPEED"][_DATA];
-	This->DELETE_DAY = j["DELETE_DAY"][_DATA];
-	This->REACTION_ANIM_SCALE = j["REACTION_ANIM_SCALE"][_DATA];
-	This->REACTION_ANIM_SPEED = j["REACTION_ANIM_SPEED"][_DATA];
-	This->SKIP_SHAKE_SPEED = j["SKIP_SHAKE_SPEED"][_DATA];
-	This->WATERING_ANIM_COOL_TIME_MAX = j["WATERING_ANIM_COOL_TIME_MAX"][_DATA];
-	This->WATERING_ANIM_COOL_TIME_MIN = j["WATERING_ANIM_COOL_TIME_MIN"][_DATA];
-	This->WATERING_ANIM_EFFECT_ALPHA_SPEED = j["WATERING_ANIM_EFFECT_ALPHA_SPEED"][_DATA];
-	This->WATER_OK_NUM = j["WATER_OK_NUM"][_DATA];
-	This->WITHER_DAY = j["WITHER_DAY"][_DATA];
+	SIZE.x		= j["Size"]["w"];
+	SIZE.y		= j["Size"]["h"];
+	FPS			= j["FPS"];
+	APP_NAME	= j["Name"]["App"];
+	WND_NAME	= j["Name"]["Wnd"];
+	VERSION		= j["Version"];
+}
+
+//----------------------------.
+// Flower.
+//----------------------------.
+void Const::stConstFlower::Load()
+{
+	json j = FileManager::JsonLoad( "Data\\Parameter\\Const\\Flower.json" );
+
+	// 初期化
+	COME_OUT_ANIM_ALPHA_SPEED = j["COME_OUT_ANIM_ALPHA_SPEED"][_DATA];
+	DELETE_DAY = j["DELETE_DAY"][_DATA];
+	REACTION_ANIM_SCALE = j["REACTION_ANIM_SCALE"][_DATA];
+	REACTION_ANIM_SPEED = j["REACTION_ANIM_SPEED"][_DATA];
+	SKIP_SHAKE_SPEED = j["SKIP_SHAKE_SPEED"][_DATA];
+	WATERING_ANIM_COOL_TIME_MAX = j["WATERING_ANIM_COOL_TIME_MAX"][_DATA];
+	WATERING_ANIM_COOL_TIME_MIN = j["WATERING_ANIM_COOL_TIME_MIN"][_DATA];
+	WATERING_ANIM_EFFECT_ALPHA_SPEED = j["WATERING_ANIM_EFFECT_ALPHA_SPEED"][_DATA];
+	WATER_OK_NUM = j["WATER_OK_NUM"][_DATA];
+	WITHER_DAY = j["WITHER_DAY"][_DATA];
 
 	Log::PushLog( "Data\\Parameter\\Const\\Flower.json 読み込み : 成功" );
 }
 
-void ConstStructs::stConstFreeCamera::Load() const
+//----------------------------.
+// FreeCamera.
+//----------------------------.
+void Const::stConstFreeCamera::Load()
 {
-	json j		= FileManager::JsonLoad( "Data\\Parameter\\Const\\FreeCamera.json" );
-	auto This	= const_cast<stConstFreeCamera*>( this );
+	json j = FileManager::JsonLoad( "Data\\Parameter\\Const\\FreeCamera.json" );
 
 	// 初期化
-	This->MOVE_SPEED = j["MOVE_SPEED"][_DATA];
-	This->ROTATION_SPEED = j["ROTATION_SPEED"][_DATA];
+	MOVE_SPEED = j["MOVE_SPEED"][_DATA];
+	ROTATION_SPEED = j["ROTATION_SPEED"][_DATA];
 
 	Log::PushLog( "Data\\Parameter\\Const\\FreeCamera.json 読み込み : 成功" );
 }
 
-void ConstStructs::stConstSystem::Load() const
+//----------------------------.
+// System.
+//----------------------------.
+void Const::stConstSystem::Load()
 {
-	json j		= FileManager::JsonLoad( "Data\\Parameter\\Const\\System.json" );
-	auto This	= const_cast<stConstSystem*>( this );
+	json j = FileManager::JsonLoad( "Data\\Parameter\\Const\\System.json" );
 
 	// 初期化
-	This->AUTO_SAVE_TIME = j["AUTO_SAVE_TIME"][_DATA];
+	AUTO_SAVE_TIME = j["AUTO_SAVE_TIME"][_DATA];
 
 	Log::PushLog( "Data\\Parameter\\Const\\System.json 読み込み : 成功" );
 }
 
-void ConstStructs::stConstWaterFall::Load() const
+//----------------------------.
+// WaterFall.
+//----------------------------.
+void Const::stConstWaterFall::Load()
 {
-	json j		= FileManager::JsonLoad( "Data\\Parameter\\Const\\WaterFall.json" );
-	auto This	= const_cast<stConstWaterFall*>( this );
+	json j = FileManager::JsonLoad( "Data\\Parameter\\Const\\WaterFall.json" );
 
 	// 初期化
-	This->WATER_FALL_W = j["WATER_FALL_W"][_DATA];
+	WATER_FALL_W = j["WATER_FALL_W"][_DATA];
 
 	Log::PushLog( "Data\\Parameter\\Const\\WaterFall.json 読み込み : 成功" );
 }
 
-void ConstStructs::stConstWateringCan::Load() const
+//----------------------------.
+// WateringCan.
+//----------------------------.
+void Const::stConstWateringCan::Load()
 {
-	json j		= FileManager::JsonLoad( "Data\\Parameter\\Const\\WateringCan.json" );
-	auto This	= const_cast<stConstWateringCan*>( this );
+	json j = FileManager::JsonLoad( "Data\\Parameter\\Const\\WateringCan.json" );
 
 	// 初期化
-	This->FALL_MAX_VECTOR = j["FALL_MAX_VECTOR"][_DATA];
-	This->FULL_ANIM_COOL_TIME = j["FULL_ANIM_COOL_TIME"][_DATA];
-	This->FULL_ANIM_POWER_MAX = j["FULL_ANIM_POWER_MAX"][_DATA];
-	This->FULL_ANIM_POWER_MIN = j["FULL_ANIM_POWER_MIN"][_DATA];
-	This->GAUGE_DISP_ALPHA_SPEED = j["GAUGE_DISP_ALPHA_SPEED"][_DATA];
-	This->GAUGE_DISP_TIME_MAX = j["GAUGE_DISP_TIME_MAX"][_DATA];
-	This->GAUGE_HIDDEN_ALPHA_SPEED = j["GAUGE_HIDDEN_ALPHA_SPEED"][_DATA];
-	This->HIT_MAX_VEC_Y = j["HIT_MAX_VEC_Y"][_DATA];
-	This->HIT_VEC_Y = j["HIT_VEC_Y"][_DATA];
-	This->HIT_WATER_NUM_MAX = j["HIT_WATER_NUM_MAX"][_DATA];
-	This->HIT_WATER_POWER_MAX = j["HIT_WATER_POWER_MAX"][_DATA];
-	This->WATERING_POWER_MAX = j["WATERING_POWER_MAX"][_DATA];
-	This->WATERING_POWER_MIN = j["WATERING_POWER_MIN"][_DATA];
-	This->WATER_VEC_ROT_MAX = j["WATER_VEC_ROT_MAX"][_DATA];
-	This->WATER_VEC_ROT_MIN = j["WATER_VEC_ROT_MIN"][_DATA];
+	FALL_MAX_VECTOR = j["FALL_MAX_VECTOR"][_DATA];
+	FULL_ANIM_COOL_TIME = j["FULL_ANIM_COOL_TIME"][_DATA];
+	FULL_ANIM_POWER_MAX = j["FULL_ANIM_POWER_MAX"][_DATA];
+	FULL_ANIM_POWER_MIN = j["FULL_ANIM_POWER_MIN"][_DATA];
+	GAUGE_DISP_ALPHA_SPEED = j["GAUGE_DISP_ALPHA_SPEED"][_DATA];
+	GAUGE_DISP_TIME_MAX = j["GAUGE_DISP_TIME_MAX"][_DATA];
+	GAUGE_HIDDEN_ALPHA_SPEED = j["GAUGE_HIDDEN_ALPHA_SPEED"][_DATA];
+	HIT_MAX_VEC_Y = j["HIT_MAX_VEC_Y"][_DATA];
+	HIT_VEC_Y = j["HIT_VEC_Y"][_DATA];
+	HIT_WATER_NUM_MAX = j["HIT_WATER_NUM_MAX"][_DATA];
+	HIT_WATER_POWER_MAX = j["HIT_WATER_POWER_MAX"][_DATA];
+	WATERING_POWER_MAX = j["WATERING_POWER_MAX"][_DATA];
+	WATERING_POWER_MIN = j["WATERING_POWER_MIN"][_DATA];
+	WATER_VEC_ROT_MAX = j["WATER_VEC_ROT_MAX"][_DATA];
+	WATER_VEC_ROT_MIN = j["WATER_VEC_ROT_MIN"][_DATA];
 
 	Log::PushLog( "Data\\Parameter\\Const\\WateringCan.json 読み込み : 成功" );
 }
 
-void ConstStructs::stConstWeed::Load() const
+//----------------------------.
+// Weed.
+//----------------------------.
+void Const::stConstWeed::Load()
 {
-	json j		= FileManager::JsonLoad( "Data\\Parameter\\Const\\Weed.json" );
-	auto This	= const_cast<stConstWeed*>( this );
+	json j = FileManager::JsonLoad( "Data\\Parameter\\Const\\Weed.json" );
 
 	// 初期化
-	This->COME_OUT_ANIM_ALPHA_SPEED = j["COME_OUT_ANIM_ALPHA_SPEED"][_DATA];
-	This->COME_OUT_ANIM_MOVE_SPEED = j["COME_OUT_ANIM_MOVE_SPEED"][_DATA];
-	This->COME_OUT_HEIGHT = j["COME_OUT_HEIGHT"][_DATA];
-	This->SKIP_SHAKE_SPEED = j["SKIP_SHAKE_SPEED"][_DATA];
+	COME_OUT_ANIM_ALPHA_SPEED = j["COME_OUT_ANIM_ALPHA_SPEED"][_DATA];
+	COME_OUT_ANIM_MOVE_SPEED = j["COME_OUT_ANIM_MOVE_SPEED"][_DATA];
+	COME_OUT_HEIGHT = j["COME_OUT_HEIGHT"][_DATA];
+	SKIP_SHAKE_SPEED = j["SKIP_SHAKE_SPEED"][_DATA];
 
 	Log::PushLog( "Data\\Parameter\\Const\\Weed.json 読み込み : 成功" );
 }
 
+//----------------------------.
+// 読み込み.
+//----------------------------.
 void Const::Load()
 {
-	Flower.Load();
-	FreeCamera.Load();
-	System.Load();
-	WaterFall.Load();
-	WateringCan.Load();
-	Weed.Load();
+	Const* pI = GetInstance();
+
+	pI->FlowerData.Load();
+	pI->FreeCameraData.Load();
+	pI->SystemData.Load();
+	pI->WaterFallData.Load();
+	pI->WateringCanData.Load();
+	pI->WeedData.Load();
 }
 
 #endif

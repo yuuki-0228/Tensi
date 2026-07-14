@@ -97,6 +97,9 @@ private:
 private:
 	std::queue<std::function<void()>>	m_RenderQueue;
 	bool								m_IsRender;
+#ifndef _DEBUG
+	char*								m_pImGuiFontData;	// リリース時のImGuiフォント復号バッファ.
+#endif
 #ifdef ENABLE_CLASS_BOOL
 	CBool								m_IsDispSample;
 #endif

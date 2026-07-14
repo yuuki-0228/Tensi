@@ -27,6 +27,10 @@ private:
 	ID3D11DeviceContext*	m_pContext;		// デバイスコンテキスト.
 	std::wstring			m_wFilePath;	// ファイルパス.
 	std::wstring			m_wFileName;	// ファイル名.
+#ifndef _DEBUG
+	HANDLE					m_hFontMem;		// メモリフォントのハンドル
+	void*					m_pFontMemBuf;	// メモリ復号済みフォントバッファ
+#endif
 
 private:
 	// デフォルトコンストラクタを禁止する.

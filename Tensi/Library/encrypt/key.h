@@ -26,14 +26,14 @@ namespace SecretKey{
 	//	std::make_pair( std::make_pair( "midi",	"MIDI"	), "03" ),	// mciSendString：非対応
 	//	std::make_pair( std::make_pair( "mp3",	"MP3"	), "04" ),	// mciSendString：非対応
 	//	std::make_pair( std::make_pair( "wav",	"WAV"	), "05" ),	// mciSendString：非対応
-	//	std::make_pair( std::make_pair( "ogg",	"OGG"	), "06" ),	// 非対応
+		std::make_pair( std::make_pair( "ogg",	"OGG"	), "06" ),
 		std::make_pair( std::make_pair( "x",	"X"		), "07" ),
 	//	std::make_pair( std::make_pair( "obj",	"OBJ"	), "08" ),	// 非対応
 	//	std::make_pair( std::make_pair( "fbx",	"FBX"	), "09" ),	// 非対応
 	//	std::make_pair( std::make_pair( "mmd",	"MMD"	), "10" ),	// 非対応
 		std::make_pair( std::make_pair( "efk",	"EFK"	), "11" ),
-	//	std::make_pair( std::make_pair( "ttf",	"TTF"	), "12" ),	// 読み込み：非対応
-	//	std::make_pair( std::make_pair( "otf",	"OTF"	), "13" ),	// 読み込み：非対応
+		std::make_pair( std::make_pair( "ttf",	"TTF"	), "12" ),
+		std::make_pair( std::make_pair( "otf",	"OTF"	), "13" ),
 		std::make_pair( std::make_pair( "txt",	"TXT"	), "14" ),
 		std::make_pair( std::make_pair( "csv",	"CSV"	), "15" ),
 		std::make_pair( std::make_pair( "json",	"JSON"	), "16" ),

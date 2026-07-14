@@ -56,7 +56,7 @@ namespace {
 //-----------------.
 int SaveCreate::main()
 {
-	fprintf( stderr, "1>CommonSaveData.h\n" );
+	PrintOutput( "1>CommonSaveData.h\n" );
 
 	auto file = FileManager::TextLoad( STRUCT_DATA_PATH );
 	if ( file.size() == 0 ) {
@@ -64,7 +64,7 @@ int SaveCreate::main()
 	}
 
 	h( file );
-	fprintf( stderr, "1>CommonSaveData.cpp\n" );
+	PrintOutput( "1>CommonSaveData.cpp\n" );
 	cpp( file );
 	return S_OK;
 }
@@ -201,6 +201,6 @@ void SaveCreate::result()
 {
 	auto h   = "1>Creator -> " + std::filesystem::absolute( H_PATH	 ).string() + "\n";
 	auto cpp = "1>Creator -> " + std::filesystem::absolute( CPP_PATH ).string() + "\n";
-	fprintf( stderr, h.c_str()		);
-	fprintf( stderr, cpp.c_str()	);
+	PrintOutput( h );
+	PrintOutput( cpp );
 }

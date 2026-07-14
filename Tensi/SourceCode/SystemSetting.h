@@ -44,6 +44,8 @@
 #define ENABLE_WINDOWS_MENU
 // Windowsのタスクトレイに関する機能の有効/無効
 #define ENABLE_WINDOWS_TASK_TRAY
+// Windowsのショートカットに関する機能の有効/無効
+#define ENABLE_WINDOWS_SHORT_CUT
 
 // 透明ウィンドウの有効/無効
 #define ENABLE_TRANSPARENT_WINDOW

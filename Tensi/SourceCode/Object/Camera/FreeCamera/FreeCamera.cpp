@@ -21,16 +21,16 @@ void CFreeCamera::Update( const float& DeltaTime )
 {
 	// カメラの操作.
 //	if ( KeyInput::IsKeyPress( VK_CONTROL ) ) {
-		if ( Input::IsKeyPress( "FreeCameraMoveF" ) ) m_CameraPosition			-= m_MoveVec	 * Const::FreeCamera.MOVE_SPEED;
-		if ( Input::IsKeyPress( "FreeCameraMoveB" ) ) m_CameraPosition			+= m_MoveVec	 * Const::FreeCamera.MOVE_SPEED;
-		if ( Input::IsKeyPress( "FreeCameraMoveL" ) ) m_CameraPosition			+= m_SideMoveVec * Const::FreeCamera.MOVE_SPEED;
-		if ( Input::IsKeyPress( "FreeCameraMoveR" ) ) m_CameraPosition			-= m_SideMoveVec * Const::FreeCamera.MOVE_SPEED;
-		if ( Input::IsKeyPress( "FreeCameraMoveU" ) ) m_CameraPosition.y		+= Const::FreeCamera.MOVE_SPEED;
-		if ( Input::IsKeyPress( "FreeCameraMoveD" ) ) m_CameraPosition.y		-= Const::FreeCamera.MOVE_SPEED;
-		if ( Input::IsKeyPress( "FreeCameraRotXU" ) ) m_Transform.Rotation.x	-= Const::FreeCamera.ROTATION_SPEED;
-		if ( Input::IsKeyPress( "FreeCameraRotXD" ) ) m_Transform.Rotation.x	+= Const::FreeCamera.ROTATION_SPEED;
-		if ( Input::IsKeyPress( "FreeCameraRotYL" ) ) m_Transform.Rotation.y	-= Const::FreeCamera.ROTATION_SPEED;
-		if ( Input::IsKeyPress( "FreeCameraRotYR" ) ) m_Transform.Rotation.y	+= Const::FreeCamera.ROTATION_SPEED;
+		if ( Input::IsKeyPress( "FreeCameraMoveF" ) ) m_CameraPosition			-= m_MoveVec	 * Const::FreeCamera().MOVE_SPEED;
+		if ( Input::IsKeyPress( "FreeCameraMoveB" ) ) m_CameraPosition			+= m_MoveVec	 * Const::FreeCamera().MOVE_SPEED;
+		if ( Input::IsKeyPress( "FreeCameraMoveL" ) ) m_CameraPosition			+= m_SideMoveVec * Const::FreeCamera().MOVE_SPEED;
+		if ( Input::IsKeyPress( "FreeCameraMoveR" ) ) m_CameraPosition			-= m_SideMoveVec * Const::FreeCamera().MOVE_SPEED;
+		if ( Input::IsKeyPress( "FreeCameraMoveU" ) ) m_CameraPosition.y		+= Const::FreeCamera().MOVE_SPEED;
+		if ( Input::IsKeyPress( "FreeCameraMoveD" ) ) m_CameraPosition.y		-= Const::FreeCamera().MOVE_SPEED;
+		if ( Input::IsKeyPress( "FreeCameraRotXU" ) ) m_Transform.Rotation.x	-= Const::FreeCamera().ROTATION_SPEED;
+		if ( Input::IsKeyPress( "FreeCameraRotXD" ) ) m_Transform.Rotation.x	+= Const::FreeCamera().ROTATION_SPEED;
+		if ( Input::IsKeyPress( "FreeCameraRotYL" ) ) m_Transform.Rotation.y	-= Const::FreeCamera().ROTATION_SPEED;
+		if ( Input::IsKeyPress( "FreeCameraRotYR" ) ) m_Transform.Rotation.y	+= Const::FreeCamera().ROTATION_SPEED;
 //	}
 
 	// 移動ベクトルの更新.
