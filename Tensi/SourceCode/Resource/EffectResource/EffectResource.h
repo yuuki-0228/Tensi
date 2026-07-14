@@ -1,4 +1,6 @@
 #pragma once
+#include "..\..\SystemSetting.h"
+#ifdef ENABLE_EFFEKSEER
 #include "..\..\Global.h"
 #include <unordered_map>
 #include <string>
@@ -47,3 +49,4 @@ private:
 	EffectResource( EffectResource&& )					= delete;
 	EffectResource& operator = ( EffectResource&& )		= delete;
 };
+#endif // ENABLE_EFFEKSEER

@@ -43,6 +43,8 @@ protected:
 	virtual bool GrabCheck() override;
 	// ’Í‚ñ‚¾‚Ì‰Šú‰».
 	virtual void GrabInit() override;
+	// —£‚µ‚½‚Ì‰Šú‰».
+	virtual void SeparateInit() override;
 
 	// ˆÚ“®‚ÌXV.
 	virtual void MoveUpdate() override;

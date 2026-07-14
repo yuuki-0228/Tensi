@@ -1,4 +1,6 @@
 #pragma once
+#include "..\..\SystemSetting.h"
+#ifdef ENABLE_SPRITE
 #include "SpriteStruct.h"
 #include "..\..\Utility\FileManager\FileManager.h"
 
@@ -108,3 +110,4 @@ private:
 	bool							m_IsAllDisp;			// この画像を全て表示するか.
 	bool*							m_pIsCreaterLog;		// ログファイルを作成するか.
 };
+#endif // ENABLE_SPRITE

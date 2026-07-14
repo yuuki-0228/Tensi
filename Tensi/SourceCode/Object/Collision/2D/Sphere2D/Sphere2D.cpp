@@ -1,4 +1,5 @@
 #include "Sphere2D.h"
+#ifdef ENABLE_SPRITE
 
 CSphere2D::CSphere2D()
 	: m_pSprite			( nullptr )
@@ -70,3 +71,4 @@ D3DXPOSITION2 CSphere2D::GetSpriteCenterPos( SSpriteRenderState* pRenderState )
 	default:						return Pos;
 	}
 }
+#endif

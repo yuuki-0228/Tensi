@@ -1,7 +1,8 @@
 #include "MasterDataAccesser.h"
+#ifdef ENABLE_MASTER_DATA
 
 namespace {
-	const std::string DATA_PATH = "Data\\Parameter\\MasterData";
+	const std::string FILE_PATH = "Data\\Parameter\\MasterData";
 }
 
 MasterDataAccesser::MasterDataAccesser()
@@ -35,22 +36,26 @@ HRESULT MasterDataAccesser::Load()
 		auto fpos = FilePath.rfind( "\\", spos - 1 );
 		std::string Container = FilePath.substr( fpos + 1, spos - fpos - 1 );
 		FileList.emplace_back( std::make_pair( Container, FileManager::JsonLoad( FilePath ) ) );
+
+		Log::PushLog( FilePath + " 読み込み : 成功" );
 	};
 
+	Log::PushLog( "------マスターデータ読み込み開始 ------" );
 	try {
-		std::filesystem::recursive_directory_iterator Dir_itr( DATA_PATH ), End_itr;
+		std::filesystem::recursive_directory_iterator Dir_itr( FILE_PATH ), End_itr;
 		std::for_each( Dir_itr, End_itr, FileLoad );
 	} catch ( const std::filesystem::filesystem_error& e ) {
 		// ファイルが見つからないエラーは無視する.
-		if ( std::string( e.what() ).find( "指定されたパスが見つかりません。" ) == std::string::npos ) {
+		if ( std::string( e.what() ).find( "The system cannot find the path specified" ) == std::string::npos ) {
 
 			// エラーメッセージを表示.
 			ErrorMessage( "ファイルの読み込み 失敗" );
 			return E_FAIL;
 		}
 	}
+	Log::PushLog( "------ マスターデータ読み込み開始 ------" );
 
-	pI->m_MasterContainer = MasterData::CreateCache( FileList );
+	pI->m_MasterContainer = MasterDataUtility::CreateCache( FileList );
 	return S_OK;
 }
 
@@ -62,3 +67,5 @@ MasterDataAccesser* MasterDataAccesser::GetInstance()
 	static std::unique_ptr<MasterDataAccesser> pInstance = std::make_unique<MasterDataAccesser>();
 	return pInstance.get();
 }
+
+#endif

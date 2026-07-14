@@ -489,7 +489,9 @@ bool ImGuiManager::Button( const char* Label, const bool Flag, D3DXCOLOR4 Color,
 		}
 		const bool Result = ImGui::Button( Label, ImSize );
 		if ( Color != Color4::None	) ImGui::PopStyleColor( 3 );
-		if ( Result					) SoundManager::PlaySE( "ImguiSE", 0.0f, false, true );
+#ifdef ENABLE_SOUND
+		if ( Result					) SoundManager::PlaySE( "ImguiSE" );
+#endif // ENABLE_SOUND
 		return Result;
 	}
 	else {
@@ -521,8 +523,10 @@ bool ImGuiManager::CheckBox( const char* Label, bool* v, D3DXCOLOR4 Color )
 	const bool Oldv = *v;
 	ImGui::Checkbox( Label, v );
 	if ( Color	!= Color4::None	) ImGui::PopStyleColor( 4 );
+#ifdef ENABLE_SOUND
 	if ( Oldv	!= *v			)
-		SoundManager::PlaySE( "ImguiSE", 0.0f, false, true );
+		SoundManager::PlaySE( "ImguiSE" );
+#endif // ENABLE_SOUND
 	return *v;
 }
 
@@ -552,7 +556,9 @@ std::string ImGuiManager::RadioButton( const char* Label, std::string* Out, cons
 		// ラジオボタンの作成.
 		ImGui::RadioButton( std::string( List[i] + "##" + std::string( Label ) + std::to_string( i ) ).c_str(), &v, i);
 	}
-	if ( *Out != List[v] ) SoundManager::PlaySE( "ImguiSE", 0.0f, false, true );
+#ifdef ENABLE_SOUND
+	if ( *Out != List[v] ) SoundManager::PlaySE( "ImguiSE" );
+#endif // ENABLE_SOUND
 	return *Out = List[v];
 }
 
@@ -594,7 +600,9 @@ std::string ImGuiManager::Combo( const char* Label, std::string* Out, const std:
 		}
 		ImGui::EndCombo();
 	}
-	if ( *Out != Items[v].second ) SoundManager::PlaySE( "ImguiSE", 0.0f, false, true );
+#ifdef ENABLE_SOUND
+	if ( *Out != Items[v].second ) SoundManager::PlaySE( "ImguiSE" );
+#endif // ENABLE_SOUND
 	return *Out = Items[v].second;
 }
 

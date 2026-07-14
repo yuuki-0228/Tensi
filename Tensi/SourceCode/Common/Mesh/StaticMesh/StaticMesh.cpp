@@ -1,6 +1,9 @@
 #include "StaticMesh.h"
+#ifdef ENABLE_MESH
 #include "..\..\DirectX\DirectX9.h"
+#ifdef ENABLE_FOG
 #include "..\..\Fog\Fog.h"
+#endif // ENABLE_FOG
 #include "..\..\..\Object\Camera\CameraManager\CameraManager.h"
 #include "..\..\..\Object\Light\Light.h"
 #include "..\..\..\Utility\Transform\PositionRenderer\PositionRenderer.h"
@@ -30,7 +33,6 @@ CStaticMesh::CStaticMesh()
 	, m_NumAttr					()
 	, m_AttrID					()
 	, m_EnableTexture			( false )
-	, m_pFog					( nullptr )
 	, m_IsFog					( false )
 	, m_DitherFlag				( false )
 	, m_AlphaBlockFlag			( true )
@@ -42,7 +44,9 @@ CStaticMesh::CStaticMesh()
 	, m_TexturePathList			()
 	, m_MaterialTextureNo		()
 {
+#ifdef ENABLE_FOG
 	m_pFog = std::make_unique<CFog>();
+#endif // ENABLE_FOG
 }
 
 CStaticMesh::~CStaticMesh()
@@ -71,7 +75,9 @@ HRESULT CStaticMesh::Init( LPCTSTR lpFileName )
 	if( FAILED( CreateSampler() )					) return E_FAIL;
 
 	// フォグの初期化.
+#ifdef ENABLE_FOG
 	m_pFog->Init();
+#endif // ENABLE_FOG
 
 	return S_OK;
 }
@@ -796,11 +802,14 @@ void CStaticMesh::RenderMesh(
 			m_pContext->PSSetShaderResources(0, 1, pNothing);
 		}
 
+#ifdef ENABLE_FOG
 		// フォグの描画.
 		if ( m_IsFog == true ) m_pFog->Render( m_pMaterials[m_AttrID[No]].dwNumFace * 3, mWorld, m_pMaterials[m_AttrID[No]].pTexture[m_MaterialTextureNo[m_AttrID[No]]], 0.0f, 100.0f );
+#endif // ENABLE_FOG
 
 		// プリミティブ(ポリゴン)をレンダリング.
 		m_pContext->DrawIndexed(
 			m_pMaterials[m_AttrID[No]].dwNumFace * 3, 0, 0);
 	}
 }
+#endif // ENABLE_MESH

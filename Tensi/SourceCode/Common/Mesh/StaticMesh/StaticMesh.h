@@ -1,11 +1,15 @@
 #pragma once
+#include "..\..\..\SystemSetting.h"
+#ifdef ENABLE_MESH
 #include "..\..\Common.h"
 #include "..\..\..\Global.h"
 
+#ifdef ENABLE_FOG
 class CFog;
+#endif // ENABLE_FOG
 
 /************************************************
-*	スタティックメッシュクラス	
+*	スタティックメッシュクラス
 **/
 class CStaticMesh final
 	: public CCommon
@@ -204,7 +208,9 @@ private:
 
 	bool					m_EnableTexture;				// テクスチャあり.
 
+#ifdef ENABLE_FOG
 	std::unique_ptr<CFog>	m_pFog;							// フォグ.
+#endif // ENABLE_FOG
 	bool					m_IsFog;						// フォグを有効にするか.
 	bool					m_DitherFlag;					// ディザ抜きを使用するか.
 	bool					m_AlphaBlockFlag;				// アルファブロックを使用するか.
@@ -218,3 +224,4 @@ private:
 	std::vector<std::string> m_TexturePathList;				// 差し替えテクスチャパスリスト.
 	std::vector<int>		m_MaterialTextureNo;			// マテリアルのテクスチャのNo.
  };
+#endif // ENABLE_MESH

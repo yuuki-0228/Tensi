@@ -1,4 +1,6 @@
 #pragma once
+#include "..\\..\\SystemSetting.h"
+#ifdef ENABLE_CONST
 #include "..\..\Global.h"
 #include <vector>
 
@@ -87,3 +89,5 @@ namespace Const{
 	const static ConstStructs::stConstWeed Weed;
 	void Load();
 }
+
+#endif

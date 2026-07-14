@@ -1,4 +1,5 @@
 #include "RayMesh.h"
+#ifdef ENABLE_MESH
 #include "..\..\..\Common\DirectX\DirectX11.h"
 #include "..\..\..\Object\Camera\CameraManager\CameraManager.h"
 #include "..\..\..\Object\Collision\Ray\Ray.h"
@@ -261,3 +262,4 @@ void CRayMesh::Render( CRay* Ray )
 	// プリミティブをレンダリング.
 	pContext->Draw( 2, 0 );// レイ(線分なので頂点2つ分).
 }
+#endif // ENABLE_MESH

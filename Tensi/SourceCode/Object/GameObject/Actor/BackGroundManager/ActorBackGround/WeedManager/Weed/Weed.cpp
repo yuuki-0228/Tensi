@@ -5,9 +5,20 @@
 #include "..\..\..\..\..\..\..\Utility\WindowManager\WindowManager.h"
 #include "..\..\..\..\..\..\..\Utility\Const\Const.h"
 
+namespace {
+	// ˆø‚Á’£‚è’†‚ÌŠgk‰‰o—pƒpƒ‰ƒ[ƒ^.
+	const float PULL_STRETCH_Y	= 0.4f;		// Å‘å‚Ü‚Åˆø‚Á’£‚Á‚½‚Éc‚ÖL‚Ñ‚é—Ê.
+	const float PULL_SHRINK_X	= 0.25f;	// Å‘å‚Ü‚Åˆø‚Á’£‚Á‚½‚É‰¡‚Ök‚Ş—Ê.
+
+	// ”²‚¯‚½uŠÔ‚Ì’e‚¯‚éŠgk’l.
+	const float POP_SCALE_X		= 0.7f;		// ”²‚¯‚½uŠÔ‚Ì‰¡‚ÌŠgk’l.
+	const float POP_SCALE_Y		= 1.45f;	// ”²‚¯‚½uŠÔ‚Ìc‚ÌŠgk’l.
+}
+
 CWeed::CWeed()
 	: m_pWeed				( nullptr )
 	, m_WeedState			()
+	, m_ScaleAnim			()
 	, m_AddCenterPosition	( INIT_FLOAT3 )
 	, m_WeedSize			( INIT_FLOAT )
 	, m_IsGrab				( false )
@@ -52,6 +63,7 @@ void CWeed::Update( const float& DeltaTime )
 	GrabUptate();			// G‘‚Ì’Í‚İ‚ÌXV.
 	GrabUpdate();			// G‘‚ğ’Í‚ñ‚Å‚¢‚é‚Æ‚«‚ÌXV.
 	ComeOutAnimUptate();	// G‘‚ª”²‚¯‚éƒAƒjƒ[ƒVƒ‡ƒ“‚ÌXV.
+	ScaleUpdate();			// ˆø‚Á’£‚è‚É‰‚¶‚½ŠgkƒAƒjƒ[ƒVƒ‡ƒ“‚ÌXV.
 
 	TransformUpdate( m_WeedState.Transform );
 	UpdateCollision();
@@ -254,6 +266,9 @@ void CWeed::GrabUpdate()
 		m_IsComeOut = true;
 		m_IsGrab	= false;
 		Input::ResetMouseSpeed();
+
+		// ”²‚¯‚½uŠÔ‚É’e‚¯‚é‚æ‚¤‚ÉŠgk‚³‚¹‚é.
+		m_ScaleAnim.Punch( POP_SCALE_X, POP_SCALE_Y );
 	}
 }
 
@@ -273,3 +288,34 @@ void CWeed::ComeOutAnimUptate()
 		m_IsDisp = false;
 	}
 }
+
+//---------------------------.
+// ˆø‚Á’£‚è‚É‰‚¶‚½ŠgkƒAƒjƒ[ƒVƒ‡ƒ“‚ÌXV.
+//---------------------------.
+void CWeed::ScaleUpdate()
+{
+	// ˆø‚Á’£‚Á‚Ä‚¢‚éŠÔ‚Íˆø‚Á’£‚è—Ê‚É‰‚¶‚Äc‚ÉL‚Î‚µ, ‰¡‚ğk‚ß‚é.
+	//	”²‚¯‚Ä‚¢‚é‚â—£‚µ‚½‚Í“™”{‚Ö–ß‚·( “r’†‚Å‚â‚ß‚½ê‡‚à’e«‚Å–ß‚é ).
+	if ( m_IsGrab && m_IsComeOut == false ) {
+		const D3DXPOSITION2& MousePos	= Input::GetMousePosition();
+		const D3DXPOSITION3& CPos		= m_WeedState.Transform.Position + m_AddCenterPosition;
+
+		// ˆø‚Á’£‚è—Ê‚ğ 0.0~1.0 ‚ÌŠ„‡‚Ö•ÏŠ·‚·‚é.
+		float Ratio = ( CPos.y - MousePos.y ) / Const::Weed.COME_OUT_HEIGHT;
+		Ratio = max( 0.0f, min( Ratio, 1.0f ) );
+
+		// ˆø‚Á’£‚è—Ê‚É‰‚¶‚½Šgk‚ğ’Ç]æ‚Éİ’è‚·‚é.
+		m_ScaleAnim.SetTarget( 1.0f - PULL_SHRINK_X * Ratio, 1.0f + PULL_STRETCH_Y * Ratio );
+	}
+	else {
+		// “™”{‚Ö–ß‚·.
+		m_ScaleAnim.SetTarget( 1.0f, 1.0f );
+	}
+
+	// Šgk‚ğXV‚µ‚Ä‰æ‘œ‚Ö”½‰f‚·‚é.
+	m_ScaleAnim.Update( m_DeltaTime );
+	const D3DXVECTOR2& Scale = m_ScaleAnim.GetScale();
+	m_WeedState.Transform.Scale.x = Scale.x;
+	m_WeedState.Transform.Scale.y = Scale.y;
+}
+

@@ -1,15 +1,24 @@
 #include "WindowObject.h"
 #include "..\..\..\..\..\Utility\Input\Input.h"
 #include <dwmapi.h>
+#include <cmath>
 
 namespace {
 	// 重力ベクトル.
 	const D3DXVECTOR3 GRAVITY_VECTOR = { 0.0f, 1.0f, 0.0f };
+
+	// 衝突時の拡縮演出用パラメータ.
+	const float SQUASH_MIN_SPEED	= 4.0f;		// この速度以下では拡縮させない.
+	const float SQUASH_SPEED_RATE	= 0.011f;	// 速度から拡縮量へ変換する係数.
+	const float SQUASH_MAX_AMOUNT	= 0.28f;	// 拡縮量の最大値.
+	const float SQUASH_CROSS_RATE	= 0.6f;		// 潰れる軸と反対の軸の膨らむ割合.
 }
 
 CWindowObject::CWindowObject()
 	: m_pSprite				( nullptr )
 	, m_SpriteState			()
+	, m_ScaleAnim			()
+	, m_IsUseImpactSquash	( false )
 	, m_VectorList			()
 	, m_OldMoveVector		( INIT_FLOAT3 )
 	, m_MoveVector			( INIT_FLOAT3 )
@@ -93,6 +102,12 @@ void CWindowObject::WindowObjectUpdate()
 	ScreenCollision();				// スクリーンから出ないようにする当たり判定.
 
 	TeleportTrashCanCheck();		// ごみ箱に移動できるかの確認.
+
+	// 拡縮アニメーションの更新を行い, 画像へ反映する.
+	m_ScaleAnim.Update( m_DeltaTime );
+	const D3DXVECTOR2& Scale = m_ScaleAnim.GetScale();
+	m_SpriteState.Transform.Scale.x = Scale.x;
+	m_SpriteState.Transform.Scale.y = Scale.y;
 }
 
 //---------------------------.
@@ -620,6 +635,9 @@ void CWindowObject::HitUp( const RECT& HitWnd, const bool IsFromOutside )
 	const float HitPos = static_cast<float>( IsFromOutside ? HitWnd.bottom : HitWnd.top );
 	m_SpriteState.Transform.Position.y = HitPos - m_AddCenterPosition.y + m_CollSize / 2.0f;
 
+	// 衝突した速度に応じて拡縮を潰す.
+	if ( m_IsUseImpactSquash ) ImpactSquash( m_MoveVector.y, false );
+
 	// 上に当たった時の更新.
 	HitUpUpdate();
 }
@@ -632,6 +650,9 @@ void CWindowObject::HitDown( const RECT& HitWnd, const bool IsFromOutside )
 	// 当たった場所に揃える.
 	const float HitPos = static_cast<float>( IsFromOutside ? HitWnd.top : HitWnd.bottom );
 	m_SpriteState.Transform.Position.y = HitPos - m_AddCenterPosition.y - m_CollSize / 2.0f;;
+
+	// 衝突した速度に応じて拡縮を潰す.
+	if ( m_IsUseImpactSquash ) ImpactSquash( m_MoveVector.y, false );
 	
 	// 下に当たった時の更新.
 	HitDownUpdate();
@@ -649,6 +670,9 @@ void CWindowObject::HitLeft( const RECT& HitWnd, const bool IsFromOutside )
 	const float HitPos = static_cast<float>( IsFromOutside ? HitWnd.right : HitWnd.left );
 	m_SpriteState.Transform.Position.x = HitPos - m_AddCenterPosition.x + m_CollSize / 2.0f;
 
+	// 衝突した速度に応じて拡縮を潰す.
+	if ( m_IsUseImpactSquash ) ImpactSquash( m_MoveVector.x, true );
+
 	// 左に当たった時の更新.
 	HitLeftUpdate();
 }
@@ -661,6 +685,9 @@ void CWindowObject::HitRight( const RECT& HitWnd, const bool IsFromOutside )
 	// 当たった場所に揃える.
 	const float HitPos = static_cast<float>( IsFromOutside ? HitWnd.left : HitWnd.right );
 	m_SpriteState.Transform.Position.x = HitPos - m_AddCenterPosition.x - m_CollSize / 2.0f;
+
+	// 衝突した速度に応じて拡縮を潰す.
+	if ( m_IsUseImpactSquash ) ImpactSquash( m_MoveVector.x, true );
 
 	// 右に当たった時の更新.
 	HitRightUpdate();
@@ -681,4 +708,22 @@ void CWindowObject::Landing( const RECT& HitWnd )
 
 	// 着地時の初期化.
 	LandingInit();
+}
+
+//---------------------------.
+// 衝突した速度に応じて拡縮を潰す.
+//---------------------------.
+void CWindowObject::ImpactSquash( const float Speed, const bool IsHorizontal )
+{
+	// 一定以上の速度でのみ拡縮させる.
+	const float AbsSpeed = std::abs( Speed );
+	if ( AbsSpeed <= SQUASH_MIN_SPEED ) return;
+
+	// 速度に応じた拡縮量を求める.
+	float Amount = ( AbsSpeed - SQUASH_MIN_SPEED ) * SQUASH_SPEED_RATE;
+	Amount = min( Amount, SQUASH_MAX_AMOUNT );
+
+	// 進行軸を潰し, 反対の軸を膨らませる.
+	if ( IsHorizontal ) m_ScaleAnim.Punch( 1.0f - Amount, 1.0f + Amount * SQUASH_CROSS_RATE );
+	else				m_ScaleAnim.Punch( 1.0f + Amount * SQUASH_CROSS_RATE, 1.0f - Amount );
 }

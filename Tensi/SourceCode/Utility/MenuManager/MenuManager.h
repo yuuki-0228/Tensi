@@ -1,6 +1,6 @@
 #pragma once
 #include "..\..\SystemSetting.h"
-#ifdef ENABLE_MENU
+#ifdef ENABLE_WINDOWS_MENU
 #include "..\..\Global.h"
 
 /************************************************

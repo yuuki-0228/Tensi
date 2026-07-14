@@ -1,4 +1,6 @@
 #pragma once
+#include "..\..\SystemSetting.h"
+#ifdef ENABLE_EFFEKSEER
 #include "..\..\Global.h"
 #include "Effect\Effect.h"
 
@@ -68,3 +70,4 @@ private:
 	Effekseer::Handle	m_Handle;		// エフェクトハンドル.
 	STransform			m_Transform;	// トランスフォーム.
 };
+#endif // ENABLE_EFFEKSEER

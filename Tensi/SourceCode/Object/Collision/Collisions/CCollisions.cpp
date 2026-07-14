@@ -1,13 +1,17 @@
 #include "CCollisions.h"
 
 CCollisions::CCollisions()
-	: m_pSphere		( nullptr )
-	, m_pRay		( nullptr )
-	, m_pCrossRay	( nullptr )
-	, m_pMesh		( nullptr )
-	, m_pBox2D		( nullptr )
-	, m_pSphere2D	( nullptr )
 {
+#ifdef ENABLE_MESH
+	m_pSphere = nullptr;
+	m_pRay = nullptr;
+	m_pCrossRay = nullptr;
+	m_pMesh = nullptr;
+#endif
+#ifdef ENABLE_SPRITE
+	m_pBox2D = nullptr;
+	m_pSphere2D = nullptr;
+#endif
 }
 
 CCollisions::~CCollisions()
@@ -20,6 +24,7 @@ CCollisions::~CCollisions()
 void CCollisions::InitCollision( const ECollType& Type )
 {
 	switch ( Type ) {
+#ifdef ENABLE_MESH
 	case ECollType::Sphere:
 		m_pSphere	= std::make_shared<CSphere>();
 		break;
@@ -35,12 +40,15 @@ void CCollisions::InitCollision( const ECollType& Type )
 	case ECollType::Mesh:
 		m_pMesh		= std::make_shared<CMesh>();
 		break;
+#endif
+#ifdef ENABLE_SPRITE
 	case ECollType::Box2D:
 		m_pBox2D	= std::make_shared<CBox2D>();
 		break;
 	case ECollType::Sphere2D:
 		m_pSphere2D	= std::make_shared<CSphere2D>();
 		break;
+#endif
 	default:
 		break;
 	}

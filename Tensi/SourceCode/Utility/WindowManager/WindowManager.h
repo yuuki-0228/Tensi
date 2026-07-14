@@ -1,6 +1,6 @@
 #pragma once
 #include "..\..\SystemSetting.h"
-#ifdef ENABLE_WINDOW
+#ifdef ENABLE_WINDOWS_WINDOW
 #include "..\..\Global.h"
 
 // ウィンドウクラス定数.

@@ -1,4 +1,5 @@
 #include "CrossRay.h"
+#ifdef ENABLE_MESH
 #include "..\..\..\Utility\Math\Math.h"
 
 CCrossRay::CCrossRay()
@@ -19,3 +20,5 @@ CCrossRay::CCrossRay()
 CCrossRay::~CCrossRay()
 {
 }
+
+#endif

@@ -1,4 +1,6 @@
 #pragma once
+#include "..\..\SystemSetting.h"
+#ifdef ENABLE_FOG
 #include "..\Common.h"
 #include "..\..\Global.h"
 #include <d3d11.h>
@@ -63,3 +65,5 @@ private:
 
 	float					m_Density;
 };
+
+#endif // ENABLE_FOG

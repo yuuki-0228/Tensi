@@ -1,4 +1,5 @@
 #include "PositionRenderer.h"
+#ifdef ENABLE_MESH
 #include "..\..\..\Common\DirectX\DirectX11.h"
 #include "..\..\..\Common\Mesh\StaticMesh\StaticMesh.h"
 #include "..\..\..\Resource\MeshResource\MeshResource.h"
@@ -71,3 +72,4 @@ void PositionRenderer::Render( const STransform& Transform )
 	pI->m_pMesh->Render( &pI->m_Transform );
 #endif // #ifdef _DEBUG.
 }
+#endif

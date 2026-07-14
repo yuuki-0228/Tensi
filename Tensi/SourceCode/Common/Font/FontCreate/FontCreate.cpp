@@ -1,4 +1,5 @@
 #include "FontCreate.h"
+#ifdef ENABLE_FONT
 #include "..\..\DirectX\DirectX11.h"
 #include "..\..\..\Utility\StringConversion\StringConversion.h"
 
@@ -190,3 +191,4 @@ D3D11_TEXTURE2D_DESC CFontCreate::CreateDesc( UINT width, UINT height )
 
 	return desc;
 }
+#endif // ENABLE_FONT

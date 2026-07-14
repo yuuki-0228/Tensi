@@ -1,4 +1,5 @@
 #include "Font.h"
+#ifdef ENABLE_FONT
 #include "..\DirectX\DirectX11.h"
 #include "..\Sprite\Sprite.h"
 #include "..\..\Resource\FontResource\FontResource.h"
@@ -764,3 +765,4 @@ void CFont::RenderFont3D( const char* c, SFontRenderState* pRenderState, const b
 	// アルファブレンド無効にする.
 	if ( !m_DitherFlag ) DirectX11::SetAlphaBlend( false );
 }
+#endif // ENABLE_FONT

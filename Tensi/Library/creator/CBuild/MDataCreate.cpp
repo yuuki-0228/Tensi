@@ -19,6 +19,12 @@ namespace {
 	constexpr int COMMENT	= 0; // コメントの位置.
 	constexpr int DATA		= 1; // データの位置.
 
+	// 配列のサイズを取得
+	int GetSize( const json& j ) {
+		// 一番最初にコメントがあるため要素数を1減らしておく.
+		return static_cast<int>( j.size() ) - 1;
+	}
+
 	// 文字化けしないようにstd::stringに変換して取得
 	std::string GetString( const std::string& string ) {
 		// jsonはUTF8なため一度文字列を変換する.
@@ -27,12 +33,45 @@ namespace {
 	}
 
 	// 型の取得
+	std::string GetArrayMold( const json& j, const bool isPair );
 	std::string GetMold( const json& j, const bool isPair = false ) {
 		if ( j.is_string()			) return "std::string";
 		if ( j.is_number_integer()	) return "int";
 		if ( j.is_number_float()	) return "float";
 		if ( j.is_boolean()			) return "bool";
+		if ( j.is_array()			) return GetArrayMold( j, isPair );
 		ErrorMessage( "1>Error : 非対応の型です", "json" );
+		return "";
+	}
+
+	// 配列になっている型の取得.
+	std::string GetArrayMold( const json& j, const bool isPair ) {
+		if ( j.is_array() == false ) return GetMold( j );
+		const auto size = j.size();
+
+		// 要素数が1つの場合その型で返す.
+		if ( size == 1 ) return GetMold( j[0], isPair );
+
+		// 要素全ての型を取得
+		std::vector<std::string> ml;
+		ml.reserve( size );
+		for ( auto& l : j ) {
+			ml.emplace_back( GetMold( l, isPair ) );
+		}
+
+		// D3DXVECTOR系のチェック
+		if ( isPair == false ) {
+			const auto isAllFloat = std::all_of( ml.begin(), ml.end(), []( std::string s ) { return s == "float"; } );
+			if ( size == 2 && isAllFloat ) return "D3DXVECTOR2";
+			if ( size == 3 && isAllFloat ) return "D3DXVECTOR3";
+			if ( size == 4 && isAllFloat ) return "D3DXVECTOR4";
+		}
+
+		// 型がバラバラなためstd::pair<A, B>で返す(要素数は2つ).
+		if ( size == 2 ) {
+			return "std::pair<" + GetMold( j[0], isPair ) + ", " + GetMold( j[1], isPair ) + ">";
+		}
+		ErrorMessage( "1>Error : 非対応の配列です", "json" );
 		return "";
 	}
 
@@ -54,7 +93,8 @@ int MDataCreate::main()
 		const std::string FileName = Entry.path().stem().string();			// ファイル名.
 
 		// jsonファイルか.
-		if ( Extension != ".json" && Extension != ".JSON" ) return;
+		if ( Extension != ".json" && Extension != ".JSON"	) return;
+		if ( FileName.substr( 0, 1 ) == "$"					) return;
 
 		// ファイルの追加
 		ContainerList.emplace_back( std::make_pair( FileName, FileManager::JsonLoad( FilePath ) ) );
@@ -84,6 +124,8 @@ void MDataCreate::h( const std::vector<std::pair<std::string, json>>& Container 
 
 	Text +=
 		"#pragma once\n"
+		"#include \"..\\..\\SystemSetting.h\"\n"
+		"#ifdef ENABLE_MASTER_DATA\n"
 		"#include \"..\\..\\Global.h\"\n"
 		"#include \"..\\FileManager\\FileManager.h\"\n"
 		"#include <unordered_map>\n"
@@ -93,7 +135,9 @@ void MDataCreate::h( const std::vector<std::pair<std::string, json>>& Container 
 		"*	マスターデータ一覧\n"
 		"*	「creator」によって自動で作成されています\n"
 		"**/\n"
-		"namespace {\n";
+		"namespace MasterData {\n"
+		"	using ulong = unsigned long;"
+		"\n";
 
 	for ( auto& [Name, File] : Container ) {
 		std::string structName = Name;
@@ -106,35 +150,59 @@ void MDataCreate::h( const std::vector<std::pair<std::string, json>>& Container 
 			"	struct " + structName + "\n"
 			"	{\n"
 			"		// ID\n"
-			"		unsigned int Id;\n";
+			"		ulong Id;\n";
 
 		for ( auto& [Key, Value] : File.items() ) {
 			if ( Key == "ID" || Key == "Id" || Key == "id"	) continue;
 			if ( Key.find( "_enum" ) != std::string::npos	) continue;
+			const auto size		= GetSize( Value );
+			const auto comment	= GetString( Value[COMMENT] );
+			const auto numf		= std::count( comment.begin(), comment.end(), '<' );
+			const auto nume		= std::count( comment.begin(), comment.end(), '>' );
+			const auto isPair	= numf == 2 && nume == 2;
+			const auto isId		= comment.find( "id" ) != std::string::npos || comment.find("Id") != std::string::npos || comment.find( "iD" ) != std::string::npos || comment.find( "ID" ) != std::string::npos;
+			const auto Enum		= File.find( Key + "_enum" );
 
-			Text += "		// " + GetString( Value[COMMENT] ) + "\n";
+			Text += "		// " + comment + "\n";
 
-			auto Enum = File.find( Key + "_enum" );
-			if ( Enum == File.end() ) {
-				Text += "		" + GetMold( Value[DATA] ) + " " + Key + ";\n";
-			}
-			else {
-				Text += "		enum class " + Key + " {\n";
+			if ( Enum != File.end() ) {
+				Text += "		enum class " + Key + "s {\n";
 
 				for ( auto& l : Enum.value() ) {
 					Text += "			" + std::string( l ) + ",\n";
 				}
 
-				Text += 
-					"		};\n"
-					"		" + Key + " " + Key + ";\n";
+				Text += "		};\n";
+
+				if ( size > 1 ) {
+					Text += "		std::vector<" + Key + "s> " + Key + ";\n";
+				}
+				else {
+					Text += "		" + Key + "s " + Key + ";\n";
+				}
+			}
+			else if ( isId ) {
+				if ( size > 1 ) {
+					Text += "		std::vector<ulong> " + Key + ";\n";
+				} else {
+					Text += "		ulong " + Key + ";\n";
+				}
+			}
+			else {
+				if ( size > 1 ) {
+					Text += "		std::vector<" + GetMold( Value[DATA], isPair ) + "> " + Key + ";\n";
+				}
+				else {
+					Text += "		" + GetMold( Value[DATA], isPair ) + " " + Key + ";\n";
+				}
 			}
 		}
 
 		Text += 
 			"\n"
+			"		" + structName + "();\n"
 			"		" + structName + "( const json& j );\n"
-			"	};\n"
+			"	} typedef " + Name + "Data;\n"
 			"\n";
 
 		// ディレクトリを作成しておく
@@ -143,10 +211,13 @@ void MDataCreate::h( const std::vector<std::pair<std::string, json>>& Container 
 
 	Text +=
 		"}\n"
+		"using namespace MasterData;\n"
 		"\n"
-		"namespace MasterData {\n"
-		"	std::unordered_map<std::string, std::unordered_map<unsigned int, std::any>> CreateCache( const std::vector<std::pair<std::string, json>>& data );\n"
-		"}\n";
+		"namespace MasterDataUtility {\n"
+		"	std::unordered_map<std::string, std::unordered_map<ulong, std::any>> CreateCache( const std::vector<std::pair<std::string, json>>& data );\n"
+		"	void CacheSetup( std::unordered_map<std::string, std::unordered_map<ulong, std::any>>& out, const std::string& Container, const json& File );\n"
+		"}\n"
+		"#endif\n";
 
 	// ファイルの作成.
 	FileManager::TextSave( H_PATH, Text );
@@ -161,18 +232,154 @@ void MDataCreate::cpp( const std::vector<std::pair<std::pair<std::string, std::s
 
 	Text +=
 		"#include \"MasterDatas.h\"\n"
+		"#ifdef ENABLE_MASTER_DATA\n"
+		"\n"
+		"namespace {\n"
+		"	constexpr int _X		= 0; // Xの位置\n"
+		"	constexpr int _Y		= 1; // Yの位置\n"
+		"	constexpr int _Z		= 2; // Zの位置\n"
+		"	constexpr int _W		= 3; // Wの位置\n"
+		"	constexpr int _FIRST	= 0; // 最初の位置\n"
+		"	constexpr int _SECOND	= 1; // 次の位置\n"
+		"\n"
+		"	// 配列のサイズを取得\n"
+		"	int GetSize( const json& j ) {\n"
+		"		return static_cast<int>( j.size() );\n"
+		"	}\n"
+		"\n"
+		"	// 文字化けしないようにstd::stringに変換して取得\n"
+		"	std::string GetString( const std::string& string ) {\n"
+		"		// jsonはUTF8なため一度文字列を変換する\n"
+		"		std::wstring wString = StringConversion::to_wString( string, ECodePage::UTF8 );\n"
+		"		return StringConversion::to_String( wString );\n"
+		"	}\n"
+		"}\n"
 		"\n";
 
 	for ( auto& [Data, File] : List ) {
 		auto& [Name, Struct] = Data;
 		Text +=
-			Struct + "::" + Struct + "( const json& j )\n"
-			"{\n";
+			"//----------------------------.\n"
+			"// " + Struct + ".\n"
+			"//----------------------------.\n";
+
+		Text +=
+			Struct + "::" + Struct + "()\n"
+			"	: Id	()\n";
 
 		for ( auto& [Key, Value] : File.items() ) {
+			if ( Key == "ID" || Key == "Id" || Key == "id" ) continue;
 			if ( Key.find( "_enum" ) != std::string::npos ) continue;
+			Text += "	, " + Key + "	()\n";
+		}
 
-			Text += "	" + Key + " = j[\"" + Key + "\"];\n";
+		Text +=
+			"{\n"
+			"}\n";
+
+		Text +=
+			Struct + "::" + Struct + "( const json& j )\n"
+			"{\n"
+			"	Id = j[\"Id\"];\n";
+
+		for ( auto& [Key, Value] : File.items() ) {
+			if ( Key == "ID" || Key == "Id" || Key == "id" ) continue;
+			if ( Key.find( "_enum" ) != std::string::npos ) continue;
+			const auto size		= GetSize( Value );
+			const auto comment	= GetString( Value[COMMENT] );
+			const auto numf		= std::count( comment.begin(), comment.end(), '<' );
+			const auto nume		= std::count( comment.begin(), comment.end(), '>' );
+			const auto isPair	= numf == 2 && nume == 2;
+			const auto m		= GetMold( Value[DATA], isPair );
+			const auto Enum		= File.find( Key + "_enum" );
+
+			if ( size > 1 ) {
+				Text +=
+					"	const int " + Key + "Size = GetSize( j[\"" + Key + "\"] );\n"
+					"	" + Key + ".resize( " + Key + "Size );\n"
+					"	for ( int i = 0; i < " + Key + "Size; ++i ) {\n";
+
+				if ( m == "std::string" ){
+					Text += "		" + Key + "[i] = GetString( j[\"" + Key + "\"][i] );\n";
+				}
+				else if ( m == "D3DXVECTOR2" ) {
+					Text += "		" + Key + "[i].x = j[\"" + Key + "\"][i][_X];\n";
+					Text += "		" + Key + "[i].y = j[\"" + Key + "\"][i][_Y];\n";
+				}
+				else if ( m == "D3DXVECTOR3" ) {
+					Text += "		" + Key + "[i].x = j[\"" + Key + "\"][i][_X];\n";
+					Text += "		" + Key + "[i].y = j[\"" + Key + "\"][i][_Y];\n";
+					Text += "		" + Key + "[i].z = j[\"" + Key + "\"][i][_Z];\n";
+				}
+				else if ( m == "D3DXVECTOR4" ) {
+					Text += "		" + Key + "[i].x = j[\"" + Key + "\"][i][_X];\n";
+					Text += "		" + Key + "[i].y = j[\"" + Key + "\"][i][_Y];\n";
+					Text += "		" + Key + "[i].z = j[\"" + Key + "\"][i][_Z];\n";
+					Text += "		" + Key + "[i].w = j[\"" + Key + "\"][i][_W];\n";
+				}
+				else if ( m.find( "std::pair" ) != std::string::npos ) {
+					// first
+					if ( m.find( "<std::string, " ) != std::string::npos ) {
+						Text += "		" + Key + "[i].first  = GetString( j[\"" + Key + "\"][i][_FIRST] );\n";
+					} else {
+						Text += "		" + Key + "[i].first  = j[\"" + Key + "\"][i][_FIRST];\n";
+					}
+					// second
+					if ( m.find( ", std::string>" ) != std::string::npos ) {
+						Text += "		" + Key + "[i].second = GetString( j[\"" + Key + "\"][i][_SECOND] );\n";
+					} else {
+						Text += "		" + Key + "[i].second = j[\"" + Key + "\"][i][_SECOND];\n";
+					}
+				}
+				else if ( Enum != File.end() ) {
+					Text += "		" + Key + "[i] = " + "static_cast<" + Key + "s>( " + "j[\"" + Key + "\"][i] );\n";
+				}
+				else {
+					Text += "		" + Key + "[i] = j[\"" + Key + "\"][i];\n";
+				}
+
+				Text += "	}\n";
+			}
+			else {
+				if ( m == "std::string" ){
+					Text += "	" + Key + " = GetString( j[\"" + Key + "\"] );\n";
+				}
+				else if ( m == "D3DXVECTOR2" ) {
+					Text += "	" + Key + ".x = j[\"" + Key + "\"][_X];\n";
+					Text += "	" + Key + ".y = j[\"" + Key + "\"][_Y];\n";
+				}
+				else if ( m == "D3DXVECTOR3" ) {
+					Text += "	" + Key + ".x = j[\"" + Key + "\"][_X];\n";
+					Text += "	" + Key + ".y = j[\"" + Key + "\"][_Y];\n";
+					Text += "	" + Key + ".z = j[\"" + Key + "\"][_Z];\n";
+				}
+				else if ( m == "D3DXVECTOR4" ) {
+					Text += "	" + Key + ".x = j[\"" + Key + "\"][_X];\n";
+					Text += "	" + Key + ".y = j[\"" + Key + "\"][_Y];\n";
+					Text += "	" + Key + ".z = j[\"" + Key + "\"][_Z];\n";
+					Text += "	" + Key + ".w = j[\"" + Key + "\"][_W];\n";
+				}
+				else if ( m.find( "std::pair" ) != std::string::npos ) {
+					// first
+					if ( m.find( "<std::string, " ) != std::string::npos ) {
+						Text += "	" + Key + ".first  = GetString( j[\"" + Key + "\"][_FIRST] );\n";
+					} else {
+						Text += "	" + Key + ".first  = j[\"" + Key + "\"][_FIRST];\n";
+					}
+					// second
+					if ( m.find( ", std::string>" ) != std::string::npos ) {
+						Text += "	" + Key + ".second = GetString( j[\"" + Key + "\"][_SECOND] );\n";
+					} else {
+						Text += "	" + Key + ".second = j[\"" + Key + "\"][_SECOND];\n";
+					}
+				}
+				else if ( Enum != File.end() ) {
+					Text += "	" + Key + " = " + "static_cast<" + Key + "s>( " + "j[\"" + Key + "\"] );\n";
+				}
+				else {
+					Text += "	" + Key + " = j[\"" + Key + "\"];\n";
+				}
+			}
 		}
 
 		Text +=
@@ -184,34 +391,43 @@ void MDataCreate::cpp( const std::vector<std::pair<std::pair<std::string, std::s
 		"//----------------------------.\n"
 		"// 読み込み\n"
 		"//----------------------------.\n"
-		"std::unordered_map<std::string, std::unordered_map<unsigned int, std::any>> MasterData::CreateCache(\n"
+		"std::unordered_map<std::string, std::unordered_map<ulong, std::any>> MasterDataUtility::CreateCache(\n"
 		"	const std::vector<std::pair<std::string, json>>& data )\n"
 		"{\n"
-		"	std::unordered_map<std::string, std::unordered_map<unsigned int, std::any>> out;\n"
+		"	std::unordered_map<std::string, std::unordered_map<ulong, std::any>> out;\n"
 		"\n"
 		"	for ( auto& [Container, File] : data )\n"
 		"	{\n"
-		"		for ( auto& f : File ) {\n";
+		"		if ( File.is_array() ) {\n"
+		"			for ( auto& Data : File ) {\n"
+		"				CacheSetup( out, Container, Data );\n"
+		"			}\n"
+		"		}\n"
+		"		else {\n"
+		"			CacheSetup( out, Container, File );\n"
+		"		}\n"
+		"	}\n"
+		"	return out;\n"
+		"}\n"
+		"void MasterDataUtility::CacheSetup( std::unordered_map<std::string, std::unordered_map<ulong, std::any>>& out, const std::string& Container, const json& File )\n"
+		"{\n";
 
 	bool isFirst = true;
 	for ( auto& [Data, File] : List ) {
 		auto& [Name, Struct] = Data;
 
 		if ( isFirst ) {
-			Text += "			if (	  Container == \"" + Name + "\" ) out[\"" + Struct + "\"][f[\"Id\"]] = " + Struct + "( f );\n";
+			Text += "	if (	  Container == \"" + Name + "\" ) out[typeid( " + Struct + " ).name()][File[\"Id\"]] = " + Struct + "( File );\n";
 			isFirst = false;
 		}
 		else {
-			Text += "			else if ( Container == \"" + Name + "\" ) out[\"" + Struct + "\"][f[\"Id\"]] = " + Struct + "( f );\n";
+			Text += "	else if ( Container == \"" + Name + "\" ) out[typeid( " + Struct + " ).name()][File[\"Id\"]] = " + Struct + "( File );\n";
 		}
 	}
 
 	Text +=
-		"		}\n"
-		"	}\n"
-		"\n"
-		"	return out;\n"
-		"}\n";
+		"}\n"
+		"#endif";
 
 	// ファイルの作成.
 	FileManager::TextSave( CPP_PATH, Text );

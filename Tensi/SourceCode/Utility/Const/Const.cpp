@@ -1,4 +1,5 @@
 #include "Const.h"
+#ifdef ENABLE_CONST
 #include "..\FileManager\FileManager.h"
 
 namespace {
@@ -127,3 +128,5 @@ void Const::Load()
 	WateringCan.Load();
 	Weed.Load();
 }
+
+#endif

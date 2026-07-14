@@ -1,4 +1,6 @@
 #pragma once
+#include "..\..\SystemSetting.h"
+#ifdef ENABLE_FONT
 #include "FontStruct.h"
 
 /********************************************
@@ -85,3 +87,4 @@ private:
 	bool							m_DitherFlag;			// ディザ抜きを使用するか.
 	bool							m_AlphaBlockFlag;		// アルファブロックを使用するか.
 };
+#endif // ENABLE_FONT

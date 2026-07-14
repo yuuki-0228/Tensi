@@ -1,4 +1,5 @@
 #include "FontResource.h"
+#ifdef ENABLE_FONT
 #include "..\..\Common\Font\FontCreate\FontCreate.h"
 #include "..\..\Utility\FileManager\FileManager.h"
 
@@ -169,3 +170,4 @@ HRESULT FontResource::CreateTexture( const std::string& FileName, const std::str
 	Log::PushLog( "フォント「" + FileName + "」の「" + Key + "」テクスチャ作成 : 成功");
 	return S_OK;
 }
+#endif // ENABLE_FONT

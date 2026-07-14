@@ -1,4 +1,6 @@
 #pragma once
+#include "..\..\SystemSetting.h"
+#ifdef ENABLE_FILE
 #include "..\..\Global.h"
 #include <nlohmnn\json.hpp>
 #include <memory>
@@ -85,6 +87,11 @@ namespace FileManager {
 
 	// ファイルが存在するか調べる.
 	bool FileCheck( const std::string& FilePath );
+
+	// ファイルを削除する
+	HRESULT FileDelete(const std::string& FilePath);
+	// ファイルを全て削除する
+	HRESULT FileDeleteAll(const std::string& FilePath);
 
 #ifndef _DEBUG
 	// 暗号化ファイルの読み込み
@@ -263,4 +270,5 @@ HRESULT FileManager::EFile::EBinaryLoad( const char* FilePath, std::vector<T>& O
 	mb.DestroyFile();
 	return S_OK;
 }
+#endif
 #endif

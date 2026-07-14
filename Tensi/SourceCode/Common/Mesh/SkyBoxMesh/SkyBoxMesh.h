@@ -1,4 +1,6 @@
 #pragma once
+#include "..\..\..\SystemSetting.h"
+#ifdef ENABLE_MESH
 #include "..\..\Common.h"
 #include "..\..\..\Global.h"
 
@@ -141,3 +143,4 @@ private:
 	bool					m_DitherFlag;			// ディザ抜きを使用するか.
 	bool					m_AlphaBlockFlag;		// アルファブロックを使用するか.
  };
+#endif // ENABLE_MESH

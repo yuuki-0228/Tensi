@@ -1,4 +1,5 @@
 #include "SpriteResource.h"
+#ifdef ENABLE_SPRITE
 #include "..\..\Utility\FileManager\FileManager.h"
 
 namespace {
@@ -109,3 +110,4 @@ CSprite* SpriteResource::GetSprite( const std::string& FileName, SSpriteRenderSt
 	for ( auto& s : *pState ) s = State;
 	return Out;
 }
+#endif // ENABLE_SPRITE

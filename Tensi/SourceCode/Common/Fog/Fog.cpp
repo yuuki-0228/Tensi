@@ -1,4 +1,5 @@
 #include "Fog.h"
+#ifdef ENABLE_FOG
 #include "..\..\Object\Camera\CameraManager\CameraManager.h"
 
 namespace{
@@ -371,3 +372,5 @@ void CFog::RenderShader( int indexCount )
 	// 三角形をレンダリング.
 	m_pContext->DrawIndexed( indexCount, 0, 0 );
 }
+
+#endif // ENABLE_FOG

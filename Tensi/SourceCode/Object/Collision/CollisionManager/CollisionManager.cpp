@@ -1,13 +1,17 @@
 #include "CollisionManager.h"
+#ifdef ENABLE_MESH
 #include "..\..\Collision\Sphere\Sphere.h"
 #include "..\..\Collision\Cylinder\Cylinder.h"
 #include "..\..\Collision\Ray\Ray.h"
 #include "..\..\Collision\CrossRay\CrossRay.h"
 #include "..\..\Collision\Mesh\Mesh.h"
-
+#endif
+#ifdef ENABLE_SPRITE
 #include "..\..\Collision\2D\Box2D\Box2D.h"
 #include "..\..\Collision\2D\Sphere2D\Sphere2D.h"
+#endif
 
+#ifdef ENABLE_SPRITE
 namespace {
 	// 2Dのボックスと円の当たり判定で使用.
 	float DistanceSqrf( const float t_x1, const float t_y1, const float t_x2, const float t_y2 ) {
@@ -17,7 +21,9 @@ namespace {
 		return ( dx * dx ) + ( dy * dy );
 	}
 }
+#endif
 
+#ifdef ENABLE_MESH
 //---------------------------.
 // 球体同士の当たり判定.
 //	球体が null / 半径が 0 以下の場合処理は行わない.
@@ -274,9 +280,9 @@ bool Coll::IsCrossRayToWallMesh(
 	}
 	return IsHit;
 }
+#endif
 
-
-
+#ifdef ENABLE_SPRITE
 //---------------------------.
 // 2Dのボックスと点の当たり判定.
 //	ボックス2D/点2D が null / サイズが 0 以下の場合処理は行わない.
@@ -454,3 +460,4 @@ bool Coll2D::IsBox2DToSphere2D( CBox2D* pMyBox, CSphere2D* pOpSphere )
 	}
 	return false;		// 外れている.
 }
+#endif

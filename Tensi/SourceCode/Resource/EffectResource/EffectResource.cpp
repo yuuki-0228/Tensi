@@ -1,4 +1,5 @@
 #include "EffectResource.h"
+#ifdef ENABLE_EFFEKSEER
 #include "..\..\Common\EffectManager\Effect\Effect.h"
 #include <encrypt/file.h>
 
@@ -98,3 +99,4 @@ CEffect* EffectResource::GetEffect( const std::string& FileName )
 	ErrorMessage( FileName + " effects not found" );
 	return nullptr;
 }
+#endif // ENABLE_EFFEKSEER

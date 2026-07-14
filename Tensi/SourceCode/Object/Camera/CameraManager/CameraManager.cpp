@@ -23,7 +23,9 @@ CameraManager::CameraManager()
 	: m_pNowCamera			( nullptr )
 	, m_pTmpCamera			( nullptr )
 	, m_pFreeCamera			( nullptr )
+#ifdef ENABLE_MESH
 	, m_pRay				( nullptr )
+#endif
 	, m_FreeCameraState		()
 	, m_TmpCameraState		()
 	, m_DireVec				( INIT_FLOAT3 )
@@ -46,7 +48,9 @@ CameraManager::CameraManager()
 #endif
 {
 	m_pFreeCamera	= std::make_unique<CFreeCamera>();
+#ifdef ENABLE_MESH
 	m_pRay			= std::make_unique<CRay>();
+#endif
 }
 
 CameraManager::~CameraManager()
@@ -129,9 +133,11 @@ void CameraManager::Update( float DeltaTime )
 	const D3DXPOSITION3& Look	= CameraManager::GetLookPosition();
 	D3DXVECTOR3 Vec				= Look - Pos;
 
+#ifdef ENABLE_MESH
 	// ƒŒƒC‚ÌXV.
 	pI->m_pRay->SetVector( Vec );
 	pI->m_pRay->SetPosition( Pos );
+#endif
 
 #ifdef _DEBUG
 	DebugWindow::PushProc( "Camera", [&]() {

@@ -1,4 +1,6 @@
 #pragma once
+#include "..\..\..\SystemSetting.h"
+#ifdef ENABLE_MESH
 #include "..\..\Common.h"
 #include "..\..\..\Global.h"
 
@@ -137,3 +139,4 @@ private:
 	bool					m_EnableTexture;		// テクスチャあり.
 	bool					m_DitherFlag;			// ディザ抜きを使用するか.
  };
+#endif // ENABLE_MESH

@@ -1,5 +1,5 @@
 #include "DebugWindow.h"
-#include "..\..\..\Common\SoundManeger\SoundManeger.h"
+#include "..\..\..\Common\XAudio2\SoundManager.h"
 
 DebugWindow::DebugWindow()
 	: m_WatchQueue		()

@@ -1,4 +1,6 @@
 #pragma once
+#include "..\..\..\..\SystemSetting.h"
+#ifdef ENABLE_SPRITE
 #include "..\..\ColliderBase.h"
 #include "..\..\..\..\Common\Sprite\Sprite.h"
 
@@ -39,3 +41,4 @@ private:
 	D3DXPOSITION2		m_LUPosition;	// ç∂è„ç¿ïW.
 	SSize				m_Size;			// ïùÅAçÇÇ≥.
 };
+#endif

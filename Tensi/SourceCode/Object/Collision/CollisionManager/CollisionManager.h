@@ -1,15 +1,20 @@
 #pragma once
 #include "..\..\..\Global.h"
 
+#ifdef ENABLE_MESH
 class CSphere;
 class CCylinder;
 class CRay;
 class CCrossRay;
 class CMesh;
+#endif
 
+#ifdef ENABLE_SPRITE
 class CBox2D;
 class CSphere2D;
+#endif
 
+#ifdef ENABLE_MESH
 /************************************************
 *	当たり判定一覧.
 **/
@@ -45,7 +50,9 @@ namespace Coll {
 		CMesh*				pWallMesh,					// 壁(メッシュ).
 		std::vector<int>*	pHitList = nullptr );		// 当たった方向リスト.
 }
+#endif
 
+#ifdef ENABLE_SPRITE
 /************************************************
 *	2Dの当たり判定一覧.
 **/
@@ -75,3 +82,4 @@ namespace Coll2D {
 		CBox2D*					pMyBox,			// 自分のボックス.
 		CSphere2D*				pOpSphere );	// 相手の円.
 }
+#endif

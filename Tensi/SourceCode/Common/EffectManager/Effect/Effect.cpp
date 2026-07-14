@@ -1,4 +1,5 @@
 #include "Effect.h"
+#ifdef ENABLE_EFFEKSEER
 #include "..\..\..\Common\DirectX\DirectX11.h"
 #include "..\..\..\Object\Camera\CameraManager\CameraManager.h"
 #include <encrypt/file.h>
@@ -261,3 +262,4 @@ void CEffect::SetProjectionMatrix( D3DXMATRIX mProj )
 	// ŽË‰es—ñ‚ðÝ’è.
 	m_pRenderer->SetProjectionMatrix( tmpEfkProjMat );
 }
+#endif // ENABLE_EFFEKSEER

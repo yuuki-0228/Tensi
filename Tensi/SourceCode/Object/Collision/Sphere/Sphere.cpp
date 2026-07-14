@@ -1,4 +1,5 @@
 #include "Sphere.h"
+#ifdef ENABLE_MESH
 #include "..\..\..\Common\Mesh\StaticMesh\StaticMesh.h"
 
 CSphere::CSphere()
@@ -96,3 +97,5 @@ HRESULT CSphere::SetMeshRadius( const CStaticMesh& pMesh, const float vScale )
 	m_Radius  = Radius * vScale;
 	return S_OK;
 }
+
+#endif

@@ -28,6 +28,7 @@ bool CSuperBall::Init()
 	m_GravityPower		= 0.9f;
 	m_IsDisp			= false;
 	m_ObjectTag			= EObjectTag::SuperBall;
+	m_IsUseImpactSquash	= true;		// ï«Ç÷ÇÃè’ìÀÇ≈ägèkÇ≥ÇπÇÈ.
 
 	WindowObjectInit();
 	InitCollision();

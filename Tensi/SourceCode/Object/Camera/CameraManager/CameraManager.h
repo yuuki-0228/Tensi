@@ -38,8 +38,10 @@ public:
 	// ビュー・プロジェクションの合成行列取得.
 	static D3DXMATRIX GetViewProjMatrix() { return GetInstance()->m_pNowCamera->GetViewProjMatrix(); }
 
+#ifdef ENABLE_MESH
 	// レイの取得.
 	static CRay* GetRay() { return GetInstance()->m_pRay.get(); }
+#endif
 
 	// カメラの振動(縦揺れ)の設定.
 	static void SetPitch( const float Time, const int Num, const float MaxValue, const float MinValue = -1.0f );
@@ -71,7 +73,9 @@ private:
 	CCameraBase*					m_pNowCamera;			// 現在のカメラ.
 	CCameraBase*					m_pTmpCamera;			// カメラを変更時に一時カメラを保管する.
 	std::unique_ptr<CFreeCamera>	m_pFreeCamera;			// 自由に動かれるカメラ.
+#ifdef ENABLE_MESH
 	std::unique_ptr<CRay>			m_pRay;					// カメラの向いている方向のレイ.
+#endif
 	SCameraState					m_FreeCameraState;		// フリーカメラの状態.
 	SCameraState					m_TmpCameraState;		// カメラの変更時に一時的にカメラの状態を保管する.
 	D3DXVECTOR3						m_DireVec;				// カメラの向きベクトル.

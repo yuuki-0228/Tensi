@@ -1,5 +1,5 @@
 #include "GameMainWidget.h"
-#include "..\..\..\..\..\Common\SoundManeger\SoundManeger.h"
+#include "..\..\..\..\..\Common\XAudio2\SoundManager.h"
 #include "..\..\..\..\..\Utility\Input\Input.h"
 
 CGameMainWidget::CGameMainWidget()

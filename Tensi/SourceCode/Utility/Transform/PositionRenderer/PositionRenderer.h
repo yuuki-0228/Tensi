@@ -1,4 +1,6 @@
 #pragma once
+#include "..\..\..\SystemSetting.h"
+#ifdef ENABLE_MESH
 #include "..\..\..\Utility\Transform\Transform.h"
 
 class CStaticMesh;
@@ -31,3 +33,4 @@ private:
 	bool			m_IsRender;		// •\Ž¦‚·‚é‚©
 #endif
 };
+#endif

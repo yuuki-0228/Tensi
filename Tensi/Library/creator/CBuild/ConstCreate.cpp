@@ -100,7 +100,8 @@ int ConstCreate::main()
 		const std::string FileName = Entry.path().stem().string();			// ファイル名.
 
 		// 拡張子が暗号化するファイルか.
-		if ( Extension != ".json" && Extension != ".JSON" ) return;
+		if ( Extension != ".json" && Extension != ".JSON"	) return;
+		if ( FileName.substr( 0, 1 ) == "$"					) return;
 
 		// ファイルの追加
 		jsonList.emplace_back( std::make_pair( std::make_pair( FilePath, FileName ), FileManager::JsonLoad( FilePath ) ) );
@@ -129,6 +130,8 @@ void ConstCreate::h( const std::vector<std::pair<std::pair<std::string, std::str
 
 	Text +=
 		"#pragma once\n"
+		"#include \"..\\..\\SystemSetting.h\"\n"
+		"#ifdef ENABLE_CONST\n"
 		"#include \"..\\..\\Global.h\"\n"
 		"#include <vector>\n"
 		"\n"
@@ -136,7 +139,22 @@ void ConstCreate::h( const std::vector<std::pair<std::pair<std::string, std::str
 		"*	定数関数\n"
 		"*	「creator」によって自動で作成されています\n"
 		"*/\n"
-		"namespace ConstStructs {\n";
+		"class Const\n"
+		"{\n"
+		"private:\n";
+
+	Text +=
+		"	struct stConstGameWindow {\n"
+		"		D3DXVECTOR2		SIZE;		// ウィンドウのサイズ(幅,高さ)\n"
+		"		float			FPS;		// フレームレート\n"
+		"		std::string		APP_NAME;	// アプリ名\n"
+		"		std::string		WND_NAME;	// ウィンドウ名\n"
+		"		std::string		VERSION;	// バージョン\n"
+		"\n"
+		"		void Load();\n"
+		"		stConstGameWindow() { Load(); }\n"
+		"	} GameWindowData;\n"
+		"\n";
 
 	std::vector<std::pair<std::string, std::string>> structList;
 	for ( auto [File, Json] : List ) {
@@ -163,24 +181,35 @@ void ConstCreate::h( const std::vector<std::pair<std::pair<std::string, std::str
 
 		Text +=
 			"\n"
-			"		void Load() const;\n"
+			"		void Load();\n"
 			"		" + structName + "() { Load(); }\n"
-			"	};\n"
+			"	} " + Name + "Data; \n"
 			"\n";
 	}
 
 
 	Text += 
-		"}\n"
+		"public:\n"
+		"	Const();\n"
+		"	~Const();\n"
 		"\n"
-		"namespace Const{\n";
+		"	// 読み込み\n"
+		"	static void Load();\n"
+		"\n"
+		"	// 定数の取得\n"
+		"	static inline stConstGameWindow GameWindow() { return GetInstance()->GameWindowData; }\n";
 
 	for ( auto [Struct, Name] : structList ) {
-		Text += "	const static ConstStructs::" + Struct + " " + Name + ";\n";
+		Text += "	static inline " + Struct + " " + Name + "() { return GetInstance()->" + Name + "Data; }\n";
 	}
+
 	Text +=
-		"	void Load();\n"
-		"}\n";
+		"\n"
+		"private:\n"
+		"	// インスタンスの取得.\n"
+		"	static Const* GetInstance();\n"
+		"};\n"
+		"#endif";
 
 	// ファイルの作成.
 	FileManager::TextSave( H_PATH, Text );
@@ -194,6 +223,7 @@ void ConstCreate::cpp( const std::vector<std::pair<std::pair<std::string, std::s
 
 	Text +=
 		"#include \"Const.h\"\n"
+		"#ifdef ENABLE_CONST\n"
 		"#include \"..\\FileManager\\FileManager.h\"\n"
 		"\n"
 		"namespace {\n"
@@ -202,7 +232,7 @@ void ConstCreate::cpp( const std::vector<std::pair<std::pair<std::string, std::s
 		"	constexpr int _X		= 0; // Xの位置\n"
 		"	constexpr int _Y		= 1; // Yの位置\n"
 		"	constexpr int _Z		= 2; // Zの位置\n"
-		"	constexpr int _W		= 2; // Wの位置\n"
+		"	constexpr int _W		= 3; // Wの位置\n"
 		"	constexpr int _FIRST	= 0; // 最初の位置\n"
 		"	constexpr int _SECOND	= 1; // 次の位置\n"
 		"\n"
@@ -218,6 +248,41 @@ void ConstCreate::cpp( const std::vector<std::pair<std::pair<std::string, std::s
 		"		std::wstring wString = StringConversion::to_wString( string, ECodePage::UTF8 );\n"
 		"		return StringConversion::to_String( wString );\n"
 		"	}\n"
+		"}\n"
+		"\n"
+		"Const::Const()\n"
+		"{\n"
+		"}\n"
+		"\n"
+		"Const::~Const()\n"
+		"{\n"
+		"}\n"
+		"\n"
+		"//----------------------------.\n"
+		"// インスタンスの取得.\n"
+		"//----------------------------.\n"
+		"Const* Const::GetInstance()\n"
+		"{\n"
+		"	static std::unique_ptr<Const> pInstance = std::make_unique<Const>();\n"
+		"	return pInstance.get();\n"
+		"}\n"
+		"\n";
+
+	Text +=
+		"//----------------------------.\n"
+		"// GameWindow.\n"
+		"//----------------------------.\n"
+		"void Const::stConstGameWindow::Load()\n"
+		"{\n"
+		"	json j = FileManager::JsonLoad( \"Data\\\\Parameter\\\\Config\\\\WindowSetting.json\" );\n"
+		"\n"
+		"	// 初期化\n"
+		"	SIZE.x		= j[\"Size\"][\"w\"];\n"
+		"	SIZE.y		= j[\"Size\"][\"h\"];\n"
+		"	FPS			= j[\"FPS\"];\n"
+		"	APP_NAME	= j[\"Name\"][\"App\"];\n"
+		"	WND_NAME	= j[\"Name\"][\"Wnd\"];\n"
+		"	VERSION		= j[\"Version\"];\n"
 		"}\n"
 		"\n";
 
@@ -236,10 +301,12 @@ void ConstCreate::cpp( const std::vector<std::pair<std::pair<std::string, std::s
 		}
 
 		Text +=
-			"void ConstStructs::" + structName + "::Load() const\n"
+			"//----------------------------.\n"
+			"// " + Name + ".\n"
+			"//----------------------------.\n"
+			"void Const::" + structName + "::Load()\n"
 			"{\n"
-			"	json j		= FileManager::JsonLoad( \"" + Path + "\" );\n"
-			"	auto This	= const_cast<" + structName + "*>( this );\n"
+			"	json j = FileManager::JsonLoad( \"" + Path + "\" );\n"
 			"\n"
 			"	// 初期化\n";
 
@@ -254,85 +321,85 @@ void ConstCreate::cpp( const std::vector<std::pair<std::pair<std::string, std::s
 			if ( size > 1 ) {
 				Text +=
 					"	const int " + Key + "_SIZE = GetSize( j[\"" + Key + "\"] );\n"
-					"	This->" + Key + ".resize( " + Key + "_SIZE );\n"
+					"	" + Key + ".resize( " + Key + "_SIZE );\n"
 					"	for ( int i = 0; i < " + Key + "_SIZE; ++i ) {\n"
 					"		const int No = i + 1;\n";
 
 				if ( m == "std::string" ) {
-					Text += "		This->" + Key + "[i] = GetString( j[\"" + Key + "\"][No] ); \n";
+					Text += "		" + Key + "[i] = GetString( j[\"" + Key + "\"][No] ); \n";
 				}
 				else if ( m == "D3DXVECTOR2" ) {
-					Text += "		This->" + Key + "[i].x = j[\"" + Key + "\"][No][_X];\n";
-					Text += "		This->" + Key + "[i].y = j[\"" + Key + "\"][No][_Y];\n";
+					Text += "		" + Key + "[i].x = j[\"" + Key + "\"][No][_X];\n";
+					Text += "		" + Key + "[i].y = j[\"" + Key + "\"][No][_Y];\n";
 				}
 				else if ( m == "D3DXVECTOR3" ) {
-					Text += "		This->" + Key + "[i].x = j[\"" + Key + "\"][No][_X];\n";
-					Text += "		This->" + Key + "[i].y = j[\"" + Key + "\"][No][_Y];\n";
-					Text += "		This->" + Key + "[i].z = j[\"" + Key + "\"][No][_Z];\n";
+					Text += "		" + Key + "[i].x = j[\"" + Key + "\"][No][_X];\n";
+					Text += "		" + Key + "[i].y = j[\"" + Key + "\"][No][_Y];\n";
+					Text += "		" + Key + "[i].z = j[\"" + Key + "\"][No][_Z];\n";
 				}
 				else if ( m == "D3DXVECTOR4" ) {
-					Text += "		This->" + Key + "[i].x = j[\"" + Key + "\"][No][_X];\n";
-					Text += "		This->" + Key + "[i].y = j[\"" + Key + "\"][No][_Y];\n";
-					Text += "		This->" + Key + "[i].z = j[\"" + Key + "\"][No][_Z];\n";
-					Text += "		This->" + Key + "[i].w = j[\"" + Key + "\"][No][_W];\n";
+					Text += "		" + Key + "[i].x = j[\"" + Key + "\"][No][_X];\n";
+					Text += "		" + Key + "[i].y = j[\"" + Key + "\"][No][_Y];\n";
+					Text += "		" + Key + "[i].z = j[\"" + Key + "\"][No][_Z];\n";
+					Text += "		" + Key + "[i].w = j[\"" + Key + "\"][No][_W];\n";
 				}
 				else if ( m.find( "std::pair" ) != std::string::npos ) {
 					// first
 					if ( m.find( "<std::string, " ) != std::string::npos ) {
-						Text += "		This->" + Key + "[i].first  = GetString( j[\"" + Key + "\"][No][_FIRST] );\n";
+						Text += "		" + Key + "[i].first  = GetString( j[\"" + Key + "\"][No][_FIRST] );\n";
 					}
 					else {
-						Text += "		This->" + Key + "[i].first  = j[\"" + Key + "\"][No][_FIRST];\n";
+						Text += "		" + Key + "[i].first  = j[\"" + Key + "\"][No][_FIRST];\n";
 					}
 					// second
 					if ( m.find( ", std::string>" ) != std::string::npos ) {
-						Text += "		This->" + Key + "[i].second = GetString( j[\"" + Key + "\"][No][_SECOND] );\n";
+						Text += "		" + Key + "[i].second = GetString( j[\"" + Key + "\"][No][_SECOND] );\n";
 					}
 					else {
-						Text += "		This->" + Key + "[i].second = j[\"" + Key + "\"][No][_SECOND];\n";
+						Text += "		" + Key + "[i].second = j[\"" + Key + "\"][No][_SECOND];\n";
 					}
 				}
 				else {
-					Text += "		This->" + Key + "[i] = j[\"" + Key + "\"][No];\n";
+					Text += "		" + Key + "[i] = j[\"" + Key + "\"][No];\n";
 				}
 
 				Text += "	}\n";
 			}
 			else {
 				if ( m == "std::string" ){
-					Text += "	This->" + Key + " = GetString( j[\"" + Key + "\"][_DATA] );\n";
+					Text += "	" + Key + " = GetString( j[\"" + Key + "\"][_DATA] );\n";
 				}
 				else if ( m == "D3DXVECTOR2" ) {
-					Text += "	This->" + Key + ".x = j[\"" + Key + "\"][_DATA][_X];\n";
-					Text += "	This->" + Key + ".y = j[\"" + Key + "\"][_DATA][_Y];\n";
+					Text += "	" + Key + ".x = j[\"" + Key + "\"][_DATA][_X];\n";
+					Text += "	" + Key + ".y = j[\"" + Key + "\"][_DATA][_Y];\n";
 				}
 				else if ( m == "D3DXVECTOR3" ) {
-					Text += "	This->" + Key + ".x = j[\"" + Key + "\"][_DATA][_X];\n";
-					Text += "	This->" + Key + ".y = j[\"" + Key + "\"][_DATA][_Y];\n";
-					Text += "	This->" + Key + ".z = j[\"" + Key + "\"][_DATA][_Z];\n";
+					Text += "	" + Key + ".x = j[\"" + Key + "\"][_DATA][_X];\n";
+					Text += "	" + Key + ".y = j[\"" + Key + "\"][_DATA][_Y];\n";
+					Text += "	" + Key + ".z = j[\"" + Key + "\"][_DATA][_Z];\n";
 				}
 				else if ( m == "D3DXVECTOR4" ) {
-					Text += "	This->" + Key + ".x = j[\"" + Key + "\"][_DATA][_X];\n";
-					Text += "	This->" + Key + ".y = j[\"" + Key + "\"][_DATA][_Y];\n";
-					Text += "	This->" + Key + ".z = j[\"" + Key + "\"][_DATA][_Z];\n";
-					Text += "	This->" + Key + ".w = j[\"" + Key + "\"][_DATA][_W];\n";
+					Text += "	" + Key + ".x = j[\"" + Key + "\"][_DATA][_X];\n";
+					Text += "	" + Key + ".y = j[\"" + Key + "\"][_DATA][_Y];\n";
+					Text += "	" + Key + ".z = j[\"" + Key + "\"][_DATA][_Z];\n";
+					Text += "	" + Key + ".w = j[\"" + Key + "\"][_DATA][_W];\n";
 				}
 				else if ( m.find( "std::pair" ) != std::string::npos ) {
 					// first
 					if ( m.find( "<std::string, " ) != std::string::npos ) {
-						Text += "	This->" + Key + ".first  = GetString( j[\"" + Key + "\"][_DATA][_FIRST] );\n";
+						Text += "	" + Key + ".first  = GetString( j[\"" + Key + "\"][_DATA][_FIRST] );\n";
 					} else {
-						Text += "	This->" + Key + ".first  = j[\"" + Key + "\"][_DATA][_FIRST];\n";
+						Text += "	" + Key + ".first  = j[\"" + Key + "\"][_DATA][_FIRST];\n";
 					}
 					// second
 					if ( m.find( ", std::string>" ) != std::string::npos ) {
-						Text += "	This->" + Key + ".second = GetString( j[\"" + Key + "\"][_DATA][_SECOND] );\n";
+						Text += "	" + Key + ".second = GetString( j[\"" + Key + "\"][_DATA][_SECOND] );\n";
 					} else {
-						Text += "	This->" + Key + ".second = j[\"" + Key + "\"][_DATA][_SECOND];\n";
+						Text += "	" + Key + ".second = j[\"" + Key + "\"][_DATA][_SECOND];\n";
 					}
 				}
 				else {
-					Text += "	This->" + Key + " = j[\"" + Key + "\"][_DATA];\n";
+					Text += "	" + Key + " = j[\"" + Key + "\"][_DATA];\n";
 				}
 			}
 		}
@@ -345,12 +412,22 @@ void ConstCreate::cpp( const std::vector<std::pair<std::pair<std::string, std::s
 	}
 
 	Text += 
+		"//----------------------------.\n"
+		"// 読み込み.\n"
+		"//----------------------------.\n"
 		"void Const::Load()\n"
-		"{\n";
+		"{\n"
+		"	Const* pI = GetInstance();\n"
+		"\n";
+
 	for ( auto Name : structList ) {
-		Text += "	" + Name + ".Load();\n";
+		Text += "	pI->" + Name + "Data.Load();\n";
 	}
-	Text += "}\n";
+
+	Text += 
+		"}\n"
+		"\n"
+		"#endif";
 
 	// ファイルの作成.
 	FileManager::TextSave( CPP_PATH, Text );

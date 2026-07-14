@@ -35,6 +35,12 @@
     <ClCompile Include="SourceCode\Common\Font\FontCreate\FontCreate.cpp" />
     <ClCompile Include="SourceCode\Common\Mesh\CollisionMesh\CollisionMesh.cpp" />
     <ClCompile Include="SourceCode\Common\Mesh\SkyBoxMesh\SkyBoxMesh.cpp" />
+    <ClCompile Include="SourceCode\Common\XAudio2\OggLoad\OggLoad.cpp" />
+    <ClCompile Include="SourceCode\Common\XAudio2\SoundManager.cpp" />
+    <ClCompile Include="SourceCode\Common\XAudio2\XAudio2Master\XAudio2MasterVoice.cpp" />
+    <ClCompile Include="SourceCode\Common\XAudio2\XAudio2Play\BGM\XAudio2PlayBGM.cpp" />
+    <ClCompile Include="SourceCode\Common\XAudio2\XAudio2Play\SE\XAudio2PlaySE.cpp" />
+    <ClCompile Include="SourceCode\Common\XAudio2\XAudio2Play\Voice\XAudio2PlayVoice.cpp" />
     <ClCompile Include="SourceCode\Object\GameObject\Actor\BackGroundManager\ActorBackGround\ActorBackGround.cpp" />
     <ClCompile Include="SourceCode\Object\GameObject\Actor\BackGroundManager\ActorBackGround\Ground\Ground.cpp" />
     <ClCompile Include="SourceCode\Object\GameObject\Actor\BackGroundManager\ActorBackGround\Ground\GroundTile\GroundTile.cpp" />
@@ -57,7 +63,9 @@
     <ClCompile Include="SourceCode\Object\GameObject\Actor\WindowObjectManager\WindowObject\WaterManager\WaterManager.cpp" />
     <ClCompile Include="SourceCode\Object\GameObject\Actor\WindowObjectManager\WindowObject\WaterManager\Water\Water.cpp" />
     <ClCompile Include="SourceCode\Object\GameObject\Actor\Window\Window.cpp" />
+    <ClCompile Include="SourceCode\Utility\CashManager\CashManager.cpp" />
     <ClCompile Include="SourceCode\Utility\Const\Const.cpp" />
+    <ClCompile Include="SourceCode\Utility\EventSubject\EventSubject.cpp" />
     <ClCompile Include="SourceCode\Utility\MasterData\MasterDataAccesser.cpp" />
     <ClCompile Include="SourceCode\Utility\MasterData\MasterDatas.cpp" />
     <ClCompile Include="SourceCode\Utility\SaveDataManager\CommonSaveData\CommonSaveData.cpp" />
@@ -77,7 +85,6 @@
     <ClCompile Include="SourceCode\Scene\FadeManager\FadeBase\MaskFade\MaskFade.cpp" />
     <ClCompile Include="SourceCode\Utility\SaveDataManager\SaveDataManager.cpp" />
     <ClCompile Include="SourceCode\Utility\Transform\PositionRenderer\PositionRenderer.cpp" />
-    <ClCompile Include="SourceCode\Common\SoundManeger\Sound\Sound.cpp" />
     <ClCompile Include="SourceCode\Editor\EditorBase.cpp" />
     <ClCompile Include="SourceCode\Object\Camera\CameraBase.cpp" />
     <ClCompile Include="SourceCode\Object\Camera\CameraManager\CameraManager.cpp" />
@@ -168,8 +175,8 @@
     <ClCompile Include="SourceCode\Utility\Math\Math.cpp" />
     <ClCompile Include="SourceCode\Utility\ImGuiManager\MessageWindow\MessageWindow.cpp" />
     <ClCompile Include="SourceCode\Utility\Random\Random.cpp" />
-    <ClCompile Include="SourceCode\Common\SoundManeger\SoundManeger.cpp" />
     <ClCompile Include="SourceCode\Utility\Transform\Transform.cpp" />
+    <ClCompile Include="SourceCode\Utility\Animation\ScaleAnimation\ScaleAnimation.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Library\encrypt\file.h" />
@@ -192,6 +199,14 @@
     <ClInclude Include="SourceCode\Common\Font\FontStruct.h" />
     <ClInclude Include="SourceCode\Common\Mesh\CollisionMesh\CollisionMesh.h" />
     <ClInclude Include="SourceCode\Common\Mesh\SkyBoxMesh\SkyBoxMesh.h" />
+    <ClInclude Include="SourceCode\Common\XAudio2\OggLoad\OggLoad.h" />
+    <ClInclude Include="SourceCode\Common\XAudio2\SoundManager.h" />
+    <ClInclude Include="SourceCode\Common\XAudio2\XAudio2.h" />
+    <ClInclude Include="SourceCode\Common\XAudio2\XAudio2CallBack\VoiceCallBack.h" />
+    <ClInclude Include="SourceCode\Common\XAudio2\XAudio2Master\XAudio2MasterVoice.h" />
+    <ClInclude Include="SourceCode\Common\XAudio2\XAudio2Play\BGM\XAudio2PlayBGM.h" />
+    <ClInclude Include="SourceCode\Common\XAudio2\XAudio2Play\SE\XAudio2PlaySE.h" />
+    <ClInclude Include="SourceCode\Common\XAudio2\XAudio2Play\Voice\XAudio2PlayVoice.h" />
     <ClInclude Include="SourceCode\Object\GameObject\Actor\BackGroundManager\ActorBackGround\Ground\Ground.h" />
     <ClInclude Include="SourceCode\Object\GameObject\Actor\BackGroundManager\ActorBackGround\Ground\GroundTile\GroundTile.h" />
     <ClInclude Include="SourceCode\Object\GameObject\Actor\ActorEffect\ActorEffect.h" />
@@ -218,7 +233,11 @@
     <ClInclude Include="SourceCode\Object\GameObject\Actor\WindowObjectManager\WindowObject\WaterManager\Water\Water.h" />
     <ClInclude Include="SourceCode\Object\GameObject\Actor\Window\Window.h" />
     <ClInclude Include="SourceCode\SystemSetting.h" />
+    <ClInclude Include="SourceCode\Utility\CashManager\CashManager.h" />
     <ClInclude Include="SourceCode\Utility\Const\Const.h" />
+    <ClInclude Include="SourceCode\Utility\EventSubject\EventParam\EventParam.h" />
+    <ClInclude Include="SourceCode\Utility\EventSubject\EventSubject.h" />
+    <ClInclude Include="SourceCode\Utility\EventSubject\Subject\Subject.h" />
     <ClInclude Include="SourceCode\Utility\MasterData\MasterDataAccesser.h" />
     <ClInclude Include="SourceCode\Utility\MasterData\MasterDatas.h" />
     <ClInclude Include="SourceCode\Utility\SaveDataManager\SaveData.h" />
@@ -239,7 +258,6 @@
     <ClInclude Include="SourceCode\Scene\FadeManager\FadeBase\MaskFade\MaskFade.h" />
     <ClInclude Include="SourceCode\Utility\SaveDataManager\SaveDataManager.h" />
     <ClInclude Include="SourceCode\Utility\Transform\PositionRenderer\PositionRenderer.h" />
-    <ClInclude Include="SourceCode\Common\SoundManeger\Sound\Sound.h" />
     <ClInclude Include="SourceCode\Common\Sprite\SpriteStruct.h" />
     <ClInclude Include="SourceCode\Editor\EditorBase.h" />
     <ClInclude Include="SourceCode\Object\Camera\CameraBase.h" />
@@ -296,6 +314,7 @@
     <ClInclude Include="SourceCode\Utility\Message\Message.h" />
     <ClInclude Include="SourceCode\Utility\StringConversion\StringConversion.h" />
     <ClInclude Include="SourceCode\Utility\Transform\Transform.h" />
+    <ClInclude Include="SourceCode\Utility\Animation\ScaleAnimation\ScaleAnimation.h" />
     <ClInclude Include="SourceCode\Common\WindowTextRenderer\WindowTextRenderer.h" />
     <ClInclude Include="SourceCode\Utility\FileManager\FileManager.h" />
     <ClInclude Include="SourceCode\Common\Fog\Fog.h" />
@@ -331,7 +350,6 @@
     <ClInclude Include="SourceCode\Utility\Math\Math.h" />
     <ClInclude Include="SourceCode\Utility\ImGuiManager\MessageWindow\MessageWindow.h" />
     <ClInclude Include="SourceCode\Utility\Random\Random.h" />
-    <ClInclude Include="SourceCode\Common\SoundManeger\SoundManeger.h" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="ico.rc" />
@@ -426,20 +444,22 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-    <IncludePath>$(DXSDK_DIR)Include;Library\Effekseer\include;Library;$(IncludePath)</IncludePath>
-    <LibraryPath>$(DXSDK_DIR)Lib\x86;Library\Effekseer\lib\x86;$(LibraryPath)</LibraryPath>
+    <!-- ksmedia.h/mmreg.h 等、新旧SDK双方に存在するヘッダーは Windows SDK 側を優先させるため、
+         $(DXSDK_DIR)Include は $(IncludePath) の後方( D3DX9 等 旧SDK専用ヘッダーの解決用 )に置く. -->
+    <IncludePath>Library\Effekseer\include;Library\libogg\include;Library;$(IncludePath);$(DXSDK_DIR)Include</IncludePath>
+    <LibraryPath>$(DXSDK_DIR)Lib\x86;Library\Effekseer\lib\x86;Library\libogg\_lib\x86\_Debug;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
-    <IncludePath>$(DXSDK_DIR)Include;Library\Effekseer\include;Library;$(IncludePath)</IncludePath>
-    <LibraryPath>$(DXSDK_DIR)Lib\x86;Library\Effekseer\lib\x86;$(LibraryPath)</LibraryPath>
+    <IncludePath>Library\Effekseer\include;Library\libogg\include;Library;$(IncludePath);$(DXSDK_DIR)Include</IncludePath>
+    <LibraryPath>$(DXSDK_DIR)Lib\x86;Library\Effekseer\lib\x86;Library\libogg\_lib\x86\_Release;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <IncludePath>$(DXSDK_DIR)Include;Library\Effekseer\include;Library;$(IncludePath)</IncludePath>
-    <LibraryPath>$(DXSDK_DIR)Lib\x64;Library\Effekseer\lib\x64;$(LibraryPath)</LibraryPath>
+    <IncludePath>Library\Effekseer\include;Library\libogg\_include;Library;$(IncludePath);$(DXSDK_DIR)Include</IncludePath>
+    <LibraryPath>$(DXSDK_DIR)Lib\x64;Library\Effekseer\lib\x64;Library\libogg\_lib\x64\_Release;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <IncludePath>$(DXSDK_DIR)Include;Library\Effekseer\include;Library;$(IncludePath)</IncludePath>
-    <LibraryPath>$(DXSDK_DIR)Lib\x64;Library\Effekseer\lib\x64;$(LibraryPath)</LibraryPath>
+    <IncludePath>Library\Effekseer\include;Library\libogg\_include;Library;$(IncludePath);$(DXSDK_DIR)Include</IncludePath>
+    <LibraryPath>$(DXSDK_DIR)Lib\x64;Library\Effekseer\lib\x64;Library\libogg\_lib\x64\_Debug;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>

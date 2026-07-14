@@ -33,6 +33,7 @@ bool CHeavyBall::Init()
 	m_DireSpeedRate.w	= 0.8f;
 	m_IsDisp			= false;
 	m_ObjectTag			= EObjectTag::HeavyBall;
+	m_IsUseImpactSquash	= true;		// ï«Ç÷ÇÃè’ìÀÇ≈ägèkÇ≥ÇπÇÈ.
 	
 	WindowObjectInit();
 	InitCollision();

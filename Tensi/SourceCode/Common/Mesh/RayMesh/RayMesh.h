@@ -1,4 +1,6 @@
 #pragma once
+#include "..\..\..\SystemSetting.h"
+#ifdef ENABLE_MESH
 #include "..\..\Common.h"
 #include "..\..\..\Global.h"
 
@@ -46,3 +48,4 @@ private:
 
 	ID3D11Buffer*			m_pVertexBuffer;	// 頂点バッファ.
 };
+#endif // ENABLE_MESH

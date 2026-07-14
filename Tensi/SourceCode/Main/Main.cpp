@@ -2,7 +2,7 @@
 #include "..\Common\DirectX\DirectX9.h"
 #include "..\Common\DirectX\DirectX11.h"
 #include "..\Common\WindowTextRenderer\WindowTextRenderer.h"
-#include "..\Common\SoundManeger\SoundManeger.h"
+#include "..\Common\XAudio2\SoundManager.h"
 #include "..\Object\Camera\CameraManager\CameraManager.h"
 #include "..\Object\Light\Light.h"
 #include "..\Object\Collision\CollisionRenderer\CollisionRenderer.h"
@@ -63,10 +63,12 @@ CMain::CMain()
 
 CMain::~CMain()
 {
-	ReleaseDC(		m_hSubWnd,	m_hSubDc	);
-	ReleaseDC(		m_hWnd,		m_hDc		);
-	DestroyWindow(	m_hSubWnd	);
-	DestroyWindow(	m_hWnd		);
+#ifdef ENABLE_SUB_WINDOW
+	ReleaseDC( m_hSubWnd, m_hSubDc );
+	DestroyWindow( m_hSubWnd );
+#endif // ENABLE_SUB_WINDOW
+	ReleaseDC( m_hWnd, m_hDc );
+	DestroyWindow( m_hWnd );
 
 	// デスクトップを再描画
 	SystemParametersInfo( SPI_SETDESKWALLPAPER, 0, NULL, SPIF_SENDCHANGE );
@@ -105,8 +107,10 @@ void CMain::Update( const float& DeltaTime )
 	}
 #endif
 
-	// ウィンドウのクリック判定の更新.
+#ifdef ENABLE_TRANSPARENT_WINDOW
+	// ウィンドウの透明部分のクリック判定の更新.
 	ClickUpdate();
+#endif // ENABLE_TRANSPARENT_WINDOW
 
 	// 更新処理.
 	DirectX11::CheckActiveWindow();
@@ -132,17 +136,21 @@ void CMain::Update( const float& DeltaTime )
 	DirectX11::CopyCursorPixel( static_cast<int>( MousePos.x ), static_cast<int>( MousePos.y ) );
 	DirectX11::Present( 0 );
 
+#ifdef ENABLE_SUB_WINDOW
 	// サブウィンドウのバックバッファをクリアにする.
 	DirectX11::ClearBackBuffer( 1 );
 
 	// サブウィンドウの描画処理.
 	SceneManager::SubRender();
+#endif // ENABLE_SUB_WINDOW
 
 	CollisionRenderer::Render();
 	ImGuiManager::Render();
 
+#ifdef ENABLE_SUB_WINDOW
 	// 画面に表示.
 	DirectX11::Present( 1 );
+#endif // ENABLE_SUB_WINDOW
 
 	// 操作のログを出力.
 	Input::KeyLogOutput();
@@ -157,23 +165,29 @@ void CMain::Update( const float& DeltaTime )
 HRESULT CMain::Create()
 {
 	// DirectX9の構築.
-	if ( FAILED( DirectX9::Create( m_hWnd	)	) ) return E_FAIL;
+	if ( FAILED( DirectX9::Create( m_hWnd ) ) ) return E_FAIL;
 	// DirectX11の構築.
+#ifdef ENABLE_SUB_WINDOW
 	if ( FAILED( DirectX11::Create( { m_hWnd, m_hSubWnd } ) ) ) return E_FAIL;
-	// オーディオインターフェースの構築.
-	if ( FAILED( SoundManager::Create()		) ) return E_FAIL;
+#else
+	if ( FAILED( DirectX11::Create( { m_hWnd } ) ) ) return E_FAIL;
+#endif // ENABLE_SUB_WINDOW
 	// 乱数の初期化.
-	if ( FAILED( Random::Init()				) ) return E_FAIL;
+	if ( FAILED( Random::Init() ) ) return E_FAIL;
 	// 入力クラスの初期化.
-	if ( FAILED( Input::Init()					) ) return E_FAIL;
+	if ( FAILED( Input::Init() ) ) return E_FAIL;
 	// デバックテキストの初期化.
-	if ( FAILED( WindowTextRenderer::Init()			) ) return E_FAIL;
+	if ( FAILED( WindowTextRenderer::Init() ) ) return E_FAIL;
 	// ImGuiの初期化.
-	if ( FAILED( ImGuiManager::Init( m_hWnd )	) ) return E_FAIL;
+	if ( FAILED( ImGuiManager::Init( m_hWnd ) ) ) return E_FAIL;
+#ifdef ENABLE_WINDOWS_WINDOW
 	// ウィンドウマネージャーの初期化.
-	if ( FAILED( WindowManager::Init()			) ) return E_FAIL;
+	if ( FAILED( WindowManager::Init() ) ) return E_FAIL;
+#endif
+#ifdef ENABLE_WINDOWS_MENU
 	// メニューの初期化.
-	if ( FAILED( MenuManager::Init( m_hWnd )	) ) return E_FAIL;
+	if ( FAILED( MenuManager::Init( m_hWnd ) ) ) return E_FAIL;
+#endif
 
 	// 深度を無くす.
 	DirectX11::SetDepth( false );
@@ -322,7 +336,11 @@ HRESULT CMain::InitWindow( HINSTANCE hInstance )
 	rect.right	= sizex + dispx;									// 右.
 	rect.bottom = sizey + dispy;									// 下.
 	dwStyle		= WS_OVERLAPPEDWINDOW;								// ウィンドウ種別.
-	dwExStyle	= WS_EX_LAYERED | WS_EX_TOOLWINDOW;					// ウィンドウ拡張機能.
+#ifdef ENABLE_TRANSPARENT_WINDOW
+	dwExStyle	= WS_EX_LAYERED | WS_EX_TOOLWINDOW;					// ウィンドウ拡張機能( 透明ウィンドウ用にレイヤード化 ).
+#else
+	dwExStyle	= WS_EX_TOOLWINDOW;									// ウィンドウ拡張機能.
+#endif // ENABLE_TRANSPARENT_WINDOW
 	if ( FileManager::JsonGet( WndSetting, "IsSizeLock", false )	) dwStyle ^= WS_THICKFRAME;		// サイズの変更を禁止するか.
 	if ( FileManager::JsonGet( WndSetting, "IsMaxLock", false )	) dwStyle ^= WS_MAXIMIZEBOX;	// 拡大化を禁止するか.
 	if ( FileManager::JsonGet( WndSetting, "IsMinLock", false )	) dwStyle ^= WS_MINIMIZEBOX;	// 拡大化を禁止するか.
@@ -356,6 +374,7 @@ HRESULT CMain::InitWindow( HINSTANCE hInstance )
 	}
 	WindowManager::SetWnd( m_hWnd );
 
+#ifdef ENABLE_SUB_WINDOW
 	// デスクトップ壁紙の上・デスクトップアイコンの下のレイヤーに描画するための
 	// 親ウィンドウ( 壁紙レイヤーの WorkerW もしくは Progman )を取得する.
 	// 自プロセスのウィンドウを WS_CHILD でその配下に配置することで
@@ -400,11 +419,15 @@ HRESULT CMain::InitWindow( HINSTANCE hInstance )
 		}
 	}
 	WindowManager::SetSubWnd( m_hSubWnd );
+#endif // ENABLE_SUB_WINDOW
 
 	// DCの取得.
 	m_hDc		= GetDC( m_hWnd );
+#ifdef ENABLE_SUB_WINDOW
 	m_hSubDc	= GetDC( m_hSubWnd );
+#endif // ENABLE_SUB_WINDOW
 
+#ifdef ENABLE_WINDOWS_TASK_TRAY
 	// タスクレイの作成.
 	NOTIFYICONDATA nid;
 	ZeroMemory( &nid, sizeof( nid ) );
@@ -416,12 +439,15 @@ HRESULT CMain::InitWindow( HINSTANCE hInstance )
 	nid.hIcon				= LoadIcon( hInstance, _T( "ICON" ) );	// タスクレイのアイコン.
 	_tcsncpy_s( nid.szTip, wAppName.c_str(), _TRUNCATE );							// タスクレイに表示する文字.
 	int ret = ( int ) Shell_NotifyIcon( NIM_ADD, &nid );			// テクスレイの開始.
+#endif
 
 	// ウィンドウの表示.
 	ShowWindow( m_hWnd, SW_SHOW );
-	ShowWindow( m_hSubWnd, SW_SHOW );
 	UpdateWindow( m_hWnd );
+#ifdef ENABLE_SUB_WINDOW
+	ShowWindow( m_hSubWnd, SW_SHOW );
 	UpdateWindow( m_hSubWnd );
+#endif // ENABLE_SUB_WINDOW
 
 	// 最背面に移動させる.
 	SetWindowPos( m_hWnd, HWND_BOTTOM, 0, 0, 0, 0, ( SWP_NOMOVE | SWP_NOSIZE | SWP_SHOWWINDOW ) );
@@ -507,7 +533,9 @@ LRESULT CALLBACK CMain::MsgProc(
 		break;
 	}
 	case WM_CLOSE:
-		// ウィンドウの破棄.
+#ifdef ENABLE_SOUND
+		SoundManager::Release();
+#endif // ENABLE_SOUND
 		DestroyWindow( hWnd );
 		break;
 	case WM_DESTROY:
@@ -544,6 +572,7 @@ LRESULT CALLBACK CMain::MsgProc(
 //---------------------------.
 void CMain::WindowInit()
 {
+#ifdef ENABLE_TRANSPARENT_WINDOW
 	// メインウィンドウにガラス効果を付与する.
 	//	バックバッファのアルファ値が DWM に反映されるようになり、
 	//	アルファ0でクリアした部分が透明になる.
@@ -558,6 +587,7 @@ void CMain::WindowInit()
 
 	// サブウィンドウは DirectComposition( プリマルチプライドアルファ )で
 	// 透過合成されるため、ガラス効果や WS_EX_LAYERED の操作は不要.
+#endif // ENABLE_TRANSPARENT_WINDOW
 
 	// ウィンドウの初期化を行った.
 	m_IsWindowInit = true;
@@ -579,20 +609,10 @@ void CMain::FPSRender()
 
 	// FPSの描画.
 	WindowTextRenderer::DebugRender( FPSText, D3DXPOSITION3( FPS_RENDER_POS ), FPS_RENDER_SIZE, D3DXCOLOR4( FPS_RENDER_COLOR ) );
-
-//	const D3DXVECTOR2 Pos = Input::GetMousePosition();
-//
-//	COLORREF MainColor = GetPixel( m_hDc, static_cast< int >( Pos.x ), static_cast< int >( Pos.y ) );
-//	std::string Text = "<Main> R:" + std::to_string( GetRValue( MainColor ) ) + ", G:" + std::to_string( GetGValue( MainColor ) ) + ", B:" + std::to_string( GetBValue( MainColor ) );
-//	WindowTextRenderer::DebugRender( Text, D3DXPOSITION3( 0.0f, 50.0f, 0.0f ), FPS_RENDER_SIZE, D3DXCOLOR4( FPS_RENDER_COLOR ) );
-//
-//	COLORREF SubColor = GetPixel( m_hSubDc, static_cast< int >( Pos.x ), static_cast< int >( Pos.y ) );
-//	Text = "<Sub>  R:" + std::to_string( GetRValue( SubColor ) ) + ", G:" + std::to_string( GetGValue( SubColor ) ) + ", B:" + std::to_string( GetBValue( SubColor ) );
-//	WindowTextRenderer::DebugRender( Text, D3DXPOSITION3( 0.0f, 80.0f, 0.0f ), FPS_RENDER_SIZE, D3DXCOLOR4( FPS_RENDER_COLOR ) );
-
 #endif	// #ifdef _DEBUG.
 }
 
+#ifdef ENABLE_TRANSPARENT_WINDOW
 //---------------------------.
 // ウィンドウのクリック判定の更新.
 //---------------------------.
@@ -618,6 +638,9 @@ void CMain::ClickUpdate()
 	// 変更がある場合のみ適用する( 毎フレームの SetWindowLong による通知を避ける ).
 	if ( NewStyle != lStyle ) SetWindowLong( m_hWnd, GWL_EXSTYLE, NewStyle );
 }
+#endif // ENABLE_TRANSPARENT_WINDOW
+
+#ifdef ENABLE_SUB_WINDOW
 //---------------------------.
 // WorkerWの取得
 // デスクトップ壁紙の上、デスクトップアイコンの下のレイヤーに描画するための
@@ -668,3 +691,4 @@ HWND CMain::FindWorkerW()
 	// 5) 最終手段: Progman を直接使用( 常に存在する ).
 	return hProgman;
 }
+#endif // ENABLE_SUB_WINDOW

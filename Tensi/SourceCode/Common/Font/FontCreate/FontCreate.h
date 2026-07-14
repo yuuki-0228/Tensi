@@ -1,4 +1,6 @@
 #pragma once
+#include "..\..\..\SystemSetting.h"
+#ifdef ENABLE_FONT
 #include "..\..\..\Global.h"
 #include <Shlwapi.h>
 
@@ -32,3 +34,4 @@ private:
 	CFontCreate( const CFontCreate& ) = delete;
 	CFontCreate& operator = ( const CFontCreate& rhs ) = default;
 };
+#endif // ENABLE_FONT

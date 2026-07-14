@@ -1,20 +1,26 @@
 #include "CollisionRenderer.h"
+#ifdef ENABLE_MESH
 #include "..\Sphere\Sphere.h"
 #include "..\Cylinder\Cylinder.h"
 #include "..\Ray\Ray.h"
 #include "..\CrossRay\CrossRay.h"
-#include "..\2D\Box2D\Box2D.h"
-#include "..\2D\Sphere2D\Sphere2D.h"
 #include "..\..\..\Common\DirectX\DirectX11.h"
 #include "..\..\..\Common\Mesh\RayMesh\RayMesh.h"
 #include "..\..\..\Common\Mesh\StaticMesh\StaticMesh.h"
 #include "..\..\..\Common\Mesh\CollisionMesh\CollisionMesh.h"
 #include "..\..\..\Resource\MeshResource\MeshResource.h"
+#endif
+#ifdef ENABLE_SPRITE
+#include "..\2D\Box2D\Box2D.h"
+#include "..\2D\Sphere2D\Sphere2D.h"
 #include "..\..\..\Resource\SpriteResource\SpriteResource.h"
+#endif
 #include "..\..\..\Utility\Input\Input.h"
 
 CollisionRenderer::CollisionRenderer()
-	: m_pPointQueue			()
+	: m_IsRender			( true, u8"“–‚½‚è”»’è‚ð•`‰æ‚·‚é‚©", u8"Collision" )		
+#ifdef ENABLE_MESH
+	, m_pPointQueue			()
 	, m_pSphereQueue		()
 	, m_pRayQueue			()
 	, m_pMeshQueue			()
@@ -24,20 +30,23 @@ CollisionRenderer::CollisionRenderer()
 	, m_pSphereMesh			( nullptr )
 	, m_pCylinderMesh		( nullptr )
 	, m_pRayMesh			( nullptr )
+	, m_IsPointRender		( false, u8"“–‚½‚è”»’è(     “_     )‚ð•`‰æ‚·‚é‚©", u8"Collision" )
+	, m_IsSphereRender		( false, u8"“–‚½‚è”»’è(    ‹…‘Ì    )‚ð•`‰æ‚·‚é‚©", u8"Collision" )
+	, m_IsCylinderRender	( false, u8"“–‚½‚è”»’è(    ‰~’Œ    )‚ð•`‰æ‚·‚é‚©", u8"Collision" )
+	, m_IsRayRender			( false, u8"“–‚½‚è”»’è(    ƒŒƒC    )‚ð•`‰æ‚·‚é‚©", u8"Collision" )
+	, m_IsMeshRender		( false, u8"“–‚½‚è”»’è(  ƒƒbƒVƒ…  )‚ð•`‰æ‚·‚é‚©", u8"Collision" )
+#endif
+#ifdef ENABLE_SPRITE
 	, m_pBox2DSprite		( nullptr )
 	, m_pSphere2DSprite		( nullptr )
 	, m_pPoint2DSprite		( nullptr )
 	, m_Box2DState			()
 	, m_Sphere2DState		()
 	, m_Point2DState		()
-	, m_IsPointRender		( false, u8"“–‚½‚è”»’è(     “_     )‚ð•`‰æ‚·‚é‚©", u8"Collision" )
-	, m_IsSphereRender		( false, u8"“–‚½‚è”»’è(    ‹…‘Ì    )‚ð•`‰æ‚·‚é‚©", u8"Collision" )
-	, m_IsCylinderRender	( false, u8"“–‚½‚è”»’è(    ‰~’Œ    )‚ð•`‰æ‚·‚é‚©", u8"Collision" )
-	, m_IsRayRender			( false, u8"“–‚½‚è”»’è(    ƒŒƒC    )‚ð•`‰æ‚·‚é‚©", u8"Collision" )
-	, m_IsMeshRender		( false, u8"“–‚½‚è”»’è(  ƒƒbƒVƒ…  )‚ð•`‰æ‚·‚é‚©", u8"Collision" )
 	, m_IsPoint2DRender		( false, u8"“–‚½‚è”»’è(    “_2D    )‚ð•`‰æ‚·‚é‚©", u8"Collision" )
 	, m_IsBox2DRender		( false, u8"“–‚½‚è”»’è( ƒ{ƒbƒNƒX2D )‚ð•`‰æ‚·‚é‚©", u8"Collision" )
 	, m_IsSphere2DRender	( false, u8"“–‚½‚è”»’è(    ‰~2D    )‚ð•`‰æ‚·‚é‚©", u8"Collision" )
+#endif
 {
 }
 
@@ -65,27 +74,38 @@ void CollisionRenderer::Render()
 
 	// “–‚½‚è”»’è‚ð•\Ž¦‚·‚é‚©.
 	if ( DebugKeyInput::IsKeyPress( VK_CONTROL ) ) {
+#ifdef ENABLE_MESH
 		if ( DebugKeyInput::IsKeyDown( VK_F1 ) ) pI->m_IsPointRender.Inversion();		// “_‚Ì•\Ž¦/”ñ•\Ž¦.
 		if ( DebugKeyInput::IsKeyDown( VK_F2 ) ) pI->m_IsSphereRender.Inversion();		// ‹…‘Ì‚Ì•\Ž¦/”ñ•\Ž¦.
 		if ( DebugKeyInput::IsKeyDown( VK_F3 ) ) pI->m_IsCylinderRender.Inversion();	// ‰~’Œ‚Ì•\Ž¦/”ñ•\Ž¦.
 		if ( DebugKeyInput::IsKeyDown( VK_F4 ) ) pI->m_IsRayRender.Inversion();			// ƒŒƒC‚Ì•\Ž¦/”ñ•\Ž¦.
 		if ( DebugKeyInput::IsKeyDown( VK_F5 ) ) pI->m_IsMeshRender.Inversion();		// ƒƒbƒVƒ…‚Ì•\Ž¦/”ñ•\Ž¦.
+#endif
+#ifdef ENABLE_SPRITE
 		if ( DebugKeyInput::IsKeyDown( VK_F6 ) ) pI->m_IsPoint2DRender.Inversion();		// “_2D‚Ì•\Ž¦/”ñ•\Ž¦.
 		if ( DebugKeyInput::IsKeyDown( VK_F7 ) ) pI->m_IsBox2DRender.Inversion();		// ƒ{ƒbƒNƒX2D‚Ì•\Ž¦/”ñ•\Ž¦.
 		if ( DebugKeyInput::IsKeyDown( VK_F8 ) ) pI->m_IsSphere2DRender.Inversion();	// ‰~2D‚Ì•\Ž¦/”ñ•\Ž¦.
+#endif
 	}
 
-	PointRender();		// “_‚Ì•`‰æ.
-	SphereRender();		// ‹…‘Ì‚Ì•`‰æ.
-	CylinderRender();	// ‰~’Œ‚Ì•`‰æ.
-	RayRender();		// ƒŒƒC‚Ì•`‰æ.
-	MeshRender();		// ƒƒbƒVƒ…‚Ì•`‰æ.
-	Point2DRender();	// “_2D‚Ì•`‰æ.
-	Box2DRender();		// ƒ{ƒbƒNƒX2D‚Ì•`‰æ.
-	Sphere2DRender();	// ‰~2D‚Ì•`‰æ.
+	if ( pI->m_IsRender == true ){
+#ifdef ENABLE_MESH
+		PointRender();		// “_‚Ì•`‰æ.
+		SphereRender();		// ‹…‘Ì‚Ì•`‰æ.
+		CylinderRender();	// ‰~’Œ‚Ì•`‰æ.
+		RayRender();		// ƒŒƒC‚Ì•`‰æ.
+		MeshRender();		// ƒƒbƒVƒ…‚Ì•`‰æ.
+#endif
+#ifdef ENABLE_SPRITE
+		Point2DRender();	// “_2D‚Ì•`‰æ.
+		Box2DRender();		// ƒ{ƒbƒNƒX2D‚Ì•`‰æ.
+		Sphere2DRender();	// ‰~2D‚Ì•`‰æ.
+#endif
 #endif // #ifdef _DEBUG.
+	}
 }
 
+#ifdef ENABLE_MESH
 //---------------------------.
 // “_‚Ì’Ç‰Á.
 //---------------------------.
@@ -190,6 +210,172 @@ void CollisionRenderer::PushMesh( CCollisionMesh* pMesh, STransform* pTrans )
 }
 
 //---------------------------.
+// “_‚Ì•`‰æ.
+//	“_‚ð•`‰æ‚µ‚È‚¢ê‡‚Íˆ—‚Ís‚í‚È‚¢.
+//---------------------------.
+void CollisionRenderer::PointRender()
+{
+	CollisionRenderer* pI = GetInstance();
+
+	if ( pI->m_IsPointRender == false ) return;
+	if ( pI->m_pPointQueue.empty() ) return;
+
+	// ‹…‘ÌƒƒbƒVƒ…‚ÌŽæ“¾.
+	if ( pI->m_pSphereMesh == nullptr ) {
+		pI->m_pSphereMesh = MeshResource::GetCollision( "Sphere_c" );
+	}
+
+	// “–‚½‚è”»’è‚ð•`‰æ‚µ‚Ä‚¢‚­.
+	D3DXPOSITION3 pRenderPoint = { 0.0f, 0.0f, 0.0f };
+	const int Size = static_cast<int>( pI->m_pPointQueue.size() );
+	DirectX11::SetDepth( false );
+	for ( int i = 0; i < Size; i++ ) {
+		pRenderPoint = pI->m_pPointQueue.front();
+
+		// ‹…‘Ì‚Ì•`‰æ.
+		pI->m_pSphereMesh->SetColor( Color::White );
+		pI->m_pSphereMesh->SetPosition( pRenderPoint );
+		pI->m_pSphereMesh->SetScale( { 0.1f, 0.1f, 0.1f } );
+		pI->m_pSphereMesh->Render();
+
+		pI->m_pPointQueue.pop();
+	}
+	DirectX11::SetDepth( true );
+}
+
+//---------------------------.
+// ‹…‘Ì‚Ì•`‰æ.
+//	‹…‘Ì‚ð•`‰æ‚µ‚È‚¢ê‡‚Íˆ—‚Ís‚í‚È‚¢.
+//---------------------------.
+void CollisionRenderer::SphereRender()
+{
+	CollisionRenderer* pI = GetInstance();
+
+	if ( pI->m_IsSphereRender == false ) return;
+	if ( pI->m_pSphereQueue.empty() ) return;
+
+	// ‹…‘ÌƒƒbƒVƒ…‚ÌŽæ“¾.
+	if ( pI->m_pSphereMesh == nullptr ) {
+		pI->m_pSphereMesh = MeshResource::GetCollision( "Sphere_c" );
+	}
+
+	// “–‚½‚è”»’è‚ð•`‰æ‚µ‚Ä‚¢‚­.
+	DirectX11::SetRasterizerState( ERS_STATE::Wire );
+	CSphere* pRenderSphere = nullptr;
+	const int Size = static_cast<int>( pI->m_pSphereQueue.size() );
+	for ( int i = 0; i < Size; i++ ) {
+		pRenderSphere = pI->m_pSphereQueue.front();
+
+		// ‹…‘Ì‚Ì•`‰æ.
+		pI->m_pSphereMesh->SetColor( pRenderSphere->IsHit() ? Color::Red : Color::White );
+		pI->m_pSphereMesh->SetPosition( pRenderSphere->GetPosition() );
+		pI->m_pSphereMesh->SetScale( pRenderSphere->GetCollisionScale( pI->m_pSphereMesh->GetMesh() ) );
+		pI->m_pSphereMesh->Render();
+
+		pI->m_pSphereQueue.pop();
+	}
+	DirectX11::SetRasterizerState( ERS_STATE::None );
+}
+
+//---------------------------.
+// ‰~’Œ‚Ì•`‰æ.
+//	‰~’Œ‚ð•`‰æ‚µ‚È‚¢ê‡ˆ—‚Ís‚í‚È‚¢.
+//---------------------------.
+void CollisionRenderer::CylinderRender()
+{
+	CollisionRenderer* pI = GetInstance();
+
+	if ( pI->m_IsCylinderRender == false ) return;
+	if ( pI->m_pCylinderQueue.empty() ) return;
+
+	// ‰~’ŒƒƒbƒVƒ…‚ÌŽæ“¾.
+	if ( pI->m_pCylinderMesh == nullptr ) {
+		pI->m_pCylinderMesh = MeshResource::GetCollision( "Cylinder_c" );
+	}
+
+	// “–‚½‚è”»’è‚ð•`‰æ‚µ‚Ä‚¢‚­.
+	DirectX11::SetRasterizerState( ERS_STATE::Wire );
+	CCylinder* pRenderCylinder = nullptr;
+	const int Size = static_cast<int>( pI->m_pCylinderQueue.size() );
+	for ( int i = 0; i < Size; i++ ) {
+		pRenderCylinder = pI->m_pCylinderQueue.front();
+
+		// ‰~’Œ‚Ì•`‰æ.
+		pI->m_pCylinderMesh->SetColor( pRenderCylinder->IsHit() ? Color::Red : Color::White );
+		pI->m_pCylinderMesh->SetPosition( pRenderCylinder->GetPosition() );
+		pI->m_pCylinderMesh->SetScale( pRenderCylinder->GetCollisionScale( pI->m_pCylinderMesh->GetMesh() ) );
+		pI->m_pCylinderMesh->Render();
+
+		pI->m_pCylinderQueue.pop();
+	}
+	DirectX11::SetRasterizerState( ERS_STATE::None );
+}
+
+//---------------------------.
+// ƒŒƒC‚Ì•`‰æ.
+//	ƒŒƒC‚ð•`‰æ‚µ‚È‚¢ê‡ˆ—‚Ís‚í‚È‚¢.
+//---------------------------.
+void CollisionRenderer::RayRender()
+{
+	CollisionRenderer* pI = GetInstance();
+
+	if ( pI->m_IsRayRender == false ) return;
+	if ( pI->m_pRayQueue.empty() ) return;
+
+	// ƒŒƒCƒƒbƒVƒ…‚ÌŽæ“¾.
+	if ( pI->m_pRayMesh == nullptr ) {
+		pI->m_pRayMesh = std::make_unique<CRayMesh>();
+		if ( FAILED( pI->m_pRayMesh->Init() ) ) return;
+	}
+
+	// “–‚½‚è”»’è‚ð•`‰æ‚µ‚Ä‚¢‚­.
+	CRay* pRenderRay = nullptr;
+	const int Size = static_cast<int>( pI->m_pRayQueue.size() );
+	for ( int i = 0; i < Size; i++ ) {
+		pRenderRay = pI->m_pRayQueue.front();
+
+		// ƒŒƒC‚Ì•`‰æ.
+		pI->m_pRayMesh->SetColor( pRenderRay->IsHit() ? Color::Red : Color::White );
+		pI->m_pRayMesh->Render( pRenderRay );
+
+		pI->m_pRayQueue.pop();
+	}
+}
+
+//---------------------------.
+// ƒƒbƒVƒ…‚Ì•`‰æ.
+//	ƒƒbƒVƒ…‚ð•`‰æ‚µ‚È‚¢ê‡ˆ—‚Ís‚í‚È‚¢.
+//---------------------------.
+void CollisionRenderer::MeshRender()
+{
+	CollisionRenderer* pI = GetInstance();
+
+	if ( pI->m_IsMeshRender == false ) return;
+	if ( pI->m_pMeshQueue.empty() ) return;
+
+	// “–‚½‚è”»’è‚ð•`‰æ‚µ‚Ä‚¢‚­.
+	DirectX11::SetRasterizerState( ERS_STATE::Wire );
+	const int Size = static_cast<int>( pI->m_pMeshQueue.size() );
+	for ( int i = 0; i < Size; i++ ) {
+		// •\Ž¦‚·‚éƒgƒ‰ƒ“ƒXƒtƒH[ƒ€‚ðŽæ“¾.
+		STransform RenderTransform = pI->m_pMeshQueue.front().second;
+		RenderTransform.Rotation = INIT_FLOAT3;
+
+		// ƒƒbƒVƒ…‚Ì•`‰æ.
+		if ( pI->m_pMeshQueue.front().first.first != nullptr ) {
+			pI->m_pMeshQueue.front().first.first->Render( &RenderTransform );
+		}
+		else {
+			pI->m_pMeshQueue.front().first.second->Render( &RenderTransform );
+		}
+		pI->m_pMeshQueue.pop();
+	}
+	DirectX11::SetRasterizerState( ERS_STATE::None );
+}
+#endif
+
+#ifdef ENABLE_SPRITE
+//---------------------------.
 // “_2D‚Ì’Ç‰Á.
 //	“_‚ð•`‰æ‚µ‚È‚¢ê‡‚Íˆ—‚Ís‚í‚È‚¢.
 //---------------------------.
@@ -233,170 +419,6 @@ void CollisionRenderer::PushSphere2D( CSphere2D* pSphere2D )
 	if ( pI->m_IsSphere2DRender == false ) return;
 	pI->m_pSphere2DQueue.push( pSphere2D );
 #endif // #ifdef _DEBUG.
-}
-
-//---------------------------.
-// “_‚Ì•`‰æ.
-//	“_‚ð•`‰æ‚µ‚È‚¢ê‡‚Íˆ—‚Ís‚í‚È‚¢.
-//---------------------------.
-void CollisionRenderer::PointRender()
-{
-	CollisionRenderer* pI = GetInstance();
-
-	if ( pI->m_IsPointRender == false	) return;
-	if ( pI->m_pPointQueue.empty()		) return;
-
-	// ‹…‘ÌƒƒbƒVƒ…‚ÌŽæ“¾.
-	if ( pI->m_pSphereMesh == nullptr ) {
-		pI->m_pSphereMesh = MeshResource::GetCollision( "Sphere_c" );
-	}
-
-	// “–‚½‚è”»’è‚ð•`‰æ‚µ‚Ä‚¢‚­.
-	D3DXPOSITION3 pRenderPoint = { 0.0f, 0.0f, 0.0f };
-	const int Size = static_cast<int>( pI->m_pPointQueue.size() );
-	DirectX11::SetDepth( false );
-	for ( int i = 0; i < Size; i++ ) {
-		pRenderPoint = pI->m_pPointQueue.front();
-
-		// ‹…‘Ì‚Ì•`‰æ.
-		pI->m_pSphereMesh->SetColor( Color::White );
-		pI->m_pSphereMesh->SetPosition( pRenderPoint );
-		pI->m_pSphereMesh->SetScale( { 0.1f, 0.1f, 0.1f } );
-		pI->m_pSphereMesh->Render();
-
-		pI->m_pPointQueue.pop();
-	}
-	DirectX11::SetDepth( true );
-}
-
-//---------------------------.
-// ‹…‘Ì‚Ì•`‰æ.
-//	‹…‘Ì‚ð•`‰æ‚µ‚È‚¢ê‡‚Íˆ—‚Ís‚í‚È‚¢.
-//---------------------------.
-void CollisionRenderer::SphereRender()
-{
-	CollisionRenderer* pI = GetInstance();
-
-	if ( pI->m_IsSphereRender == false	) return;
-	if ( pI->m_pSphereQueue.empty()		) return;
-
-	// ‹…‘ÌƒƒbƒVƒ…‚ÌŽæ“¾.
-	if ( pI->m_pSphereMesh == nullptr ) {
-		pI->m_pSphereMesh = MeshResource::GetCollision( "Sphere_c" );
-	}
-
-	// “–‚½‚è”»’è‚ð•`‰æ‚µ‚Ä‚¢‚­.
-	DirectX11::SetRasterizerState( ERS_STATE::Wire );
-	CSphere* pRenderSphere = nullptr;
-	const int Size = static_cast<int>( pI->m_pSphereQueue.size() );
-	for ( int i = 0; i < Size; i++ ) {
-		pRenderSphere = pI->m_pSphereQueue.front();
-
-		// ‹…‘Ì‚Ì•`‰æ.
-		pI->m_pSphereMesh->SetColor( pRenderSphere->IsHit() ? Color::Red : Color::White );
-		pI->m_pSphereMesh->SetPosition( pRenderSphere->GetPosition() );
-		pI->m_pSphereMesh->SetScale( pRenderSphere->GetCollisionScale( pI->m_pSphereMesh->GetMesh() ) );
-		pI->m_pSphereMesh->Render();
-
-		pI->m_pSphereQueue.pop();
-	}
-	DirectX11::SetRasterizerState( ERS_STATE::None );
-}
-
-//---------------------------.
-// ‰~’Œ‚Ì•`‰æ.
-//	‰~’Œ‚ð•`‰æ‚µ‚È‚¢ê‡ˆ—‚Ís‚í‚È‚¢.
-//---------------------------.
-void CollisionRenderer::CylinderRender()
-{
-	CollisionRenderer* pI = GetInstance();
-
-	if ( pI->m_IsCylinderRender == false	) return;
-	if ( pI->m_pCylinderQueue.empty()		) return;
-
-	// ‰~’ŒƒƒbƒVƒ…‚ÌŽæ“¾.
-	if ( pI->m_pCylinderMesh == nullptr ) {
-		pI->m_pCylinderMesh = MeshResource::GetCollision( "Cylinder_c" );
-	}
-
-	// “–‚½‚è”»’è‚ð•`‰æ‚µ‚Ä‚¢‚­.
-	DirectX11::SetRasterizerState( ERS_STATE::Wire );
-	CCylinder* pRenderCylinder = nullptr;
-	const int Size = static_cast<int>( pI->m_pCylinderQueue.size() );
-	for ( int i = 0; i < Size; i++ ) {
-		pRenderCylinder = pI->m_pCylinderQueue.front();
-
-		// ‰~’Œ‚Ì•`‰æ.
-		pI->m_pCylinderMesh->SetColor( pRenderCylinder->IsHit() ? Color::Red : Color::White );
-		pI->m_pCylinderMesh->SetPosition( pRenderCylinder->GetPosition() );
-		pI->m_pCylinderMesh->SetScale( pRenderCylinder->GetCollisionScale( pI->m_pCylinderMesh->GetMesh() ) );
-		pI->m_pCylinderMesh->Render();
-
-		pI->m_pCylinderQueue.pop();
-	}
-	DirectX11::SetRasterizerState( ERS_STATE::None );
-}
-
-//---------------------------.
-// ƒŒƒC‚Ì•`‰æ.
-//	ƒŒƒC‚ð•`‰æ‚µ‚È‚¢ê‡ˆ—‚Ís‚í‚È‚¢.
-//---------------------------.
-void CollisionRenderer::RayRender()
-{
-	CollisionRenderer* pI = GetInstance();
-
-	if ( pI->m_IsRayRender == false	) return;
-	if ( pI->m_pRayQueue.empty()	) return;
-
-	// ƒŒƒCƒƒbƒVƒ…‚ÌŽæ“¾.
-	if ( pI->m_pRayMesh == nullptr ) {
-		pI->m_pRayMesh = std::make_unique<CRayMesh>();
-		if ( FAILED( pI->m_pRayMesh->Init() ) ) return;
-	}
-
-	// “–‚½‚è”»’è‚ð•`‰æ‚µ‚Ä‚¢‚­.
-	CRay* pRenderRay = nullptr;
-	const int Size = static_cast<int>( pI->m_pRayQueue.size() );
-	for ( int i = 0; i < Size; i++ ) {
-		pRenderRay = pI->m_pRayQueue.front();
-
-		// ƒŒƒC‚Ì•`‰æ.
-		pI->m_pRayMesh->SetColor( pRenderRay->IsHit() ? Color::Red : Color::White );
-		pI->m_pRayMesh->Render( pRenderRay );
-
-		pI->m_pRayQueue.pop();
-	}
-}
-
-//---------------------------.
-// ƒƒbƒVƒ…‚Ì•`‰æ.
-//	ƒƒbƒVƒ…‚ð•`‰æ‚µ‚È‚¢ê‡ˆ—‚Ís‚í‚È‚¢.
-//---------------------------.
-void CollisionRenderer::MeshRender()
-{
-	CollisionRenderer* pI = GetInstance();
-
-	if ( pI->m_IsMeshRender == false	) return;
-	if ( pI->m_pMeshQueue.empty()		) return;
-
-	// “–‚½‚è”»’è‚ð•`‰æ‚µ‚Ä‚¢‚­.
-	DirectX11::SetRasterizerState( ERS_STATE::Wire );
-	const int Size = static_cast<int>( pI->m_pMeshQueue.size() );
-	for ( int i = 0; i < Size; i++ ) {
-		// •\Ž¦‚·‚éƒgƒ‰ƒ“ƒXƒtƒH[ƒ€‚ðŽæ“¾.
-		STransform RenderTransform	= pI->m_pMeshQueue.front().second;
-		RenderTransform.Rotation	= INIT_FLOAT3;
-
-		// ƒƒbƒVƒ…‚Ì•`‰æ.
-		if ( pI->m_pMeshQueue.front().first.first != nullptr ) {
-			pI->m_pMeshQueue.front().first.first->Render( &RenderTransform );
-		}
-		else {
-			pI->m_pMeshQueue.front().first.second->Render( &RenderTransform );
-		}
-		pI->m_pMeshQueue.pop();
-	}
-	DirectX11::SetRasterizerState( ERS_STATE::None );
 }
 
 //---------------------------.
@@ -532,3 +554,4 @@ void CollisionRenderer::Sphere2DRender()
 	}
 	DirectX11::SetDepth( true );
 }
+#endif

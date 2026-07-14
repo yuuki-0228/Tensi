@@ -1,5 +1,5 @@
 #include "MenuManager.h"
-#ifdef ENABLE_MENU
+#ifdef ENABLE_WINDOWS_MENU
 #include "..\..\Object\GameObject\Actor\WindowObjectManager\WindowObject\WindowObject.h"
 #include "..\..\Object\GameObject\Actor\WindowObjectManager\WindowObjectManager.h"
 

@@ -2,6 +2,8 @@
 #include "ConstCreate.h"
 #include "SaveCreate.h"
 #include "MDataCreate.h"
+#include <exception>
+#include <stdexcept>
 
 namespace {
 	int NormalEnd() {
@@ -26,9 +28,15 @@ int main() {
 	fprintf( stderr, "1>------ Creator 開始: プラグイン: creator ------\n" );
 	fprintf( stderr, "1>コード作成しています。\n" );
 
-	if ( FAILED( ConstCreate::main()	) ) return ErrorEnd();
-	if ( FAILED( SaveCreate::main()		) ) return ErrorEnd();
-	if ( FAILED( MDataCreate::main()	) ) return ErrorEnd();
+	try {
+		if ( FAILED( ConstCreate::main()	) ) return ErrorEnd();
+		if ( FAILED( SaveCreate::main()		) ) return ErrorEnd();
+		if ( FAILED( MDataCreate::main()	) ) return ErrorEnd();
+	}
+	catch ( const std::exception& e ) {
+		fprintf( stderr, std::string( std::string( "1>" ) + e.what() + std::string( "\n" ) ).c_str() );
+		return ErrorEnd();
+	}
 
 	return NormalEnd();
 }

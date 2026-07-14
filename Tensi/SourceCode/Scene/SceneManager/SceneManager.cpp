@@ -1,15 +1,17 @@
 #include "SceneManager.h"
 #include "..\GameMain\GameMain.h"
 #include "..\..\Common\DirectX\DirectX11.h"
-#include "..\..\Common\SoundManeger\SoundManeger.h"
+#include "..\..\Common\XAudio2\SoundManager.h"
 #include "..\..\Object\GameObject\ActorCollisionManager\ActorCollisionManager.h"
 #include "..\..\Utility\ImGuiManager\DebugWindow\DebugWindow.h"
 #include "..\..\Utility\ImGuiManager\MessageWindow\MessageWindow.h"
 #include "..\..\Utility\StringConversion\StringConversion.h"
 #include "..\..\Utility\Input\Input.h"
-#include "..\..\Utility\Transform\PositionRenderer\PositionRenderer.h"
 #include "..\..\Utility\SaveDataManager\SaveDataManager.h"
 #include "..\..\Utility\Const\Const.h"
+#ifdef ENABLE_MESH
+#include "..\..\Utility\Transform\PositionRenderer\PositionRenderer.h"
+#endif
 
 SceneManager::SceneManager()
 	: m_pScene			( nullptr )
@@ -66,7 +68,7 @@ void SceneManager::Update( const float& DeltaTime )
 {
 	SceneManager* pI = GetInstance();
 
-#ifdef _DEBUG
+#if defined(_DEBUG) && defined(ENABLE_MESH)
 	PositionRenderer::Update( DeltaTime );
 #endif
 
@@ -176,7 +178,9 @@ void SceneManager::SceneChangeUpdate()
 		// ƒV[ƒ“‚ð•ÏX.
 		switch ( pI->m_ChangeScene ) {
 		case ESceneList::GameMain:
-			SoundManager::BGMAllStop();
+#ifdef ENABLE_SOUND
+			SoundManager::StopAllBGM();
+#endif // ENABLE_SOUND
 			pI->m_pScene = std::make_unique<CGameMain>();
 			break;
 		default:

@@ -1,4 +1,6 @@
 #pragma once
+#include "..\..\..\SystemSetting.h"
+#ifdef ENABLE_MESH
 #include "..\ColliderBase.h"
 
 /************************************************
@@ -35,3 +37,5 @@ private:
 	LPD3DXMESH m_Model;			// モデルのメッシュ.
 	LPD3DXMESH m_ModelForRay;	// レイとの当たり判定用のメッシュ.
 };
+
+#endif

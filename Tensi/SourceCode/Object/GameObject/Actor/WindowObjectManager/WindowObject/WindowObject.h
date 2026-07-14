@@ -4,6 +4,7 @@
 #include "..\..\..\..\..\Common\Sprite\Sprite.h"
 #include "..\..\..\..\..\Resource\SpriteResource\SpriteResource.h"
 #include "..\..\..\..\..\Utility\WindowManager\WindowManager.h"
+#include "..\..\..\..\..\Utility\Animation\ScaleAnimation\ScaleAnimation.h"
 
 /************************************************
 *	ウィンドウのオブジェクト.
@@ -58,6 +59,16 @@ protected:
 	// 着地の更新.
 	virtual void LandingUpdate() {};
 
+	// 衝突した速度に応じて拡縮を潰す( 進行軸を潰し反対の軸を膨らませる ).
+	//	IsHorizontal : 横方向の衝突なら true, 縦方向なら false.
+	void ImpactSquash( const float Speed, const bool IsHorizontal );
+	// 瞬間的に拡縮させ, 弾性で等倍へ戻す.
+	void PunchScale( const float ScaleX, const float ScaleY ) { m_ScaleAnim.Punch( ScaleX, ScaleY ); }
+	// 拡縮の追従先を設定する.
+	void SetScaleTarget( const float ScaleX, const float ScaleY ) { m_ScaleAnim.SetTarget( ScaleX, ScaleY ); }
+	// 拡縮を即座に等倍へ戻す.
+	void ResetScale() { m_ScaleAnim.Reset(); }
+
 private:
 	// 掴む.
 	void Grab();
@@ -109,6 +120,8 @@ private:
 protected:
 	CSprite*					m_pSprite;			// 画像.
 	SSpriteRenderState			m_SpriteState;		// 画像の情報.
+	CScaleAnimation				m_ScaleAnim;		// 拡縮アニメーション.
+	bool						m_IsUseImpactSquash;// 衝突時に拡縮させるか.
 	std::vector<D3DXVECTOR3>	m_VectorList;		// ベクトルリスト.
 	D3DXVECTOR3					m_OldMoveVector;	// 前回の移動ベクトル.
 	D3DXVECTOR3					m_MoveVector;		// 移動ベクトル.

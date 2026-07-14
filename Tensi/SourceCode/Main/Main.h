@@ -33,11 +33,15 @@ private:
 	// FPSの描画.
 	void FPSRender();
 
+#ifdef ENABLE_TRANSPARENT_WINDOW
 	// ウィンドウのクリック判定の更新.
 	void ClickUpdate();
+#endif // ENABLE_TRANSPARENT_WINDOW
 
+#ifdef ENABLE_SUB_WINDOW
 	// WorkerWの取得
 	HWND FindWorkerW();
+#endif // ENABLE_SUB_WINDOW
 
 private:
 	HWND							m_hWnd;			// ウィンドウハンドル.

@@ -1,4 +1,5 @@
 #include "Sprite.h"
+#ifdef ENABLE_SPRITE
 #include "..\DirectX\DirectX11.h"
 #include "..\..\Object\Camera\CameraManager\CameraManager.h"
 #include "..\..\Resource\SpriteResource\SpriteResource.h"
@@ -7,7 +8,9 @@
 #include "..\..\Utility\ImGuiManager\ImGuiManager.h"
 #include "..\..\Utility\ImGuiManager\MessageWindow\MessageWindow.h"
 #include "..\..\Utility\Message\Message.h"
+#ifdef ENABLE_MESH
 #include "..\..\Utility\Transform\PositionRenderer\PositionRenderer.h"
+#endif
 
 namespace {
 	// シェーダファイル名(ディレクトリも含む).
@@ -202,7 +205,7 @@ void CSprite::Render3D( SSpriteRenderState* pRenderState, const bool IsBillBoard
 {
 	SSpriteRenderState* RenderState = pRenderState == nullptr ? &m_SpriteRenderState : pRenderState;
 	SSpriteAnimState*	AnimState	= &RenderState->AnimState;
-#ifdef _DEBUG
+#if defined(_DEBUG) && defined(ENABLE_MESH)
 	PositionRenderer::Render( RenderState->Transform );
 #endif
 	// 非表示の場合は処理を行わない.
@@ -814,3 +817,4 @@ D3DXPOSITION3 CSprite::GetAddCenterPosition()
 		return INIT_FLOAT3;
 	}
 }
+#endif // ENABLE_SPRITE

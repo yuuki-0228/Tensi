@@ -147,7 +147,6 @@
     <ClCompile Include="SourceCode\Common\Sprite\Sprite.cpp">
       <Filter>Source\Sprite</Filter>
     </ClCompile>
-    <ClCompile Include="SourceCode\Common\SoundManeger\SoundManeger.cpp" />
     <ClCompile Include="SourceCode\Utility\ImGuiManager\DebugWindow\DebugWindow.cpp" />
     <ClCompile Include="SourceCode\Utility\ImGuiManager\ImGuiManager.cpp" />
     <ClCompile Include="SourceCode\Utility\ImGuiManager\MessageWindow\MessageWindow.cpp" />
@@ -201,7 +200,6 @@
     <ClCompile Include="SourceCode\Object\Collision\CrossRay\CrossRay.cpp" />
     <ClCompile Include="SourceCode\Scene\SceneBase.cpp" />
     <ClCompile Include="SourceCode\Scene\SceneManager\SceneManager.cpp" />
-    <ClCompile Include="SourceCode\Common\SoundManeger\Sound\Sound.cpp" />
     <ClCompile Include="SourceCode\Common\WindowTextRenderer\WindowTextRenderer.cpp" />
     <ClCompile Include="SourceCode\Object\GameObject\Widget\SceneWidget\SceneWidget.cpp" />
     <ClCompile Include="SourceCode\Object\GameObject\Actor\Actor.cpp" />
@@ -229,6 +227,7 @@
     <ClCompile Include="Library\ImGui\imgui_stdlib.cpp" />
     <ClCompile Include="SourceCode\Utility\Input\Controller\DirectInput\DirectInput.cpp" />
     <ClCompile Include="SourceCode\Utility\Transform\Transform.cpp" />
+    <ClCompile Include="SourceCode\Utility\Animation\ScaleAnimation\ScaleAnimation.cpp" />
     <ClCompile Include="SourceCode\Object\Collision\Cylinder\Cylinder.cpp" />
     <ClCompile Include="SourceCode\Object\GameObject\Widget\Widget.cpp" />
     <ClCompile Include="SourceCode\Object\GameObject\Widget\UIWidget\UIWidget.cpp" />
@@ -288,6 +287,14 @@
     <ClCompile Include="SourceCode\Object\GameObject\Actor\BackGroundManager\ActorBackGround\Ground\GroundTile\GroundTile.cpp" />
     <ClCompile Include="SourceCode\Object\GameObject\Actor\BackGroundManager\ActorBackGround\Ground\Ground.cpp" />
     <ClCompile Include="SourceCode\Object\GameObject\Actor\BackGroundManager\BackGroundManager.cpp" />
+    <ClCompile Include="SourceCode\Utility\CashManager\CashManager.cpp" />
+    <ClCompile Include="SourceCode\Utility\EventSubject\EventSubject.cpp" />
+    <ClCompile Include="SourceCode\Common\XAudio2\OggLoad\OggLoad.cpp" />
+    <ClCompile Include="SourceCode\Common\XAudio2\XAudio2Master\XAudio2MasterVoice.cpp" />
+    <ClCompile Include="SourceCode\Common\XAudio2\XAudio2Play\BGM\XAudio2PlayBGM.cpp" />
+    <ClCompile Include="SourceCode\Common\XAudio2\XAudio2Play\SE\XAudio2PlaySE.cpp" />
+    <ClCompile Include="SourceCode\Common\XAudio2\XAudio2Play\Voice\XAudio2PlayVoice.cpp" />
+    <ClCompile Include="SourceCode\Common\XAudio2\SoundManager.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="SourceCode\Global.h">
@@ -342,7 +349,6 @@
     <ClInclude Include="SourceCode\Common\Sprite\Sprite.h">
       <Filter>Source\Sprite</Filter>
     </ClInclude>
-    <ClInclude Include="SourceCode\Common\SoundManeger\SoundManeger.h" />
     <ClInclude Include="SourceCode\Utility\ImGuiManager\DebugWindow\DebugWindow.h" />
     <ClInclude Include="SourceCode\Utility\ImGuiManager\ImGuiManager.h" />
     <ClInclude Include="SourceCode\Utility\Color\Color.h" />
@@ -399,7 +405,6 @@
     <ClInclude Include="SourceCode\Object\Collision\CrossRay\CrossRay.h" />
     <ClInclude Include="SourceCode\Scene\SceneBase.h" />
     <ClInclude Include="SourceCode\Scene\SceneManager\SceneManager.h" />
-    <ClInclude Include="SourceCode\Common\SoundManeger\Sound\Sound.h" />
     <ClInclude Include="SourceCode\Common\WindowTextRenderer\WindowTextRenderer.h" />
     <ClInclude Include="SourceCode\Object\GameObject\GameObjectList.h" />
     <ClInclude Include="SourceCode\Object\GameObject\Widget\SceneWidget\SceneWidget.h" />
@@ -423,6 +428,7 @@
     <ClInclude Include="SourceCode\Utility\StringConversion\StringConversion.h" />
     <ClInclude Include="SourceCode\Utility\Easing\Easing.h" />
     <ClInclude Include="SourceCode\Utility\Transform\Transform.h" />
+    <ClInclude Include="SourceCode\Utility\Animation\ScaleAnimation\ScaleAnimation.h" />
     <ClInclude Include="SourceCode\Common\Common.h" />
     <ClInclude Include="SourceCode\Utility\FileManager\DragAndDrop\DragAndDrop.h" />
     <ClInclude Include="SourceCode\Utility\FileManager\ImagSize\ImageSize.h" />
@@ -494,6 +500,18 @@
     <ClInclude Include="SourceCode\Object\GameObject\Actor\BackGroundManager\ActorBackGround\Ground\Ground.h" />
     <ClInclude Include="SourceCode\Object\GameObject\Actor\BackGroundManager\BackGroundManager.h" />
     <ClInclude Include="SourceCode\SystemSetting.h" />
+    <ClInclude Include="SourceCode\Utility\CashManager\CashManager.h" />
+    <ClInclude Include="SourceCode\Utility\EventSubject\EventParam\EventParam.h" />
+    <ClInclude Include="SourceCode\Utility\EventSubject\Subject\Subject.h" />
+    <ClInclude Include="SourceCode\Utility\EventSubject\EventSubject.h" />
+    <ClInclude Include="SourceCode\Common\XAudio2\OggLoad\OggLoad.h" />
+    <ClInclude Include="SourceCode\Common\XAudio2\XAudio2CallBack\VoiceCallBack.h" />
+    <ClInclude Include="SourceCode\Common\XAudio2\XAudio2Master\XAudio2MasterVoice.h" />
+    <ClInclude Include="SourceCode\Common\XAudio2\XAudio2Play\BGM\XAudio2PlayBGM.h" />
+    <ClInclude Include="SourceCode\Common\XAudio2\XAudio2Play\SE\XAudio2PlaySE.h" />
+    <ClInclude Include="SourceCode\Common\XAudio2\XAudio2Play\Voice\XAudio2PlayVoice.h" />
+    <ClInclude Include="SourceCode\Common\XAudio2\SoundManager.h" />
+    <ClInclude Include="SourceCode\Common\XAudio2\XAudio2.h" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="ico.rc" />

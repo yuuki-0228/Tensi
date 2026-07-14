@@ -1,4 +1,6 @@
 #pragma once
+#include "..\..\SystemSetting.h"
+#ifdef ENABLE_MASTER_DATA
 #include "..\..\Global.h"
 #include "MasterDatas.h"
 #include <functional>
@@ -6,7 +8,6 @@
 
 /************************************************
 *	マスターデータのアクセスクラス.
-*	「creator」によって自動で「cpp」が作成されています
 **/
 class MasterDataAccesser
 {
@@ -20,11 +21,11 @@ public:
 	// 1件取得する
 	//	存在しなければエラーが発生する
 	template<class T>
-	static T Get( unsigned int id );
+	static T Get( const ulong id );
 
 	// 1件探す
 	template<class T>
-	static T Find( unsigned int id );
+	static T Find( const ulong id );
 
 	// 一致する要素を返す
 	template<class T>
@@ -36,7 +37,7 @@ public:
 
 	// idが一致する要素があるかを判断して返す
 	template<class T>
-	static bool Any( unsigned int id );
+	static bool Any( const ulong id );
 
 	// 一致する要素があるかを判断して返す
 	template<class T>
@@ -59,7 +60,7 @@ private:
 	static MasterDataAccesser* GetInstance();
 
 private:
-	std::unordered_map<std::string, std::unordered_map<unsigned int, std::any>> m_MasterContainer;
+	std::unordered_map<std::string, std::unordered_map<ulong, std::any>> m_MasterContainer;
 };
 
 
@@ -67,15 +68,15 @@ private:
 // IDからマスターデータを取得する
 //----------------------------.
 template<class T>
-inline T MasterDataAccesser::Get( unsigned int id )
+inline T MasterDataAccesser::Get( const ulong id )
 {
 	MasterDataAccesser* pI = GetInstance();
 	try
 	{
-		return std::any_cast<T>( pI->m_MasterContainer[typeid( T ).name].at( id ) );
-	} catch ( const std::out_of_range& out )
+		return std::any_cast<T>( pI->m_MasterContainer[typeid( T ).name()].at( id ) );
+	} catch ( const std::out_of_range& )
 	{
-		ErrorMessage( std::string( typeid( T ).name ) + "にID:" + std::to_string( id ) + "が存在しません" );
+		ErrorMessage( std::string( typeid( T ).name() ) + "にID:" + std::to_string( id ) + "が存在しません" );
 		return T();
 	}
 }
@@ -84,11 +85,16 @@ inline T MasterDataAccesser::Get( unsigned int id )
 // 1件探す
 //----------------------------.
 template<class T>
-inline T MasterDataAccesser::Find( unsigned int id )
+inline T MasterDataAccesser::Find( const ulong id )
 {
 	MasterDataAccesser* pI = GetInstance();
-
-	return std::any_cast<T>( pI->m_MasterContainer[typeid( T ).name][id] );
+	try
+	{
+		return std::any_cast< T >( pI->m_MasterContainer[typeid( T ).name()].at( id ) );
+	} catch ( const std::out_of_range& )
+	{
+		return T();
+	}
 }
 
 //----------------------------.
@@ -101,8 +107,8 @@ inline std::vector<T> MasterDataAccesser::Where( const std::function<bool( T )>&
 
 	std::vector<T> out;
 	out.reserve( MasterDataAccesser::Count<T>() );
-	for ( auto& m : pI->m_MasterContainer[typeid( T ).name] ) {
-		const T& data = std::any_cast<T>( m );
+	for ( auto& [key, value] : pI->m_MasterContainer[typeid( T ).name()] ) {
+		auto data = std::any_cast<T>( value );
 		if ( function( data ) ) {
 			out.emplace_back( data );
 		}
@@ -118,8 +124,8 @@ inline T MasterDataAccesser::First( const std::function<bool( T )>& function )
 {
 	MasterDataAccesser* pI = GetInstance();
 
-	for ( auto& m : pI->m_MasterContainer[typeid( T ).name] ) {
-		const T& data = std::any_cast<T>( m );
+	for ( auto& [key, value] : pI->m_MasterContainer[typeid( T ).name()] ) {
+		const T& data = std::any_cast<T>( value );
 		if ( function( data ) ) {
 			return data;
 		}
@@ -131,11 +137,11 @@ inline T MasterDataAccesser::First( const std::function<bool( T )>& function )
 // idが一致する要素があるかを判断して返す
 //----------------------------.
 template<class T>
-inline bool MasterDataAccesser::Any( unsigned int id )
+inline bool MasterDataAccesser::Any( const ulong id )
 {
 	MasterDataAccesser* pI = GetInstance();
 
-	return pI->m_MasterContainer[typeid( T ).name].find( id ) != pI->m_MasterContainer[typeid( T ).name].end();
+	return pI->m_MasterContainer[typeid( T ).name()].find( id ) != pI->m_MasterContainer[typeid( T ).name()].end();
 }
 
 //----------------------------.
@@ -146,8 +152,8 @@ inline bool MasterDataAccesser::Any( const std::function<bool( T )>& function )
 {
 	MasterDataAccesser* pI = GetInstance();
 
-	for ( auto& m : pI->m_MasterContainer[typeid( T ).name] ) {
-		if ( function( std::any_cast<T>( m ) ) ) {
+	for ( auto& [key, value] : pI->m_MasterContainer[typeid( T ).name()] ) {
+		if ( function( std::any_cast<T>( value ) ) ) {
 			return true;
 		}
 	}
@@ -164,8 +170,8 @@ inline std::vector<T> MasterDataAccesser::All()
 
 	std::vector<T> out;
 	out.reserve( MasterDataAccesser::Count<T>() );
-	for ( auto& m : pI->m_MasterContainer[typeid( T ).name] ) {
-		out.emplace_back( std::any_cast<T>( m ) );
+	for ( auto& [key, value] : pI->m_MasterContainer[typeid( T ).name()] ) {
+		out.emplace_back( std::any_cast<T>( value ) );
 	}
 	return out;
 }
@@ -178,7 +184,7 @@ inline int MasterDataAccesser::Count()
 {
 	MasterDataAccesser* pI = GetInstance();
 
-	return pI->m_MasterContainer[typeid( T ).name].size();
+	return static_cast<int>( pI->m_MasterContainer[typeid( T ).name()].size() );
 }
 
 //----------------------------.
@@ -190,10 +196,11 @@ inline int MasterDataAccesser::Count( const std::function<bool( T )>& function )
 	MasterDataAccesser* pI = GetInstance();
 
 	int num = 0;
-	for ( auto& m : pI->m_MasterContainer[typeid( T ).name] ) {
-		if ( function( std::any_cast<T>( m ) ) ) {
+	for ( auto& [key, value] : pI->m_MasterContainer[typeid( T ).name()] ) {
+		if ( function( std::any_cast<T>( value ) ) ) {
 			num++;
 		}
 	}
 	return num;
 }
+#endif

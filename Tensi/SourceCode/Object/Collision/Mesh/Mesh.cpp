@@ -1,4 +1,5 @@
 #include "Mesh.h"
+#ifdef ENABLE_MESH
 
 CMesh::CMesh()
 	: m_Model		( nullptr )
@@ -65,3 +66,5 @@ HRESULT CMesh::FindVerticesOnPoly(
 
 	return S_OK;
 }
+
+#endif

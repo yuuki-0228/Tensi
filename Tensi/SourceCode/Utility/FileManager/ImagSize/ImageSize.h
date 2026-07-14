@@ -1,4 +1,6 @@
 #pragma once
+#include "..\..\..\SystemSetting.h"
+#ifdef ENABLE_FILE
 #include "..\..\..\Global.h"
 
 /************************************************
@@ -18,3 +20,5 @@ namespace ImageSize {
 	// bmpファイルの幅、高さを取得する.
 	D3DXVECTOR2 GetBmpImageSize( const std::string& FilePath );
 }
+
+#endif

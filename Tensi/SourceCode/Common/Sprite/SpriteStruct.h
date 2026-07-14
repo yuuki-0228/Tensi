@@ -1,4 +1,6 @@
 #pragma once
+#include "..\..\SystemSetting.h"
+#ifdef ENABLE_SPRITE
 #include "..\..\Global.h"
 
 // ƒ[ƒJƒ‹À•W‚Ì”Ô†.
@@ -306,3 +308,5 @@ struct stSpriteRenderState
 
 } typedef SSpriteRenderState;
 using SSpriteRenderStateList = std::vector<SSpriteRenderState>;
+
+#endif // ENABLE_SPRITE

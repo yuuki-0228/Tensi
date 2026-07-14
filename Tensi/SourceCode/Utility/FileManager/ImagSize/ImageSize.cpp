@@ -1,4 +1,5 @@
 #include "ImageSize.h"
+#ifdef ENABLE_FILE
 #include <iostream>
 #include <fstream>
 
@@ -196,3 +197,5 @@ D3DXVECTOR2 ImageSize::GetBmpImageSize( const std::string& FilePath )
 		static_cast<float>( Image.Height )
 	);
 }
+
+#endif

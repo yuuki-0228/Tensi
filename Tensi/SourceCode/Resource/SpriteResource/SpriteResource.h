@@ -1,4 +1,6 @@
 #pragma once
+#include "..\..\SystemSetting.h"
+#ifdef ENABLE_SPRITE
 #include "..\..\Global.h"
 #include "..\..\Common\Sprite\Sprite.h"
 #include <unordered_map>
@@ -49,3 +51,4 @@ private:
 	SpriteResource( SpriteResource&& )					= delete;
 	SpriteResource& operator = ( SpriteResource&& )		= delete;
 };
+#endif // ENABLE_SPRITE

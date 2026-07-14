@@ -1,4 +1,6 @@
 #pragma once
+#include "..\..\..\SystemSetting.h"
+#ifdef ENABLE_MESH
 #include "..\ColliderBase.h"
 
 class CStaticMesh;
@@ -40,3 +42,5 @@ private:
 	float m_Radius;		// îºåa(í∑Ç≥).
 	float m_Height;		// çÇÇ≥.
 };
+
+#endif

@@ -1,4 +1,6 @@
 #pragma once
+#include "..\..\..\SystemSetting.h"
+#ifdef ENABLE_MESH
 #include "..\ColliderBase.h"
 #include "..\Ray\Ray.h"
 
@@ -56,3 +58,5 @@ private:
 	float								m_Length;	// ’·‚³.
 
 };
+
+#endif

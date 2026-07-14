@@ -1,4 +1,5 @@
 #include "Cylinder.h"
+#ifdef ENABLE_MESH
 #include "..\..\..\Common\Mesh\StaticMesh\StaticMesh.h"
 
 CCylinder::CCylinder()
@@ -99,3 +100,5 @@ HRESULT CCylinder::SetMeshRadius( const LPD3DXMESH& pMesh, const float vScale )
 	m_Radius = Radius * vScale;
 	return S_OK;
 }
+
+#endif

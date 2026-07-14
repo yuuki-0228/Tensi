@@ -134,7 +134,7 @@ void SaveCreate::cpp( const std::vector<std::string>& File ) {
 		"#include \"..\\..\\FileManager\\FileManager.h\"\n"
 		"\n"
 		"namespace {\n"
-		"	constexpr char FILE_PATH[] = \"Data\\\\Parameter\\\\d\\\\m.bin\";\n"
+		"	constexpr char FILE_PATH[] = \"Data\\\\Parameter\\\\ms.bin\";\n"
 		"}\n"
 		"\n"
 		"CCommonSaveData::CCommonSaveData()\n"

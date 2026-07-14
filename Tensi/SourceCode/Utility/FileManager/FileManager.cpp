@@ -1,4 +1,5 @@
 #include "FileManager.h"
+#ifdef ENABLE_FILE
 
 //----------------------------.
 // テキストファイルの読み込み.
@@ -198,6 +199,24 @@ bool FileManager::FileCheck( const std::string& FilePath )
 	return std::filesystem::is_regular_file( FilePath );
 }
 
+//----------------------------.
+// ファイルを削除する
+//----------------------------.
+HRESULT FileManager::FileDelete(const std::string& FilePath)
+{
+	std::filesystem::remove(FilePath);
+	return S_OK;
+}
+
+//----------------------------.
+// ファイルを全て削除する
+//----------------------------.
+HRESULT FileManager::FileDeleteAll(const std::string& FilePath)
+{
+	std::filesystem::remove_all(FilePath);
+	return S_OK;
+}
+
 #ifndef _DEBUG
 //----------------------------.
 // 暗号化テキストファイルの読み込み.
@@ -277,4 +296,5 @@ json FileManager::EFile::EJsonLoad( const std::string& FilePath )
 	mb.DestroyFile();
 	return Out;
 }
+#endif
 #endif

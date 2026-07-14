@@ -1,4 +1,6 @@
 #pragma once
+#include "..\..\..\SystemSetting.h"
+#ifdef ENABLE_FILE
 #include "..\..\..\Global.h"
 
 /************************************************
@@ -41,3 +43,5 @@ private:
 	DragAndDrop& operator = ( const DragAndDrop& )	= delete;
 	DragAndDrop& operator = ( DragAndDrop&& )			= delete;
 };
+
+#endif

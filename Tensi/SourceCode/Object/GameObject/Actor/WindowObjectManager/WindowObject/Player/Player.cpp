@@ -2,12 +2,13 @@
 #include "..\..\..\ActorEffect\SleepEffectManager\SleepEffectManager.h"
 #include "..\..\..\ActorEffect\NoteEffectManager\NoteEffectManager.h"
 #include "..\..\..\..\..\..\Common\DirectX\DirectX11.h"
-#include "..\..\..\..\..\..\Common\SoundManeger\SoundManeger.h"
+#include "..\..\..\..\..\..\Common\XAudio2\SoundManager.h"
 #include "..\..\..\..\..\..\Scene\SceneManager\SceneManager.h"
 #include "..\..\..\..\..\..\Utility\Math\Math.h"
 #include "..\..\..\..\..\..\Utility\Random\Random.h"
 #include "..\..\..\..\..\..\Utility\Input\Input.h"
 #include "..\..\..\..\..\..\Utility\SaveDataManager\SaveDataManager.h"
+#include <cmath>
 
 namespace {
 	const D3DXVECTOR3	LEFT_MOVE_VECTOR	= { -10.0f, -20.0f, 0.0f };	// ¶‚ÉˆÚ“®‚·‚éƒxƒNƒgƒ‹.
@@ -15,6 +16,16 @@ namespace {
 	const D3DXVECTOR3	JUMP_VECTOR			= { 0.0f,   -20.0f, 0.0f };	// ƒWƒƒƒ“ƒvƒxƒNƒgƒ‹.
 	const float			PLAYER_SIZE			= 80.0f;					// ‰æ‘œ‚ÌƒTƒCƒY.
 	const float			CEILING_POS			= -PLAYER_SIZE * 5.0f;		// “Vˆä‚ÌˆÊ’u.
+
+	// ’Í‚ñ‚¾‚ÌŠgk—Ê( ‰¡‚É’×‚ê‚Äc‚Ék‚Ş ).
+	const float			GRAB_SQUASH_X		= 1.2f;						// ’Í‚ñ‚¾‚Ì‰¡‚ÌŠgk’l.
+	const float			GRAB_SQUASH_Y		= 0.8f;						// ’Í‚ñ‚¾‚Ìc‚ÌŠgk’l.
+
+	// “Š‚°‚½‚ÌŠgk‰‰o—pƒpƒ‰ƒ[ƒ^.
+	const float			THROW_MIN_SPEED		= 4.0f;						// ‚±‚Ì‘¬“xˆÈ‰º‚Å‚ÍŠgk‚³‚¹‚È‚¢.
+	const float			THROW_SPEED_RATE	= 0.018f;					// ‘¬“x‚©‚çŠgk—Ê‚Ö•ÏŠ·‚·‚éŒW”.
+	const float			THROW_MAX_AMOUNT	= 0.3f;						// Šgk—Ê‚ÌÅ‘å’l.
+	const float			THROW_CROSS_RATE	= 0.6f;						// L‚Ñ‚é²‚Æ”½‘Î‚Ì²‚Ìk‚ŞŠ„‡.
 
 	// Œ©‚½–ÚNo.
 	enum enImageNo : unsigned char {
@@ -90,6 +101,7 @@ bool CPlayer::Init()
 	m_SpeedRate			= 0.95f;
 	m_CeilingPosY		= CEILING_POS;
 	m_ObjectTag			= EObjectTag::Player;
+	m_IsUseImpactSquash	= true;		// •Ç‚â’n–Ê‚Ö‚ÌÕ“Ë‚ÅŠgk‚³‚¹‚é.
 
 	SaveDataManager::SetSaveData()->PlayerTransform = &m_SpriteState.Transform;
 
@@ -203,6 +215,29 @@ void CPlayer::GrabInit()
 	ActionEnd();
 	m_Action		= ActionWait;
 	m_ActionTime	= 2.0f;
+
+	// ’Í‚Ü‚ê‚½”½‰‚Æ‚µ‚ÄŠgk‚ğ’e‚Ü‚¹‚é.
+	PunchScale( GRAB_SQUASH_X, GRAB_SQUASH_Y );
+}
+
+//---------------------------.
+// —£‚µ‚½‚Ì‰Šú‰».
+//---------------------------.
+void CPlayer::SeparateInit()
+{
+	// “Š‚°‚½‘¬“x‚ğ‹‚ß‚é.
+	const float SpeedX	= m_OldMoveVector.x;
+	const float SpeedY	= m_OldMoveVector.y;
+	const float Speed	= sqrtf( SpeedX * SpeedX + SpeedY * SpeedY );
+	if ( Speed <= THROW_MIN_SPEED ) return;
+
+	// ‘¬“x‚É‰‚¶‚½Šgk—Ê‚ğ‹‚ß‚é.
+	float Amount = ( Speed - THROW_MIN_SPEED ) * THROW_SPEED_RATE;
+	Amount = min( Amount, THROW_MAX_AMOUNT );
+
+	// is•ûŒü‚ÖL‚Î‚µ, ”½‘Î‚Ì²‚ğk‚ß‚é.
+	if ( std::abs( SpeedY ) >= std::abs( SpeedX ) ) PunchScale( 1.0f - Amount * THROW_CROSS_RATE, 1.0f + Amount );
+	else								PunchScale( 1.0f + Amount, 1.0f - Amount * THROW_CROSS_RATE );
 }
 
 //---------------------------.

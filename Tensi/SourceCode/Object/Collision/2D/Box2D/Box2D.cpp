@@ -1,4 +1,5 @@
 #include "Box2D.h"
+#ifdef ENABLE_SPRITE
 
 CBox2D::CBox2D()
 	: m_pSprite			( nullptr )
@@ -76,3 +77,4 @@ D3DXPOSITION2 CBox2D::GetSpriteUpperLeftPos( SSpriteRenderState* pRenderState )
 	default:						return Pos;
 	}
 }
+#endif

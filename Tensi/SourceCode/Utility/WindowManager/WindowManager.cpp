@@ -1,5 +1,5 @@
 #include "WindowManager.h"
-#ifdef ENABLE_WINDOW
+#ifdef ENABLE_WINDOWS_WINDOW
 #include "..\Input\Input.h"
 #include <dwmapi.h>
 #include <psapi.h>

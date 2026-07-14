@@ -4,6 +4,7 @@
 *		Unicode‘Î‰ž.
 **/
 #include "SkinMeshParser.h"
+#ifdef ENABLE_MESH
 #include <stdlib.h>
 #include <string.h>
 #include <crtdbg.h>
@@ -841,3 +842,4 @@ HRESULT D3DXPARSER::Release()
 
 	return S_OK;
 }
+#endif // ENABLE_MESH

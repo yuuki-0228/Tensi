@@ -7,8 +7,7 @@
 #include <string>
 
 namespace {
-	constexpr char	RECOVERY_FILE_PATH[]	= "Data\\Parameter\\Config\\MouseSpeedRecovery.json";	// 復元用ファイルの保存場所.
-	constexpr char	JSON_KEY_MOUSE_SPEED[]	= "MouseSpeed";											// 復元用ファイル内の速度のキー名.
+	constexpr char	RECOVERY_FILE_PATH[]	= "Data\\Parameter\\Data\\ms.bin";				// 復帰用ファイルの保存場所.
 	constexpr char	WATCHDOG_OPTION[]		= "--mouse-speed-watchdog";								// 監視プロセス起動用のコマンドライン引数.
 	constexpr int	MOUSE_SPEED_MIN			= 1;	// マウス速度の最小値.
 	constexpr int	MOUSE_SPEED_MAX			= 20;	// マウス速度の最大値.
@@ -111,8 +110,9 @@ bool MouseSpeedGuard::RunWatchdogIfRequested( const char* lpCmdLine )
 	// 復元用ファイルが残っている場合は異常終了のため復元する.
 	//	※正常終了時は本体側でファイルが削除されているため何もしない.
 	if ( FileManager::FileCheck( RECOVERY_FILE_PATH ) == false ) return true;
-	const json Data = FileManager::JsonLoad( RECOVERY_FILE_PATH );
-	ApplyMouseSpeed( FileManager::JsonGet( Data, JSON_KEY_MOUSE_SPEED, Speed ) );
+	int SavedSpeed = Speed;
+	FileManager::BinaryLoad( RECOVERY_FILE_PATH, SavedSpeed );
+	ApplyMouseSpeed( SavedSpeed );
 	return true;
 }
 
@@ -129,8 +129,8 @@ __int64 MouseSpeedGuard::Start()
 	// 保存していた速度を元の速度として採用して復元する.
 	//	※現在の速度は前回の実行で変更されたままの可能性があるため使用しない.
 	if ( FileManager::FileCheck( RECOVERY_FILE_PATH ) ) {
-		const json	Data		= FileManager::JsonLoad( RECOVERY_FILE_PATH );
-		const int	SavedSpeed	= FileManager::JsonGet( Data, JSON_KEY_MOUSE_SPEED, Speed );
+		int SavedSpeed = Speed;
+		FileManager::BinaryLoad( RECOVERY_FILE_PATH, SavedSpeed );
 		if ( MOUSE_SPEED_MIN <= SavedSpeed && SavedSpeed <= MOUSE_SPEED_MAX ) Speed = SavedSpeed;
 		ApplyMouseSpeed( Speed );
 	}
@@ -138,9 +138,7 @@ __int64 MouseSpeedGuard::Start()
 
 	// 異常終了時に復元できるように元の速度を保存しておく.
 	//	※このファイルは正常終了時に削除される.
-	json Data;
-	Data[JSON_KEY_MOUSE_SPEED] = Speed;
-	FileManager::JsonSave( RECOVERY_FILE_PATH, Data );
+	FileManager::BinarySave( RECOVERY_FILE_PATH, Speed );
 
 	// クラッシュ時に復元するためのハンドラを登録.
 	s_PrevExceptionFilter	= SetUnhandledExceptionFilter( CrashExceptionFilter );

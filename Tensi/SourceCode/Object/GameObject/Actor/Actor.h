@@ -31,6 +31,7 @@ public:
 
 	// 当たり判定の取得.
 	template<class T> T*	GetCollision() { return nullptr; }
+#ifdef ENABLE_MESH
 	// 当たり判定の取得(球体).
 	template<> CSphere*		GetCollision() { return m_pCollisions->GetCollision<CSphere>(); }
 	// 当たり判定の取得(円柱).
@@ -41,10 +42,13 @@ public:
 	template<> CCrossRay*	GetCollision() { return m_pCollisions->GetCollision<CCrossRay>(); }
 	// 当たり判定の取得(メッシュ).
 	template<> CMesh*		GetCollision() { return m_pCollisions->GetCollision<CMesh>(); }
+#endif
+#ifdef ENABLE_SPRITE
 	// 当たり判定の取得(球体2D).
 	template<> CSphere2D*	GetCollision() { return m_pCollisions->GetCollision<CSphere2D>(); }
 	// 当たり判定の取得(ボックス2D).
 	template<> CBox2D*		GetCollision() { return m_pCollisions->GetCollision<CBox2D>(); }
+#endif
 
 	// スクリーン座標を取得.
 	D3DXPOSITION3 GetScreenPos();

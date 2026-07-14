@@ -4,11 +4,15 @@
 *		Unicode対応.
 **/
 #pragma once
+#include "..\..\..\SystemSetting.h"
+#ifdef ENABLE_MESH
 
 #include "..\..\Common.h"
 #include "Parser\SkinMeshParser.h"
 
+#ifdef ENABLE_FOG
 class CFog;
+#endif // ENABLE_FOG
 class CStaticMesh;
 
 // アニメーションコントローラ構造体.
@@ -304,7 +308,9 @@ private:
 
 	float					m_PointLightIntensity;			// メッシュに足してのポイントライトの強さ.
 
+#ifdef ENABLE_FOG
 	std::unique_ptr<CFog>	m_pFog;							// フォグ.
+#endif // ENABLE_FOG
 	bool					m_IsFog;						// フォグを有効にするか.
 	bool					m_DitherFlag;					// ディザ抜きを使用するか.
 	bool					m_AlphaBlockFlag;				// アルファブロックを使用するか.
@@ -320,3 +326,4 @@ private:
 
 	std::vector<int>		m_MaterialTextureNo;			// マテリアルのテクスチャのNo.
 };
+#endif // ENABLE_MESH

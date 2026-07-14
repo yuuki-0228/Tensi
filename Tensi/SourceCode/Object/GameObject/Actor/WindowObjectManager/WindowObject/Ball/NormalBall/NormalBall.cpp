@@ -28,6 +28,7 @@ bool CNormalBall::Init()
 	m_SpeedRate			= 0.996f;
 	m_IsDisp			= false;
 	m_ObjectTag			= EObjectTag::NormalBall;
+	m_IsUseImpactSquash	= true;		// •Ç‚Ö‚ÌÕ“Ë‚ÅŠgk‚³‚¹‚é.
 
 	SaveDataManager::SetSaveData()->BallTransform = &m_SpriteState.Transform;
 

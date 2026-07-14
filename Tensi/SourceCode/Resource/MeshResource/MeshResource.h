@@ -1,4 +1,6 @@
 #pragma once
+#include "..\..\SystemSetting.h"
+#ifdef ENABLE_MESH
 #include "..\..\Global.h"
 #include "..\..\Common\Mesh\SkinMesh\SkinMesh.h"
 #include <unordered_map>
@@ -65,3 +67,4 @@ private:
 	MeshResource( MeshResource&& )					= delete;
 	MeshResource& operator= ( MeshResource&& )		= delete;
 };
+#endif // ENABLE_MESH

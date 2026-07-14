@@ -4,6 +4,8 @@
 *		Unicode対応.
 **/
 #pragma once
+#include "..\..\..\..\SystemSetting.h"
+#ifdef ENABLE_MESH
 #include "..\..\..\..\Global.h"
 
 //警告についてのコード分析を無効にする。4005：再定義.
@@ -252,4 +254,4 @@ public:
 	// メッシュ解放.
 //	HRESULT ReleaseMesh( LPD3DXFRAME pFrame );
 };
-
+#endif // ENABLE_MESH

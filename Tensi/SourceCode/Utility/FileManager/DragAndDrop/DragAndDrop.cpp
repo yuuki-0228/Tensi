@@ -1,4 +1,5 @@
 #include "DragAndDrop.h"
+#ifdef ENABLE_FILE
 
 DragAndDrop::DragAndDrop()
 	: m_hWnd			()
@@ -41,3 +42,5 @@ void DragAndDrop::Close()
 	// 保存しているファイルパスを削除する.
 	pI->m_FilePathList.clear();
 }
+
+#endif 

@@ -1,4 +1,6 @@
 #pragma once
+#include "..\..\..\SystemSetting.h"
+#ifdef ENABLE_EFFEKSEER
 #include "..\..\..\Global.h"
 
 // 警告についてのコード分析を無効にする.4005：再定義.
@@ -180,3 +182,4 @@ private:
 
 	std::mutex								m_Mutex;
 };
+#endif // ENABLE_EFFEKSEER

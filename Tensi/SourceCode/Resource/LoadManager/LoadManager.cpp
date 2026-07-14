@@ -3,8 +3,9 @@
 #include "..\SpriteResource\SpriteResource.h"
 #include "..\EffectResource\EffectResource.h"
 #include "..\FontResource\FontResource.h"
-#include "..\..\Common\SoundManeger\SoundManeger.h"
+#include "..\..\Common\XAudio2\SoundManager.h"
 #include "..\..\Utility\MasterData\MasterDataAccesser.h"
+#include "..\..\Utility\CashManager\CashManager.h"
 
 CLoadManager::CLoadManager()
 	: m_Thread				()
@@ -25,36 +26,51 @@ CLoadManager::~CLoadManager()
 //---------------------------.
 void CLoadManager::LoadResource( HWND hWnd )
 {
-	if ( FAILED( SoundManager::SoundLoad( hWnd ) ) ){
-		m_isLoadFailed = true;
-		return;
-	}
+#ifdef ENABLE_SOUND
+	SoundManager::CreateSoundData();
+#endif
 
 	// 読み込み関数.
 	auto Load = [&]( HWND hWnd ) {
 		std::unique_lock<std::mutex> lock( m_Mutex );
 
 		Log::PushLog( "------ スレッドロード開始 ------" );
+#ifdef ENABLE_SPRITE
 		if ( FAILED( SpriteResource::SpriteLoad() ) ){
 			m_isLoadFailed = true;
 			return;
 		}
+#endif
+#ifdef ENABLE_EFFEKSEER
 		if ( FAILED( EffectResource::EffectLoad() ) ) {
 			m_isLoadFailed = true;
 			return;
 		}
+#endif
+#ifdef ENABLE_FONT
 		if ( FAILED( FontResource::FontLoad() ) ) {
 			m_isLoadFailed = true;
 			return;
 		}
+#endif
+#ifdef ENABLE_MESH
 		if ( FAILED( MeshResource::MeshLoad() ) ) {
 			m_isLoadFailed = true;
 			return;
 		}
+#endif
+#ifdef ENABLE_MASTER_DATA
 		if ( FAILED( MasterDataAccesser::Load() ) ) {
 			m_isLoadFailed = true;
 			return;
 		}
+#endif
+#ifdef ENABLE_CASH
+		if (FAILED(CashManager::Load())) {
+			m_isLoadFailed = true;
+			return;
+		}
+#endif
 		m_isLoadEnd = true;
 		Log::PushLog( "------ スレッドロード終了 ------" );
 		Log::PushLog( "------ メインループ開始 ------" );

@@ -1,6 +1,6 @@
 #pragma once
 #include "SceneManager\SceneManager.h"
-#include "..\Common\SoundManeger\SoundManeger.h"
+#include "..\Common\XAudio2\SoundManager.h"
 #include "..\Object\Camera\Cameras\Cameras.h"
 #include "..\Object\Camera\CameraManager\CameraManager.h"
 #include "..\Utility\Input\Input.h"

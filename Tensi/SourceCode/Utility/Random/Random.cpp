@@ -4,7 +4,7 @@
 #include "..\FileManager\FileManager.h"
 
 namespace{
-	constexpr char TEXT_PATH[] = "Data\\Parameter\\Config\\Random.json";
+	constexpr char BINARY_PATH[] = "Data\\Parameter\\Data\\rd.bin";
 }
 
 Random::Random()
@@ -38,15 +38,11 @@ HRESULT Random::Init()
 	// 乱数の固定化が有効なら.
 	if ( GetInstance()->m_RandLock ){
 		// 前回の初期化の値で初期化.
-		const json& Text = FileManager::JsonLoad( TEXT_PATH );
-		InitNum			 = Text["Init"];
+		FileManager::BinaryLoad( BINARY_PATH, InitNum );
 	}
 	else{
 		// 乱数の初期化の値を保存.
-		json j;
-		j[".Comment"]	= u8"乱数を初期する値";
-		j["Init"]		= InitNum;
-		FileManager::JsonSave( TEXT_PATH, j );
+		FileManager::BinarySave( BINARY_PATH, InitNum );
 	}
 
 	// 乱数の初期化.

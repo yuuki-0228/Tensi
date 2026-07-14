@@ -1,4 +1,4 @@
-// このファイルは Global.h ( 旧DirectX SDKヘッダーを含む ) を一切 include しないこと.
+﻿// このファイルは Global.h ( 旧DirectX SDKヘッダーを含む ) を一切 include しないこと.
 //	dcomp.h が内部で include する <d2d1.h> は、旧DirectX SDKの同名ヘッダーと
 //	インクルードガードが衝突するため、混在すると解決に失敗してビルドが壊れる.
 #include "DCompHelper.h"

@@ -1,4 +1,5 @@
 #include "CollisionMesh.h"
+#ifdef ENABLE_MESH
 #include "..\..\DirectX\DirectX9.h"
 #include "..\..\..\Object\Camera\CameraManager\CameraManager.h"
 #include "..\..\..\Object\Light\Light.h"
@@ -666,3 +667,4 @@ void CCollisionMesh::RenderMesh(
 			m_pMaterials[m_AttrID[No]].dwNumFace * 3, 0, 0 );
 	}
 }
+#endif // ENABLE_MESH

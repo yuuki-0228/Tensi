@@ -1,4 +1,5 @@
 #include "MeshResource.h"
+#ifdef ENABLE_MESH
 #include "..\..\Common\Mesh\StaticMesh\StaticMesh.h"
 #include "..\..\Common\Mesh\SkyBoxMesh\SkyBoxMesh.h"
 #include "..\..\Common\Mesh\CollisionMesh\CollisionMesh.h"
@@ -206,3 +207,4 @@ CSkinMesh* MeshResource::GetSkin( const std::string& name, SAnimationController*
 	ErrorMessage( name + " mesh not found" );
 	return nullptr;
 }
+#endif // ENABLE_MESH

@@ -1,4 +1,5 @@
 #include "EffectManager.h"
+#ifdef ENABLE_EFFEKSEER
 #include "..\..\Resource\EffectResource\EffectResource.h"
 
 CEffectManager::CEffectManager()
@@ -175,3 +176,4 @@ int CEffectManager::GetTotalInstanceCount()
 {
 	return m_pEffect->GetTotalInstanceCount();
 }
+#endif // ENABLE_EFFEKSEER

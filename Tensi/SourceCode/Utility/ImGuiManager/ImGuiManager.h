@@ -1,6 +1,6 @@
 #pragma once
 #include "..\..\Global.h"
-#include "..\..\Common\SoundManeger\SoundManeger.h"
+#include "..\..\Common\XAudio2\SoundManager.h"
 #include "..\StringConversion\StringConversion.h"
 #include <ImGui\imgui.h>
 #include <ImGui\imgui_impl_dx11.h>
@@ -129,7 +129,9 @@ T ImGuiManager::RadioButton( const char* Label, T* Out, std::vector<T> SkipEnum 
 			ImGui::RadioButton( std::string( ButName + "##" + std::to_string( i ) ).c_str(), &v, i);
 		}
 	}
+#ifdef ENABLE_SOUND
 	if ( *Out != static_cast<T>( v ) ) SoundManager::PlaySE( "ImguiSE" );
+#endif // ENABLE_SOUND
 	return *Out = static_cast<T>( v );
 }
 
@@ -166,6 +168,8 @@ T ImGuiManager::Combo( const char* Label, T* Out, std::vector<T> SkipEnum )
 		}
 		ImGui::EndCombo();
 	}
+#ifdef ENABLE_SOUND
 	if ( *Out != static_cast<T>( v ) ) SoundManager::PlaySE( "ImguiSE" );
+#endif // ENABLE_SOUND
 	return *Out = static_cast<T>( v );
 }

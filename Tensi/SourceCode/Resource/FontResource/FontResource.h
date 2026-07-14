@@ -1,4 +1,6 @@
 #pragma once
+#include "..\..\SystemSetting.h"
+#ifdef ENABLE_FONT
 #include "..\..\Global.h"
 #include "..\..\Common\Font\Font.h"
 #include <unordered_map>
@@ -52,3 +54,4 @@ private:
 	std::mutex			m_Mutex;
 	bool				m_IsLoadEnd;		// ì«Ç›çûÇ›Ç™èIÇÌÇ¡ÇΩÇ©.
 };
+#endif // ENABLE_FONT

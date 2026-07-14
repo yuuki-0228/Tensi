@@ -4,8 +4,11 @@
 *		Unicode対応.
 **/
 #include "SkinMesh.h"
+#ifdef ENABLE_MESH
 #include "..\..\DirectX\DirectX9.h"
+#ifdef ENABLE_FOG
 #include "..\..\Fog\Fog.h"
+#endif // ENABLE_FOG
 #include "..\..\..\Object\Camera\CameraManager\CameraManager.h"
 #include "..\..\..\Object\Light\Light.h"
 #include "..\..\..\Utility\Transform\PositionRenderer\PositionRenderer.h"
@@ -43,7 +46,6 @@ CSkinMesh::CSkinMesh()
 	, m_FilePath				()
 	, m_iFrame					()
 	, m_PointLightIntensity		( 3.0f )
-	, m_pFog					( nullptr )
 	, m_IsFog					( false )
 	, m_DitherFlag				( false )
 	, m_AlphaBlockFlag			( true )
@@ -56,7 +58,9 @@ CSkinMesh::CSkinMesh()
 	, m_NewIndex				( 0 )
 	, m_MaterialTextureNo		()
 {
+#ifdef ENABLE_FOG
 	m_pFog = std::make_unique<CFog>();
+#endif // ENABLE_FOG
 }
 
 CSkinMesh::~CSkinMesh()
@@ -108,7 +112,9 @@ HRESULT CSkinMesh::Init( LPCTSTR fileName )
 	m_pD3dxMesh->UpdateFrameMatrices( m_pD3dxMesh->m_pFrameRoot, &m );
 
 	// フォグの初期化.
+#ifdef ENABLE_FOG
 	m_pFog->Init();
+#endif // ENABLE_FOG
 
 	return S_OK;
 }
@@ -901,8 +907,10 @@ void CSkinMesh::DrawPartsMesh(
 			m_pContext->PSSetShaderResources( 0, 1, Nothing );
 		}
 
+#ifdef ENABLE_FOG
 		// フォグの描画.
 		if ( m_IsFog == true ) m_pFog->Render( pMesh->pMaterial[i].dwNumFace * 3, m_mWorld, pMesh->pMaterial[i].pTexture[m_MaterialTextureNo[i]], 0.0f, 100.0f );
+#endif // ENABLE_FOG
 
 		// Draw.
 		m_pContext->DrawIndexed( pMesh->pMaterial[i].dwNumFace * 3, 0, 0 );
@@ -1511,3 +1519,4 @@ void CSkinMesh::ChangeUVY( const int MaterialNo, const float uv, LPD3DXFRAME p )
 		ChangeUVY( MaterialNo, uv, pFrame->pFrameFirstChild );
 	}
 }
+#endif // ENABLE_MESH

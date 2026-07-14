@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 // DirectComposition 合成用ヘルパー.
 //	dcomp.h は内部で <d2d1.h> を include するが、このプロジェクトの
 //	AdditionalIncludeDirectories は旧DirectX SDK( $(DXSDK_DIR)Include )が
