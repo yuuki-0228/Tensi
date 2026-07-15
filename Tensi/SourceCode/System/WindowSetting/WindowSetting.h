@@ -21,6 +21,7 @@ private:
 	D3DXPOSITION2	m_Pos;					// ウィンドウの表示位置.
 	std::string		m_AppName;				// アプリ名.
 	std::string		m_WndName;				// ウィンドウ名.
+	float			m_FPS;					// フレームレート.
 	bool			m_IsDispCenter;			// 真ん中に表示するか.
 	bool			m_IsDispMouseCursor;	// マウスカーソルを表示するか.
 	bool			m_IsFPSRender;			// 画面にFPSを描画するか.

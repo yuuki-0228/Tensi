@@ -1,4 +1,4 @@
-#include "ScaleAnimation.h"
+#include "SpringScale.h"
 #ifdef ENABLE_ANIMATION
 #include <cmath>
 
@@ -9,7 +9,7 @@ namespace {
 	const float SETTLE_THRESHOLD	= 0.0005f;
 }
 
-CScaleAnimation::CScaleAnimation()
+CSpringScale::CSpringScale()
 	: m_Scale		( 1.0f, 1.0f )
 	, m_Velocity	( 0.0f, 0.0f )
 	, m_Target		( 1.0f, 1.0f )
@@ -21,7 +21,7 @@ CScaleAnimation::CScaleAnimation()
 //---------------------------.
 // èâä˙âª.
 //---------------------------.
-void CScaleAnimation::Init( const float Stiffness, const float Damping )
+void CSpringScale::Init( const float Stiffness, const float Damping )
 {
 	m_Stiffness = Stiffness;
 	m_Damping	= Damping;
@@ -31,7 +31,7 @@ void CScaleAnimation::Init( const float Stiffness, const float Damping )
 //---------------------------.
 // çXêV.
 //---------------------------.
-void CScaleAnimation::Update( const float DeltaTime )
+void CSpringScale::Update( const float DeltaTime )
 {
 	if ( DeltaTime <= 0.0f ) return;
 
@@ -69,7 +69,7 @@ void CScaleAnimation::Update( const float DeltaTime )
 //---------------------------.
 // èuä‘ìIÇ…ägèkÇ≥Çπ, íeê´Ç≈ìôî{Ç÷ñﬂÇ∑.
 //---------------------------.
-void CScaleAnimation::Punch( const float ScaleX, const float ScaleY )
+void CSpringScale::Punch( const float ScaleX, const float ScaleY )
 {
 	// í«è]êÊÇÕìôî{Ç…ñﬂÇµ, åªç›ílÇæÇØÇïœâªÇ≥ÇπÇƒíeÇ‹ÇπÇÈ.
 	m_Target	= D3DXVECTOR2( 1.0f, 1.0f );
@@ -80,7 +80,7 @@ void CScaleAnimation::Punch( const float ScaleX, const float ScaleY )
 //---------------------------.
 // í«è]êÊÇÃägèkílÇê›íËÇ∑ÇÈ.
 //---------------------------.
-void CScaleAnimation::SetTarget( const float ScaleX, const float ScaleY )
+void CSpringScale::SetTarget( const float ScaleX, const float ScaleY )
 {
 	m_Target = D3DXVECTOR2( ScaleX, ScaleY );
 }
@@ -88,7 +88,7 @@ void CScaleAnimation::SetTarget( const float ScaleX, const float ScaleY )
 //---------------------------.
 // ë¶ç¿Ç…ìôî{Ç÷ñﬂÇ∑.
 //---------------------------.
-void CScaleAnimation::Reset()
+void CSpringScale::Reset()
 {
 	m_Scale		= D3DXVECTOR2( 1.0f, 1.0f );
 	m_Velocity	= D3DXVECTOR2( 0.0f, 0.0f );

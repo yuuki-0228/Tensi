@@ -43,6 +43,75 @@ namespace {
 	}
 }
 
+namespace {
+	// デスクトップ内の実ファイルの情報.
+	struct SDesktopFileInfo {
+		bool		IsDirectory;	// フォルダかどうか.
+		std::string	Extension;		// 拡張子( 小文字・ドット付き / フォルダは空 ).
+	};
+
+	// ASCII範囲の大文字を小文字に変換する( 日本語バイトは変えない ).
+	std::string ToLowerAscii( const std::string& Str )
+	{
+		std::string Result = Str;
+		for ( auto& c : Result ) {
+			if ( c >= 'A' && c <= 'Z' ) c = static_cast<char>( c - 'A' + 'a' );
+		}
+		return Result;
+	}
+
+	// フォルダかどうかと拡張子からアイコンの種類を判定する.
+	WindowManager::enDesktopIconType ToDesktopIconType( const bool IsDirectory, const std::string& Ext )
+	{
+		if ( IsDirectory		) return WindowManager::enDesktopIconType::Folder;
+		if ( Ext == ".exe"		) return WindowManager::enDesktopIconType::Exe;
+		if ( Ext == ".lnk"		) return WindowManager::enDesktopIconType::Shortcut;
+		if ( Ext == ".txt"		) return WindowManager::enDesktopIconType::TextFile;
+		if ( Ext == ".png" || Ext == ".jpg" || Ext == ".jpeg" ||
+			 Ext == ".bmp" || Ext == ".gif" ) return WindowManager::enDesktopIconType::Image;
+		return WindowManager::enDesktopIconType::Other;
+	}
+
+	// 指定フォルダ内を走査してファイル情報を集める.
+	//	FullMap: 小文字のフルファイル名 -> 情報 / StemMap: 小文字の拡張子なし名 -> 情報.
+	void CollectDesktopFiles( const std::string& Dir,
+		std::unordered_map<std::string, SDesktopFileInfo>& FullMap,
+		std::unordered_map<std::string, SDesktopFileInfo>& StemMap )
+	{
+		const std::wstring wPattern = StringConversion::to_wString( Dir + "\\*" );
+		WIN32_FIND_DATAW fd;
+		HANDLE hFind = FindFirstFileW( wPattern.c_str(), &fd );
+		if ( hFind == INVALID_HANDLE_VALUE ) return;
+
+		do {
+			const std::wstring wName = fd.cFileName;
+			if ( wName == L"." || wName == L".." ) continue;
+			const std::string Name = StringConversion::to_String( wName );
+
+			SDesktopFileInfo Info;
+			Info.IsDirectory = ( fd.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY ) != 0;
+
+			// 拡張子と拡張子なし名を取り出す.
+			std::string Stem = Name;
+			std::string Ext;
+			if ( Info.IsDirectory == false ) {
+				const size_t Dot = Name.find_last_of( '.' );
+				if ( Dot != std::string::npos && Dot != 0 ) {
+					Ext  = ToLowerAscii( Name.substr( Dot ) );
+					Stem = Name.substr( 0, Dot );
+				}
+			}
+			Info.Extension = Ext;
+
+			// キーは小文字に統一して登録する.
+			FullMap[ToLowerAscii( Name )] = Info;
+			StemMap.emplace( ToLowerAscii( Stem ), Info );
+		} while ( FindNextFileW( hFind, &fd ) );
+
+		FindClose( hFind );
+	}
+}
+
 WindowManager::WindowManager()
 	: m_hDesktop				( NULL )
 	, m_hMyWindow				( NULL )
@@ -61,10 +130,10 @@ WindowManager::WindowManager()
 	, m_WindowNameMap			()
 	, m_WindowClassMap			()
 	, m_WindowZOrderMap			()
-	, m_IconList				()
 	, m_IconFindMap				()
 	, m_IconPosMap				()
 	, m_IconNameMap				()
+	, m_IconList				()
 	, m_UserName				( "" )
 	, m_IsWindowUpdate			( false )
 	, m_IsDesktopIconUpdate		( false )
@@ -318,13 +387,13 @@ WindowManager::WndList WindowManager::GetWindowList()
 }
 
 //---------------------------.
-// デスクトップのアイコンの位置リストの取得.
+// デスクトップのアイコンの詳細情報リストの取得.
 //---------------------------.
 WindowManager::IconList WindowManager::GetDesktopIconList()
 {
 	WindowManager* pI = GetInstance();
 
-	// ウィンドウクラスを更新していない場合更新する.
+	// アイコンリストを更新していない場合更新する.
 	if ( pI->m_IsDesktopIconUpdate == false ) DesktopIconUpdate();
 	return pI->m_IconList;
 }
@@ -797,6 +866,12 @@ void WindowManager::DesktopIconUpdate()
 	pI->m_IconList.clear();
 	pI->m_IconList.resize( nCount );
 
+	// デスクトップの実ファイル一覧を構築する( 種類判定用 ).
+	std::unordered_map<std::string, SDesktopFileInfo> FileFullMap;
+	std::unordered_map<std::string, SDesktopFileInfo> FileStemMap;
+	CollectDesktopFiles( "C:\\Users\\" + pI->m_UserName + "\\Desktop", FileFullMap, FileStemMap );
+	CollectDesktopFiles( "C:\\Users\\Public\\Desktop", FileFullMap, FileStemMap );
+
 	// 対象アイテムの取得.
 	for( int i = 0; i < nCount; i++ ) {
 		// アイコン名の取得.
@@ -823,10 +898,61 @@ void WindowManager::DesktopIconUpdate()
 		// アイコン情報を保存.
 		const D3DXPOSITION2 IconPos		= { static_cast<float>( p.x ), static_cast<float>( p.y ) };
 		const std::string	IconName	= StringConversion::to_String( buff );
-		pI->m_IconList[i]				= std::make_pair( IconPos, IconName );
 		pI->m_IconFindMap[IconName]		= i;
 		pI->m_IconPosMap[i]				= IconPos;
 		pI->m_IconNameMap[i]			= IconName;
+
+		// クリック判定の矩形( アイコン+ラベル )の取得.
+		RECT ClickRect;
+		ClickRect.left = LVIR_SELECTBOUNDS;
+		WriteProcessMemory( pI->m_DProcessHandle, pI->m_DProcessMemory, &ClickRect, sizeof( RECT ), NULL );
+		SendMessage( pI->m_hDesktop, LVM_GETITEMRECT, i, ( LPARAM )pI->m_DProcessMemory );
+		ReadProcessMemory( pI->m_DProcessHandle, pI->m_DProcessMemory, &ClickRect, sizeof( RECT ), NULL );
+
+		// アイコン画像の描画矩形の取得.
+		RECT DrawRect;
+		DrawRect.left = LVIR_ICON;
+		WriteProcessMemory( pI->m_DProcessHandle, pI->m_DProcessMemory, &DrawRect, sizeof( RECT ), NULL );
+		SendMessage( pI->m_hDesktop, LVM_GETITEMRECT, i, ( LPARAM )pI->m_DProcessMemory );
+		ReadProcessMemory( pI->m_DProcessHandle, pI->m_DProcessMemory, &DrawRect, sizeof( RECT ), NULL );
+
+		// 矩形をゲーム座標系に変換する.
+		ClickRect.left		+= pI->m_AddWindowRect.left;
+		ClickRect.right		+= pI->m_AddWindowRect.left;
+		ClickRect.top		+= pI->m_AddWindowRect.top;
+		ClickRect.bottom	+= pI->m_AddWindowRect.top;
+		DrawRect.left		+= pI->m_AddWindowRect.left;
+		DrawRect.right		+= pI->m_AddWindowRect.left;
+		DrawRect.top		+= pI->m_AddWindowRect.top;
+		DrawRect.bottom		+= pI->m_AddWindowRect.top;
+
+		// アイコンの種類と拡張子を判定する( 実ファイルを照合 ).
+		const std::string		LowName		= ToLowerAscii( IconName );
+		enDesktopIconType		IconType	= enDesktopIconType::Special;
+		std::string				IconExt;
+		const SDesktopFileInfo*	pFileInfo	= nullptr;
+		auto ItFull = FileFullMap.find( LowName );
+		if ( ItFull != FileFullMap.end() ) {
+			pFileInfo = &ItFull->second;
+		}
+		else {
+			auto ItStem = FileStemMap.find( LowName );
+			if ( ItStem != FileStemMap.end() ) pFileInfo = &ItStem->second;
+		}
+		if ( pFileInfo != nullptr ) {
+			IconType = ToDesktopIconType( pFileInfo->IsDirectory, pFileInfo->Extension );
+			IconExt  = pFileInfo->Extension;
+		}
+
+		// アイコンの詳細情報を保存する.
+		SDesktopIcon Info;
+		Info.Index			= i;
+		Info.Name			= IconName;
+		Info.ClickRect		= ClickRect;
+		Info.DrawRect		= DrawRect;
+		Info.Type			= IconType;
+		Info.Extension		= IconExt;
+		pI->m_IconList[i]	= Info;
 	}
 
 	// デスクトップのアイコンの位置の更新を行った.
@@ -903,6 +1029,76 @@ float WindowManager::GetGroundY( const float X )
 		}
 	}
 	return static_cast<float>( pNearest->Work.bottom );
+}
+
+//---------------------------.
+// ウィンドウを画面外へ完全に出さないように移動量を制限して動かす.
+//---------------------------.
+void WindowManager::MoveWindowInScreen( const HWND& hWnd, const int dx, const int dy )
+{
+	if ( hWnd == NULL			) return;
+	if ( dx == 0 && dy == 0		) return;
+
+	// 現在のウィンドウ矩形( スクリーン座標系 )を取得.
+	RECT Rect;
+	if ( GetWindowRect( hWnd, &Rect ) == FALSE ) return;
+
+	// 仮想スクリーン全体( 全モニターの範囲 )を取得.
+	const int VLeft		= GetSystemMetrics( SM_XVIRTUALSCREEN );
+	const int VTop		= GetSystemMetrics( SM_YVIRTUALSCREEN );
+	const int VRight	= VLeft + GetSystemMetrics( SM_CXVIRTUALSCREEN );
+	const int VBottom	= VTop  + GetSystemMetrics( SM_CYVIRTUALSCREEN );
+
+	// 移動後の位置とウィンドウのサイズ.
+	int			NewLeft	= Rect.left + dx;
+	int			NewTop	= Rect.top  + dy;
+	const int	Width	= Rect.right  - Rect.left;
+	const int	Height	= Rect.bottom - Rect.top;
+
+	// 画面内に最低限残す量.
+	constexpr int MARGIN = 32;
+
+	// 左右: 一部でも画面内に残るように制限する.
+	if ( NewLeft			> VRight - MARGIN	) NewLeft = VRight - MARGIN;
+	if ( NewLeft + Width	< VLeft  + MARGIN	) NewLeft = VLeft + MARGIN - Width;
+
+	// 上下: 一部でも画面内に残るように制限する.
+	if ( NewTop				> VBottom - MARGIN	) NewTop = VBottom - MARGIN;
+	if ( NewTop + Height	< VTop    + MARGIN	) NewTop = VTop + MARGIN - Height;
+
+	// ウィンドウを移動する( サイズ・Zオーダー・アクティブ化はしない ).
+	SetWindowPos( hWnd, NULL, NewLeft, NewTop, 0, 0, SWP_NOSIZE | SWP_NOZORDER | SWP_NOACTIVATE );
+}
+
+//---------------------------.
+// ウィンドウが全画面表示( 最大化 or モニター全体を覆う )かを取得.
+//---------------------------.
+bool WindowManager::IsFullScreenWindow( const HWND& hWnd )
+{
+	if ( hWnd == NULL ) return false;
+
+	// 最大化されている場合は全画面表示とみなす.
+	if ( IsZoomed( hWnd ) ) return true;
+
+	// ウィンドウの矩形( スクリーン座標系 )を取得.
+	RECT WndRect;
+	if ( GetWindowRect( hWnd, &WndRect ) == FALSE ) return false;
+
+	// ウィンドウのあるモニターの物理範囲を取得.
+	const HMONITOR hMonitor = MonitorFromWindow( hWnd, MONITOR_DEFAULTTONEAREST );
+	MONITORINFO mi;
+	mi.cbSize = sizeof( MONITORINFO );
+	if ( GetMonitorInfo( hMonitor, &mi ) == FALSE ) return false;
+
+	// ウィンドウがモニター全体を覆っている場合は全画面表示とみなす.
+	if ( WndRect.left	<= mi.rcMonitor.left	&&
+		 WndRect.top	<= mi.rcMonitor.top		&&
+		 WndRect.right	>= mi.rcMonitor.right	&&
+		 WndRect.bottom	>= mi.rcMonitor.bottom	)
+	{
+		return true;
+	}
+	return false;
 }
 
 #endif

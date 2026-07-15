@@ -4,7 +4,7 @@
 #include "..\FileManager\FileManager.h"
 
 namespace{
-	constexpr char BINARY_PATH[] = "Data\\Parameter\\Data\\rd.bin";
+	constexpr char BINARY_PATH[] = "Data\\Parameter\\Data\\rnd.bin";
 }
 
 Random::Random()

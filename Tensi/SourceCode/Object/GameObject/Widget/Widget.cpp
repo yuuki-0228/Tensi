@@ -1,8 +1,8 @@
 #include "Widget.h"
 
 CWidget::CWidget()
-	: m_Wnd_W	( FWND_W )
-	, m_Wnd_H	( FWND_H )
+	: m_Wnd_W	( Const::GameWindow().SIZE.x )
+	, m_Wnd_H	( Const::GameWindow().SIZE.y )
 {
 }
 

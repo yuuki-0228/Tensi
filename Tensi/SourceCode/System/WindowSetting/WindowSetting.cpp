@@ -1,4 +1,5 @@
 #include "WindowSetting.h"
+#include "../../Utility/Const/Const.h"
 
 namespace {
 	constexpr char WINDOW_SETTING_FILE_PATH[] = "Data\\Parameter\\Config\\WindowSetting.json";	// ウィンドウの設定のファイルパス.
@@ -10,6 +11,7 @@ CWindowSetting::CWindowSetting()
 	, m_Pos						( INIT_FLOAT2 )
 	, m_AppName					( "" )
 	, m_WndName					( "" )
+	, m_FPS						( INIT_FLOAT )
 	, m_IsDispCenter			( false )
 	, m_IsDispMouseCursor		( false )
 	, m_IsFPSRender				( false )
@@ -41,8 +43,9 @@ void CWindowSetting::Init()
 	m_Color.x				= FileManager::JsonGet( WndData, "BackColor", "R", 1.0f );
 	m_Color.y				= FileManager::JsonGet( WndData, "BackColor", "G", 1.0f );
 	m_Color.z				= FileManager::JsonGet( WndData, "BackColor", "B", 1.0f );
-	m_Size.x				= FileManager::JsonGet( WndData, "Size", "w", FWND_W );
-	m_Size.y				= FileManager::JsonGet( WndData, "Size", "h", FWND_H );
+	m_FPS					= FileManager::JsonGet( WndData, "FPS", 60.0f );
+	m_Size.x				= FileManager::JsonGet( WndData, "Size", "w", 1280.0f );
+	m_Size.y				= FileManager::JsonGet( WndData, "Size", "h", 720.0f );
 	m_Pos.x					= FileManager::JsonGet( WndData, "Pos", "x", 0.0f );
 	m_Pos.y					= FileManager::JsonGet( WndData, "Pos", "y", 0.0f );
 	m_AppName				= FileManager::JsonGet( WndData, "Name", "App", std::string() );
@@ -99,6 +102,11 @@ void CWindowSetting::Init()
 		ImGui::SameLine();
 		ImGui::ColorEdit3( "##BackColor", m_Color );
 
+		// フレームレートの指定.
+		ImGui::Text( u8"フレームレート　　　　: " );
+		ImGui::SameLine();
+		ImGui::InputFloat( "##FPS", &m_FPS );
+
 		// 各フラグのチェックボックスの表示.
 		ImGui::Separator();
 		ImGuiManager::CheckBox( u8"中央に表示",				&m_IsDispCenter );
@@ -150,6 +158,7 @@ void CWindowSetting::Init()
 				u8"ウィンドウの設定が行えます。",
 				u8"----------------------------------------------",
 				u8"[BackColor           ] : 背景の色",
+				u8"[FPS                 ] : フレームレート",
 				u8"[IsDispCenter        ] : 起動時に画面の中央に配置するか",
 				u8"[IsDispCloseMessage  ] : 「Escape」を押した時にメッセージボックスを表示させるか",
 				u8"[IsDispMouseCursor   ] : 画面にマウスカーソルを表示するか",
@@ -172,6 +181,7 @@ void CWindowSetting::Init()
 			j["BackColor"]["R"]			= m_Color.x;
 			j["BackColor"]["G"]			= m_Color.y;
 			j["BackColor"]["B"]			= m_Color.z;
+			j["FPS"]					= m_FPS;
 			j["Size"]["w"]				= m_Size.x;
 			j["Size"]["h"]				= m_Size.y;
 			j["Pos"]["x"]				= m_Pos.x;

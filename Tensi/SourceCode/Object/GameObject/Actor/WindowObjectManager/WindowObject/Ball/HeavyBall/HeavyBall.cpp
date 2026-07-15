@@ -1,6 +1,5 @@
 #include "HeavyBall.h"
 #include "..\..\Player\Player.h"
-#include "..\..\..\..\..\..\..\Utility\Input\Input.h"
 
 namespace {
 	const float BALL_SIZE = 64.0f;	// ボールのサイズ.
@@ -33,7 +32,9 @@ bool CHeavyBall::Init()
 	m_DireSpeedRate.w	= 0.8f;
 	m_IsDisp			= false;
 	m_ObjectTag			= EObjectTag::HeavyBall;
-	m_IsUseImpactSquash	= true;		// 壁への衝突で拡縮させる.
+	m_IsUseImpactSquash	= false;	// 壁への衝突で拡縮させない.
+	m_Weight			= 10;		// 重さを設定する( 最も重い ).
+	m_GrabDownSpeed		= 1.0f;		// 掴んでいる時に毎フレームマウスを下に下げる速度.
 	
 	WindowObjectInit();
 	InitCollision();
@@ -115,27 +116,6 @@ void CHeavyBall::InitCollision()
 //---------------------------.
 void CHeavyBall::UpdateCollision()
 {
-}
-
-//---------------------------.
-// 掴みの更新.
-//---------------------------.
-void CHeavyBall::GrabUpdate()
-{
-	// マウスを少しずつ下に下げる.
-	const D3DXVECTOR2& Pos = Input::GetMousePosition();
-	SetCursorPos( static_cast<int>( Pos.x ), static_cast<int>( Pos.y + 1.0f ) );
-
-	// マウスの移動速度を下げる.
-	Input::SetMouseSpeed( 2 );
-}
-
-//---------------------------.
-// 離した時の初期化.
-//---------------------------.
-void CHeavyBall::SeparateInit()
-{
-	Input::ResetMouseSpeed();
 }
 
 //---------------------------.

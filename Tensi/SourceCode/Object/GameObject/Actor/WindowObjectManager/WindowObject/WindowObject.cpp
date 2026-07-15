@@ -7,6 +7,9 @@ namespace {
 	// 重力ベクトル.
 	const D3DXVECTOR3 GRAVITY_VECTOR = { 0.0f, 1.0f, 0.0f };
 
+	// 他ウィンドウを押す時の衝突速度の倍率( 小さめにする ).
+	const float WINDOW_PUSH_SPEED_RATE = 0.03f;
+
 	// 衝突時の拡縮演出用パラメータ.
 	const float SQUASH_MIN_SPEED	= 4.0f;		// この速度以下では拡縮させない.
 	const float SQUASH_SPEED_RATE	= 0.011f;	// 速度から拡縮量へ変換する係数.
@@ -29,6 +32,8 @@ CWindowObject::CWindowObject()
 	, m_InWndHandle			( NULL )
 	, m_LandingWnd			()
 	, m_AddWndRect			()
+	, m_Weight				( 0 )
+	, m_GrabDownSpeed	( 0.0f )
 	, m_CollSize			( INIT_FLOAT )
 	, m_GravityPower		( 1.0f )
 	, m_SpeedRate			( INIT_FLOAT )
@@ -39,6 +44,7 @@ CWindowObject::CWindowObject()
 	, m_IsInWndSmall		( false )
 	, m_IsTrashCan			( false )
 	, m_IsDisp				( true )
+	, m_IsWeightMouseSpeed	( false )
 	, m_AddCenterPosition	( INIT_FLOAT3 )
 {
 }
@@ -173,6 +179,12 @@ void CWindowObject::GrabMoveUpdate()
 
 	// 掴みの更新.
 	GrabUpdate();
+
+	// 掴んでいる時にマウスを下に下げる処理.
+	ApplyGrabDownSpeed();
+
+	// 重さに応じてマウス速度を変更.
+	ApplyWeightMouseSpeed();
 }
 
 //---------------------------.
@@ -190,6 +202,12 @@ void CWindowObject::Separate()
 
 	// 離した時の初期化.
 	SeparateInit();
+
+	// 重さでマウス速度を変えていた場合は元に戻す.
+	if ( m_IsWeightMouseSpeed ) {
+		Input::ResetMouseSpeed();
+		m_IsWeightMouseSpeed = false;
+	}
 }
 
 //---------------------------.
@@ -381,10 +399,10 @@ void CWindowObject::WindowCollision()
 
 			// 位置関係を見て当たり判定の動作を変更.
 			switch ( Dire ) {
-			case EDirection::Up:	HitUp( w );		break;
-			case EDirection::Down:	HitDown( w );	break;
-			case EDirection::Left:	HitLeft( w );	break;
-			case EDirection::Right:	HitRight( w );	break;
+			case EDirection::Up:	HitUp( w, true, hWnd );		break;
+			case EDirection::Down:	HitDown( w, true, hWnd );	break;
+			case EDirection::Left:	HitLeft( w, true, hWnd );	break;
+			case EDirection::Right:	HitRight( w, true, hWnd );	break;
 			default:								break;
 			}
 		}
@@ -509,10 +527,10 @@ void CWindowObject::InWindowCollision()
 
 	// ウィンドウから出ていないか確認.
 	const D3DXPOSITION3& CPos = m_SpriteState.Transform.Position + m_AddCenterPosition;
-	if (		CPos.y - m_CollSize / 2.0f	< WndRect.top		) HitUp(	WndRect, false );
-	else if (	CPos.y + m_CollSize / 2.0f	> WndRect.bottom	) HitDown(	WndRect, false );
-	if (		CPos.x - m_CollSize / 2.0f	< WndRect.left		) HitLeft(	WndRect, false );
-	else if (	CPos.x + m_CollSize / 2.0f	> WndRect.right		) HitRight( WndRect, false );
+	if (		CPos.y - m_CollSize / 2.0f	< WndRect.top		) HitUp(	WndRect, false, m_InWndHandle );
+	else if (	CPos.y + m_CollSize / 2.0f	> WndRect.bottom	) HitDown(	WndRect, false, m_InWndHandle );
+	if (		CPos.x - m_CollSize / 2.0f	< WndRect.left		) HitLeft(	WndRect, false, m_InWndHandle );
+	else if (	CPos.x + m_CollSize / 2.0f	> WndRect.right		) HitRight( WndRect, false, m_InWndHandle );
 }
 
 //---------------------------.
@@ -629,7 +647,7 @@ void CWindowObject::UpdateMonitorWorkAreas()
 //---------------------------.
 // 上側に当たった.
 //---------------------------.
-void CWindowObject::HitUp( const RECT& HitWnd, const bool IsFromOutside )
+void CWindowObject::HitUp( const RECT& HitWnd, const bool IsFromOutside, const HWND& HitHandle )
 {
 	// 当たった場所に揃える.
 	const float HitPos = static_cast<float>( IsFromOutside ? HitWnd.bottom : HitWnd.top );
@@ -638,6 +656,9 @@ void CWindowObject::HitUp( const RECT& HitWnd, const bool IsFromOutside )
 	// 衝突した速度に応じて拡縮を潰す.
 	if ( m_IsUseImpactSquash ) ImpactSquash( m_MoveVector.y, false );
 
+	// ぶつかった方向へウィンドウを動かす.
+	PushWindow( HitHandle, EDirection::Up );
+
 	// 上に当たった時の更新.
 	HitUpUpdate();
 }
@@ -645,7 +666,7 @@ void CWindowObject::HitUp( const RECT& HitWnd, const bool IsFromOutside )
 //---------------------------.
 // 下側に当たった.
 //---------------------------.
-void CWindowObject::HitDown( const RECT& HitWnd, const bool IsFromOutside )
+void CWindowObject::HitDown( const RECT& HitWnd, const bool IsFromOutside, const HWND& HitHandle )
 {
 	// 当たった場所に揃える.
 	const float HitPos = static_cast<float>( IsFromOutside ? HitWnd.top : HitWnd.bottom );
@@ -654,6 +675,9 @@ void CWindowObject::HitDown( const RECT& HitWnd, const bool IsFromOutside )
 	// 衝突した速度に応じて拡縮を潰す.
 	if ( m_IsUseImpactSquash ) ImpactSquash( m_MoveVector.y, false );
 	
+	// ぶつかった方向へウィンドウを動かす.
+	PushWindow( HitHandle, EDirection::Down );
+
 	// 下に当たった時の更新.
 	HitDownUpdate();
 
@@ -664,7 +688,7 @@ void CWindowObject::HitDown( const RECT& HitWnd, const bool IsFromOutside )
 //---------------------------.
 // 左側に当たった.
 //---------------------------.
-void CWindowObject::HitLeft( const RECT& HitWnd, const bool IsFromOutside )
+void CWindowObject::HitLeft( const RECT& HitWnd, const bool IsFromOutside, const HWND& HitHandle )
 {
 	// 当たった場所に揃える.
 	const float HitPos = static_cast<float>( IsFromOutside ? HitWnd.right : HitWnd.left );
@@ -673,6 +697,9 @@ void CWindowObject::HitLeft( const RECT& HitWnd, const bool IsFromOutside )
 	// 衝突した速度に応じて拡縮を潰す.
 	if ( m_IsUseImpactSquash ) ImpactSquash( m_MoveVector.x, true );
 
+	// ぶつかった方向へウィンドウを動かす.
+	PushWindow( HitHandle, EDirection::Left );
+
 	// 左に当たった時の更新.
 	HitLeftUpdate();
 }
@@ -680,7 +707,7 @@ void CWindowObject::HitLeft( const RECT& HitWnd, const bool IsFromOutside )
 //---------------------------.
 // 右側に当たった.
 //---------------------------.
-void CWindowObject::HitRight( const RECT& HitWnd, const bool IsFromOutside )
+void CWindowObject::HitRight( const RECT& HitWnd, const bool IsFromOutside, const HWND& HitHandle )
 {
 	// 当たった場所に揃える.
 	const float HitPos = static_cast<float>( IsFromOutside ? HitWnd.left : HitWnd.right );
@@ -688,6 +715,9 @@ void CWindowObject::HitRight( const RECT& HitWnd, const bool IsFromOutside )
 
 	// 衝突した速度に応じて拡縮を潰す.
 	if ( m_IsUseImpactSquash ) ImpactSquash( m_MoveVector.x, true );
+
+	// ぶつかった方向へウィンドウを動かす.
+	PushWindow( HitHandle, EDirection::Right );
 
 	// 右に当たった時の更新.
 	HitRightUpdate();
@@ -726,4 +756,80 @@ void CWindowObject::ImpactSquash( const float Speed, const bool IsHorizontal )
 	// 進行軸を潰し, 反対の軸を膨らませる.
 	if ( IsHorizontal ) m_ScaleAnim.Punch( 1.0f - Amount, 1.0f + Amount * SQUASH_CROSS_RATE );
 	else				m_ScaleAnim.Punch( 1.0f + Amount * SQUASH_CROSS_RATE, 1.0f - Amount );
+}
+
+//---------------------------.
+// 重さに応じたマウス速度の適用.
+//---------------------------.
+void CWindowObject::ApplyWeightMouseSpeed()
+{
+	// 重さ0は重さ系の制御をしない( 直前まで変えていたらデフォに戻す ).
+	if ( m_Weight <= 0 ) {
+		if ( m_IsWeightMouseSpeed ) {
+			Input::ResetMouseSpeed();
+			m_IsWeightMouseSpeed = false;
+		}
+		return;
+	}
+
+	// デフォルトのマウス速度を取得.
+	const __int64 Default = Input::SetMouseSpeed();
+
+	// 重さに応じて線形補間する( 重さ10 で速度1 ).
+	const __int64 Speed = static_cast<__int64>( Default - ( Default - 1 ) * m_Weight / 10.0 );
+	Input::SetMouseSpeed( Speed );
+	m_IsWeightMouseSpeed = true;
+}
+
+//---------------------------.
+// 掴んでいる時にマウスを下に下げる処理.
+//---------------------------.
+void CWindowObject::ApplyGrabDownSpeed()
+{
+	// 下げない設定なら何もしない.
+	if ( m_GrabDownSpeed <= 0.0f ) return;
+
+	// マウス座標( クライアント座標 )を取得.
+	const D3DXPOSITION2& Pos = Input::GetMousePosition();
+
+	// スクリーン座標に変換してから下方向へ動かす.
+	POINT Point = { static_cast<LONG>( Pos.x ), static_cast<LONG>( Pos.y + m_GrabDownSpeed ) };
+	ClientToScreen( WindowManager::GetWnd(), &Point );
+	SetCursorPos( Point.x, Point.y );
+}
+
+//---------------------------.
+// 衝突した時の重さと衝突速度に応じてぶつかったウィンドウを動かす.
+//---------------------------.
+void CWindowObject::PushWindow( const HWND& hWnd, const EDirection Dire )
+{
+	// 重さ0のオブジェクトは動かさない.
+	if ( m_Weight <= 0	) return;
+	if ( hWnd == NULL	) return;
+
+	// 全画面表示( 最大化・フルスクリーン )のウィンドウは動かさない.
+	if ( WindowManager::IsFullScreenWindow( hWnd ) ) return;
+
+	// ぶつかった方向の衝突速度を取得する.
+	float Speed = 0.0f;
+	switch ( Dire ) {
+	case EDirection::Up:
+	case EDirection::Down:	Speed = m_MoveVector.y;	break;
+	case EDirection::Left:
+	case EDirection::Right:	Speed = m_MoveVector.x;	break;
+	default:									return;
+	}
+
+	// 重さと衝突速度に応じた移動量を求める.
+	const int Move = static_cast<int>( std::abs( Speed ) * m_Weight * WINDOW_PUSH_SPEED_RATE );
+	if ( Move <= 0 ) return;
+
+	// ぶつかった方向へウィンドウを動かす( 画面外には出さない ).
+	switch ( Dire ) {
+	case EDirection::Up:	WindowManager::MoveWindowInScreen( hWnd, 0, -Move );	break;
+	case EDirection::Down:	WindowManager::MoveWindowInScreen( hWnd, 0,  Move );	break;
+	case EDirection::Left:	WindowManager::MoveWindowInScreen( hWnd, -Move, 0 );	break;
+	case EDirection::Right:	WindowManager::MoveWindowInScreen( hWnd,  Move, 0 );	break;
+	default:														break;
+	}
 }

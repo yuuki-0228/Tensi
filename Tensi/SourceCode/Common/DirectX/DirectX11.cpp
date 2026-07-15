@@ -180,6 +180,7 @@ HRESULT DirectX11::CreateDeviceAndSwapChain()
 
 	// ウィンドウの設定の取得.
 	json WndSetting = FileManager::JsonLoad( WINDOW_SETTING_FILE_PATH );
+	const float FPS = FileManager::JsonGet( WndSetting, "FPS", 60.0f );
 
 	for ( int i = 0; i < pI->m_WindowNum; ++i ) {
 		// スワップチェーン構造体.

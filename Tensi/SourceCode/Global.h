@@ -37,14 +37,6 @@
 //----------------------------.
 //	定数.
 //----------------------------.
-// ウィンドウ関係.
-constexpr int		WND_W			= 1280;		// ウィンドウの幅.
-constexpr int		WND_H			= 720;		// ウィンドウの高さ.
-constexpr int		FPS				= 60;		// フレームレート.
-constexpr float		FWND_W			= static_cast<float>( WND_W );
-constexpr float		FWND_H			= static_cast<float>( WND_H );
-constexpr float		FFPS			= static_cast<float>( FPS );
-
 // 初期化用.
 constexpr int		INIT_INT		= 0;
 constexpr int		INIT_INT2[2]	= { INIT_INT, INIT_INT };

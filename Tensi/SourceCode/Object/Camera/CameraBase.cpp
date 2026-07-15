@@ -1,5 +1,6 @@
 #include "CameraBase.h"
 #include "..\..\Utility\Math\Math.h"
+#include "../../Utility/Const/Const.h"
 
 CCameraBase::CCameraBase()
 	: m_pTarget				( nullptr )
@@ -11,7 +12,7 @@ CCameraBase::CCameraBase()
 	, m_ProjMatrix			()
 	, m_ShakingAddPosition	( INIT_FLOAT3 )
 	, m_ViewAngle			( Math::PI / 4.0f )
-	, m_Aspect				( FWND_W / FWND_H )
+	, m_Aspect				( Const::GameWindow().SIZE.x / Const::GameWindow().SIZE.y )
 	, m_MaxZView			( 2500.0f )
 	, m_MinZView			( 0.1f )
 {

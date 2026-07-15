@@ -7,7 +7,7 @@
 
 namespace {
 	const float		OBJ_SIZE		= 55.0f;	// ジョウロのサイズ.
-	const __int64	MAX_MOUSE_SPEED = 2;		// 一番重い時のマウス速度
+	const int		MAX_WEIGHT = 9;			// 満水時の重さ( 0=制御なし ... 9=重い ).
 	const float		WATER_MIN		= 0.0f;		// 水の量の最小値
 	const float		WATER_MAX		= 1.0f;		// 水の量の最大値
 	const float		WATERING_ROT	= -45.0f;	// 水やりの時の角度;
@@ -173,17 +173,8 @@ void CWateringCan::UpdateCollision()
 //---------------------------.
 void CWateringCan::GrabUpdate()
 {
-	// 水の量に対応したマウスの速度に変更する
-	const auto s = Input::SetMouseSpeed();
-	Input::SetMouseSpeed( static_cast<__int64>( s - ( s - MAX_MOUSE_SPEED ) * m_WaterValue ) );
-}
-
-//---------------------------.
-// 離した時の初期化.
-//---------------------------.
-void CWateringCan::SeparateInit()
-{
-	Input::ResetMouseSpeed();
+	// 水の量に応じて重さを設定する.
+	m_Weight = static_cast<int>( m_WaterValue * MAX_WEIGHT + 0.5f );
 }
 
 //---------------------------.

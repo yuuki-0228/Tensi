@@ -33,11 +33,6 @@ protected:
 	//	Update関数の最後に呼ぶ.
 	virtual void UpdateCollision() override;
 
-	// 掴みの更新.
-	virtual void GrabUpdate();
-	// 離した時の初期化.
-	virtual void SeparateInit();
-
 	// 上に当たった時の更新.
 	virtual void HitUpUpdate() override;
 	// 下に当たった時の更新.

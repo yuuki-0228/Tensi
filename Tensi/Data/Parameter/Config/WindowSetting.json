@@ -3,6 +3,7 @@
     "ウィンドウの設定が行えます。",
     "----------------------------------------------",
     "[BackColor           ] : 背景の色",
+    "[FPS                 ] : フレームレート",
     "[IsDispCenter        ] : 起動時に画面の中央に配置するか",
     "[IsDispCloseMessage  ] : 「Escape」を押した時にメッセージボックスを表示させるか",
     "[IsDispMouseCursor   ] : 画面にマウスカーソルを表示するか",
@@ -27,6 +28,7 @@
     "G": 0.0,
     "R": 0.0
   },
+  "FPS": 60.0,
   "IsDispCenter": false,
   "IsDispCloseMessage": false,
   "IsDispMouseCursor": true,

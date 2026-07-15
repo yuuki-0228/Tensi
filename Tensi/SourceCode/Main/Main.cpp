@@ -21,6 +21,7 @@
 #include "..\Utility\WindowsMenuManager\WindowsMenuManager.h"
 #include "..\System\SystemWindowManager\SystemWindowManager.h"
 #include <dwmapi.h>
+#include "../Utility/Const/Const.h"
 
 // ImGUi‚ÅŽg—p.
 extern LRESULT ImGui_ImplWin32_WndProcHandler( HWND, UINT, WPARAM, LPARAM );
@@ -57,7 +58,7 @@ CMain::CMain()
 	, m_IsWindowTop		( true )
 #endif
 {
-	m_pFrameRate	= std::make_unique<CFrameRate>( FPS );
+	m_pFrameRate	= std::make_unique<CFrameRate>( Const::GameWindow().FPS );
 	m_pLoadManager	= std::make_unique<CLoadManager>();
 }
 

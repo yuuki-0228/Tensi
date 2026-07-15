@@ -21,7 +21,6 @@ namespace {
 class WindowManager
 {
 public:
-	using IconList		= std::vector<std::pair<D3DXPOSITION2, std::string>>;
 	using IconFindMap	= std::unordered_map<std::string, ICOINDEX>;
 	using IconPosMap	= std::unordered_map<ICOINDEX, D3DXPOSITION2>;
 	using IconNameMap	= std::unordered_map<ICOINDEX, std::string>;
@@ -38,6 +37,28 @@ public:
 		RECT Work;		// タスクバーを除いたワークエリア.
 	};
 	using MonitorAreaList = std::vector<SMonitorArea>;
+
+	// デスクトップアイコンの種類( ファイルの種別 ).
+	enum class enDesktopIconType : unsigned char {
+		Folder,		// フォルダ.
+		Exe,		// 実行ファイル( .exe ).
+		Shortcut,	// ショートカット( .lnk ).
+		TextFile,	// テキストファイル( .txt ).
+		Image,		// 画像ファイル( .png / .jpg など ).
+		Other,		// その他のファイル.
+		Special,	// ごみ箱など実ファイルに対応しない特殊アイコン.
+	};
+
+	// デスクトップアイコンの詳細情報.
+	struct SDesktopIcon {
+		ICOINDEX			Index;		// アイコンのインデックス.
+		std::string			Name;		// アイコン名( 表示名 ).
+		RECT				ClickRect;	// クリック判定の矩形( アイコン+ラベル / ゲーム座標系 ).
+		RECT				DrawRect;	// アイコン画像の描画矩形( ゲーム座標系 ).
+		enDesktopIconType	Type;		// アイコンの種類.
+		std::string			Extension;	// 拡張子( ".txt" など / フォルダ・特殊は空 ).
+	};
+	using IconList = std::vector<SDesktopIcon>;
 
 public:
 	WindowManager();
@@ -104,10 +125,10 @@ public:
 	// ウィンドウの情報リストを取得.
 	//	<ドロップシャドウを除いたウィンドウの情報, ウィンドウハンドル>.
 	static WndList GetWindowList();
-	// デスクトップのアイコンの位置リストの取得.
-	//	<アイコンの位置, アイコン名>.
-	static IconList	GetDesktopIconList();
-	// デスクトップのドラッグ中の青い選択矩形を取得（ゲーム坐標系）.
+	// デスクトップのアイコンの詳細情報リストの取得.
+	//	<インデックス, 名前, クリック判定, 描画領域, 種類, 拡張子>.
+	static IconList GetDesktopIconList();
+	// デスクトップのドラッグ中の青い選択矩形を取得（ゲーム座標系）.
 	//	ドラッグ中でない場合はサイズ0のRECTを返す.
 	static RECT GetDesktopDragSelectRect() { return GetInstance()->m_DesktopDragRect; }
 
@@ -149,6 +170,12 @@ public:
 	static void AddWindowPosition( const HWND& hWnd, const int x, const int y );
 	static void AddWindowPosition( const HWND& hWnd, const D3DXPOSITION2& Pos );
 	static void AddWindowPosition( const HWND& hWnd, const D3DXPOSITION3& Pos );
+
+	// ウィンドウを画面外へ完全に出さないように移動量を制限して動かす.
+	static void MoveWindowInScreen( const HWND& hWnd, const int dx, const int dy );
+
+	// ウィンドウが全画面表示( 最大化 or モニター全体を覆う )かを取得.
+	static bool IsFullScreenWindow( const HWND& hWnd );
 
 	// ウィンドウのサイズを設定.
 	static void SetWindowSize( const HWND& hWnd, const int x, const int y );
@@ -211,10 +238,10 @@ private:
 	WndNameMap		m_WindowNameMap;			// ウィンドウ名取得用リスト.
 	WndNameMap		m_WindowClassMap;			// ウィンドウクラス名取得用リスト.
 	WndZOrderMap	m_WindowZOrderMap;			// ウィンドウのZオーダー取得用リスト.
-	IconList		m_IconList;					// アイコンの位置リスト.
 	IconFindMap		m_IconFindMap;				// アイコンの名前でアイコンの位置取得用リスト.
 	IconPosMap		m_IconPosMap;				// アイコンのインデックス取得用リスト.
 	IconNameMap		m_IconNameMap;				// アイコンのインデックス取得用リスト.
+	IconList		m_IconList;					// アイコンの情報リスト.
 	std::string		m_UserName;					// ユーザー名.
 	bool			m_IsWindowUpdate;			// ウィンドウリストを更新したか.
 	bool			m_IsDesktopIconUpdate;		// デスクトップのアイコンの位置を更新したか.

@@ -181,7 +181,10 @@
     <ClCompile Include="SourceCode\Utility\ImGuiManager\MessageWindow\MessageWindow.cpp" />
     <ClCompile Include="SourceCode\Utility\Random\Random.cpp" />
     <ClCompile Include="SourceCode\Utility\Transform\Transform.cpp" />
-    <ClCompile Include="SourceCode\Utility\Animation\ScaleAnimation\ScaleAnimation.cpp" />
+    <ClCompile Include="SourceCode\Utility\Animation\SpringScale\SpringScale.cpp" />
+    <ClCompile Include="SourceCode\Utility\Animation\ValueAnimation\ValueAnimation.cpp" />
+    <ClCompile Include="SourceCode\Utility\Animation\Vector2Animation\Vector2Animation.cpp" />
+    <ClCompile Include="SourceCode\Utility\Animation\ShakeAnimation\ShakeAnimation.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Library\encrypt\file.h" />
@@ -320,7 +323,10 @@
     <ClInclude Include="SourceCode\Utility\Message\Message.h" />
     <ClInclude Include="SourceCode\Utility\StringConversion\StringConversion.h" />
     <ClInclude Include="SourceCode\Utility\Transform\Transform.h" />
-    <ClInclude Include="SourceCode\Utility\Animation\ScaleAnimation\ScaleAnimation.h" />
+    <ClInclude Include="SourceCode\Utility\Animation\SpringScale\SpringScale.h" />
+    <ClInclude Include="SourceCode\Utility\Animation\ValueAnimation\ValueAnimation.h" />
+    <ClInclude Include="SourceCode\Utility\Animation\Vector2Animation\Vector2Animation.h" />
+    <ClInclude Include="SourceCode\Utility\Animation\ShakeAnimation\ShakeAnimation.h" />
     <ClInclude Include="SourceCode\Common\WindowTextRenderer\WindowTextRenderer.h" />
     <ClInclude Include="SourceCode\Utility\FileManager\FileManager.h" />
     <ClInclude Include="SourceCode\Common\Fog\Fog.h" />

@@ -4,7 +4,7 @@
 #include "..\..\..\..\..\Common\Sprite\Sprite.h"
 #include "..\..\..\..\..\Resource\SpriteResource\SpriteResource.h"
 #include "..\..\..\..\..\Utility\WindowManager\WindowManager.h"
-#include "..\..\..\..\..\Utility\Animation\ScaleAnimation\ScaleAnimation.h"
+#include "..\..\..\..\..\Utility\Animation\SpringScale\SpringScale.h"
 
 /************************************************
 *	ウィンドウのオブジェクト.
@@ -103,24 +103,32 @@ private:
 	void ScreenCollision();
 
 	// 上側に当たった.
-	void HitUp( const RECT& HitWnd, const bool IsFromOutside = true );
+	void HitUp( const RECT& HitWnd, const bool IsFromOutside = true, const HWND& HitHandle = NULL );
 	// 下側に当たった.
-	void HitDown( const RECT& HitWnd, const bool IsFromOutside = true );
+	void HitDown( const RECT& HitWnd, const bool IsFromOutside = true, const HWND& HitHandle = NULL );
 	// 左側に当たった.
-	void HitLeft( const RECT& HitWnd, const bool IsFromOutside = true );
+	void HitLeft( const RECT& HitWnd, const bool IsFromOutside = true, const HWND& HitHandle = NULL );
 	// 右側に当たった.
-	void HitRight( const RECT& HitWnd, const bool IsFromOutside = true );
+	void HitRight( const RECT& HitWnd, const bool IsFromOutside = true, const HWND& HitHandle = NULL );
 
 	// 着地.
 	void Landing( const RECT& HitWnd );
 
+	// 衝突した時の重さと衝突速度に応じてぶつかったウィンドウを動かす.
+	void PushWindow( const HWND& hWnd, const EDirection Dire );
+
 	// モニターのワークエリアリストを更新.
 	void UpdateMonitorWorkAreas();
+
+	// 重さに応じたマウス速度の適用.
+	void ApplyWeightMouseSpeed();
+	// 掴んでいる時にマウスを下に下げる処理.
+	void ApplyGrabDownSpeed();
 
 protected:
 	CSprite*					m_pSprite;			// 画像.
 	SSpriteRenderState			m_SpriteState;		// 画像の情報.
-	CScaleAnimation				m_ScaleAnim;		// 拡縮アニメーション.
+	CSpringScale				m_ScaleAnim;		// 拡縮アニメーション.
 	bool						m_IsUseImpactSquash;// 衝突時に拡縮させるか.
 	std::vector<D3DXVECTOR3>	m_VectorList;		// ベクトルリスト.
 	D3DXVECTOR3					m_OldMoveVector;	// 前回の移動ベクトル.
@@ -132,6 +140,8 @@ protected:
 	HWND						m_InWndHandle;		// 中に入っているウィンドウのハンドル.
 	RECT						m_LandingWnd;		// 着地しているウィンドウ情報.
 	RECT						m_AddWndRect;		// ウィンドウの情報に追加する補正値.
+	int							m_Weight;			// 重さ( 0=制御なし, 1=軽い ... 10=重い ).
+	float						m_GrabDownSpeed;		// 掴んでいる時にマウスを下に下げる速度( 0=下がらない ).
 	float						m_CollSize;			// 当たり判定のサイズ.
 	float						m_GravityPower;		// 重力の強さ.
 	float						m_SpeedRate;		// 速度の保存率.
@@ -145,5 +155,6 @@ protected:
 	WindowManager::MonitorList	m_MonitorWorkAreas;	// モニターごとのワークエリア.
 
 private:
+	bool						m_IsWeightMouseSpeed;// 重さでマウス速度を変更中か.
 	D3DXPOSITION3				m_AddCenterPosition;// 中心座標に変換するため用の座標.
 };

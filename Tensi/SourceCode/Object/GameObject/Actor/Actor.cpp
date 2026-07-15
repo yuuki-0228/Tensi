@@ -2,6 +2,7 @@
 #include "..\..\..\Common\DirectX\DirectX11.h"
 #include "..\..\Camera\CameraManager\CameraManager.h"
 #include <cmath>
+#include "../../../Utility/Const/Const.h"
 
 CActor::CActor()
 	: m_pCollisions		()
@@ -32,10 +33,10 @@ D3DXVECTOR3 CActor::GetScreenPos()
 	// ビューポート行列.
 	D3DXMATRIX mViewport;
 	D3DXMatrixIdentity( &mViewport );
-	mViewport._11 = FWND_W *  0.5f;
-	mViewport._22 = FWND_H * -0.5f;
-	mViewport._41 = FWND_W *  0.5f;
-	mViewport._42 = FWND_H *  0.5f;
+	mViewport._11 = Const::GameWindow().SIZE.x *  0.5f;
+	mViewport._22 = Const::GameWindow().SIZE.y * -0.5f;
+	mViewport._41 = Const::GameWindow().SIZE.x *  0.5f;
+	mViewport._42 = Const::GameWindow().SIZE.y *  0.5f;
 
 	// スクリーン座標.
 	D3DXMATRIX	m	= CameraManager::GetViewProjMatrix() * mViewport;
@@ -57,8 +58,8 @@ bool CActor::IsScreenOut( const float& Size )
 	D3DXVECTOR3	ScreenPos	= Math::Round_n( GetScreenPos(), 5 );
 
 	// 画面内にいるか.
-	if ( -Size * 2 < ScreenPos.x && ScreenPos.x < FWND_W + Size * 2 &&
-		 -Size * 2 < ScreenPos.y && ScreenPos.y < FWND_H + Size * 2 &&
+	if ( -Size * 2 < ScreenPos.x && ScreenPos.x < Const::GameWindow().SIZE.x + Size * 2 &&
+		 -Size * 2 < ScreenPos.y && ScreenPos.y < Const::GameWindow().SIZE.y + Size * 2 &&
 		 ScreenPos.z < 1.15f ) return false;
 
 	return true;	// 画面外.

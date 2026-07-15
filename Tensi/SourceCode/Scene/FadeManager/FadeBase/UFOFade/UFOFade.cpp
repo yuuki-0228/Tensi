@@ -1,5 +1,6 @@
 #include "UFOFade.h"
 #include "..\..\..\..\Resource\SpriteResource\SpriteResource.h"
+#include "../../../../Utility/Const/Const.h"
 
 namespace{
 	constexpr float		END_FADEOUT_SCALE		= 2.0f;		// フェードアウトの最終サイズ.
@@ -26,8 +27,8 @@ bool CUFOFade::Init()
 	m_pSpriteUFO	= SpriteResource::GetSprite( "UFO",	&m_UFOState );
 
 	m_UFOState.Transform.Scale			= END_FADEOUT_SCALE_VEC3;
-	m_UFOState.Transform.Position.x		= static_cast<float>( WND_W / 2 );
-	m_UFOState.Transform.Position.y		= static_cast<float>( WND_H / 2 );
+	m_UFOState.Transform.Position.x		= static_cast<float>( Const::GameWindow().SIZE.x / 2 );
+	m_UFOState.Transform.Position.y		= static_cast<float>( Const::GameWindow().SIZE.y / 2 );
 	m_UFOState.IsAlphaBlock				= false;
 	return true;
 }
@@ -50,8 +51,8 @@ void CUFOFade::Render()
 void CUFOFade::FadeSetting()
 {
 	m_UFOState.Transform.Scale			= END_FADEOUT_SCALE_VEC3;
-	m_UFOState.Transform.Position.x		= static_cast<float>( WND_W / 2 );
-	m_UFOState.Transform.Position.y		= static_cast<float>( WND_H / 2 );
+	m_UFOState.Transform.Position.x		= static_cast<float>( Const::GameWindow().SIZE.x / 2 );
+	m_UFOState.Transform.Position.y		= static_cast<float>( Const::GameWindow().SIZE.y / 2 );
 }
 
 //---------------------------.

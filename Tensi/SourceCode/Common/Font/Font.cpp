@@ -611,8 +611,8 @@ void CFont::RenderFontUI( const char* c, SFontRenderState* pRenderState )
 
 		// 描画するエリア.
 		D3DXVECTOR4 RenderArea = pRenderState->RenderArea;
-		const float WndScalseW = DirectX11::GetWndWidth()  / FWND_W;
-		const float WndScalseH = DirectX11::GetWndHeight() / FWND_H;
+		const float WndScalseW = DirectX11::GetWndWidth()  / Const::GameWindow().SIZE.x;
+		const float WndScalseH = DirectX11::GetWndHeight() / Const::GameWindow().SIZE.y;
 		RenderArea.x	*= WndScalseW;
 		RenderArea.z	*= WndScalseW;
 		RenderArea.y	*= WndScalseH;
@@ -620,8 +620,8 @@ void CFont::RenderFontUI( const char* c, SFontRenderState* pRenderState )
 		cb.vRenderArea	 = RenderArea;
 
 		// ビューポートの幅、高さを渡す.
-		cb.fViewPortWidth	= FWND_W;
-		cb.fViewPortHeight	= FWND_H;
+		cb.fViewPortWidth	= Const::GameWindow().SIZE.x;
+		cb.fViewPortHeight	= Const::GameWindow().SIZE.y;
 
 		// ディザ抜きを使用するか.
 		cb.vDitherFlag.x = m_DitherFlag == true ? 1.0f : 0.0f;
@@ -712,8 +712,8 @@ void CFont::RenderFont3D( const char* c, SFontRenderState* pRenderState, const b
 
 		// 描画するエリア.
 		D3DXVECTOR4 RenderArea = pRenderState->RenderArea;
-		const float WndScalseW = DirectX11::GetWndWidth()  / FWND_W;
-		const float WndScalseH = DirectX11::GetWndHeight() / FWND_H;
+		const float WndScalseW = DirectX11::GetWndWidth()  / Const::GameWindow().SIZE.x;
+		const float WndScalseH = DirectX11::GetWndHeight() / Const::GameWindow().SIZE.y;
 		RenderArea.x	*= WndScalseW;
 		RenderArea.z	*= WndScalseW;
 		RenderArea.y	*= WndScalseH;

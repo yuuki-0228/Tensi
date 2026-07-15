@@ -1,4 +1,5 @@
 #include "WindowTextRenderer.h"
+#include "../../Utility/Const/Const.h"
 
 namespace {
 	constexpr float RECT_W			= 30.0f;
@@ -443,8 +444,8 @@ void WindowTextRenderer::RenderFont(
 		cb.vColor = pI->m_Color;
 
 		// ビューポートの幅、高さを渡す.
-		cb.fViewPortWidth	= FWND_W;
-		cb.fViewPortHeight	= FWND_H;
+		cb.fViewPortWidth	= Const::GameWindow().SIZE.x;
+		cb.fViewPortHeight	= Const::GameWindow().SIZE.y;
 
 		memcpy_s(pData.pData, pData.RowPitch,
 			(void*)(&cb), sizeof(cb));

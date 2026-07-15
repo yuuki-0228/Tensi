@@ -7,8 +7,8 @@
 #include <string>
 
 namespace {
-	constexpr char	RECOVERY_FILE_PATH[]	= "Data\\Parameter\\Data\\ms.bin";				// 復帰用ファイルの保存場所.
-	constexpr char	WATCHDOG_OPTION[]		= "--mouse-speed-watchdog";								// 監視プロセス起動用のコマンドライン引数.
+	constexpr char	RECOVERY_FILE_PATH[]	= "Data\\Parameter\\Data\\msp.bin";		// 復帰用ファイルの保存場所.
+	constexpr char	WATCHDOG_OPTION[]		= "--mouse-speed-watchdog";				// 監視プロセス起動用のコマンドライン引数.
 	constexpr int	MOUSE_SPEED_MIN			= 1;	// マウス速度の最小値.
 	constexpr int	MOUSE_SPEED_MAX			= 20;	// マウス速度の最大値.
 

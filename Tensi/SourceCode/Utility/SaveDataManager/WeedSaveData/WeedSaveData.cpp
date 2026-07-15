@@ -2,7 +2,7 @@
 #include "..\..\..\Utility\FileManager\FileManager.h"
 
 namespace {
-	constexpr char FILE_PATH[] = "Data\\Parameter\\Data\\w.bin";
+	constexpr char FILE_PATH[] = "Data\\Parameter\\Data\\wed.bin";
 
 }
 

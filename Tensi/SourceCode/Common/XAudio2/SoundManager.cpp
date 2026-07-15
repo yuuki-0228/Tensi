@@ -10,7 +10,7 @@ namespace fs = std::filesystem;
 
 namespace {
 	constexpr char	FILE_PATH[]							= "Data\\Sound";					// Soundデータが入っているディレクトリパス.
-	constexpr char	BINARY_FILE_PATH[]					= "Data\\Parameter\\Data\\sv.bin";	// バイナリデータが入ってるパス.
+	constexpr char	BINARY_FILE_PATH[]					= "Data\\Parameter\\Data\\adv.bin";	// バイナリデータが入ってるパス.
 	constexpr SoundManager::SSoundVolume INIT_VOLUME	= { 0.5f, 0.5f, 0.5f, 0.5f };		// バイナリデータが存在しない際に設定する初期音量.
 	constexpr float	DEFAULT_SOUND_VOLUME				= 1.0f;								// サウンドデータのデフォルトの音量
 	constexpr float	DEFAULT_MAX_PITCH					= 2.0f;								// サウンドデータのデフォルトの最大ピッチ数
@@ -58,6 +58,27 @@ SoundManager::SoundManager()
 
 SoundManager::~SoundManager()
 {
+	// 終了フラグを立て, 各再生ループを抜けさせる.
+	m_EndGameFlag = true;
+
+	// 音量変更スレッドを停止して回収する.
+	m_MoveSoundVolumeThreadFlag = false;
+	{
+		// cv の待機を解除して while ループを抜けさせる.
+		std::lock_guard<std::mutex> lk( m_SoundVolumemtx );
+		m_ResumeSoundVolumeThreadFlag = true;
+	}
+	m_SoundVolumeCv.notify_all();
+	// joinable なまま破棄すると terminate するため join する.
+	if ( m_SoundSourceVolume.joinable() ) m_SoundSourceVolume.join();
+
+	// BGM 再生スレッドを停止して回収する.
+	for ( auto& [Name, Thread] : m_pBGMThread ) {
+		// 再生ループを抜けさせる.
+		m_bisEndThread[Name] = true;
+		// joinable なまま破棄すると terminate するため detach する.
+		if ( Thread.joinable() ) Thread.detach();
+	}
 }
 
 //----------------------------.

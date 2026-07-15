@@ -1,6 +1,7 @@
 #pragma once
 #include "..\..\Global.h"
 #include "..\Sprite\SpriteStruct.h"
+#include "../../Utility/Const/Const.h"
 
 // コンスタントバッファのアプリ側の定義.
 //	※シェーダ内のコンスタントバッファと一致している必要あり.
@@ -54,7 +55,7 @@ struct stFontRenderState
 		, TextAlign		( ETextAlign::Left )
 		, Color			( Color4::White )
 		, OutLineColor	( Color4::Black )
-		, RenderArea	( 0, 0, WND_W, WND_H )
+		, RenderArea	( 0, 0, Const::GameWindow().SIZE.x, Const::GameWindow().SIZE.y )
 		, TextInterval	( 0.0f, 0.0f )
 		, OutLineSize	( 4.0 )
 		, IsDisp		( true )
