@@ -46,7 +46,7 @@ HRESULT CEffect::Init( const std::string& FileName )
 	}
 
 	std::string Msg = FileName + " ì«Ç›çûÇ› : ê¨å˜";
-	Log::PushLog( Msg.c_str() );
+	Log::PushLogInfo( Msg.c_str() );
 	return S_OK;
 }
 

@@ -48,15 +48,54 @@ Const* Const::GetInstance()
 //----------------------------.
 void Const::stConstGameWindow::Load()
 {
-	json j = FileManager::JsonLoad( "Data\\Parameter\\Config\\WindowSetting.json" );
+	Json j = FileManager::JsonLoad( "Data\\Parameter\\Config\\WindowSetting.json" );
 
 	// èâä˙âª
-	SIZE.x		= j["Size"]["w"];
-	SIZE.y		= j["Size"]["h"];
-	FPS			= j["FPS"];
-	APP_NAME	= j["Name"]["App"];
-	WND_NAME	= j["Name"]["Wnd"];
-	VERSION		= j["Version"];
+	SIZE.x		= j["Size"]["w"].Get<float>();
+	SIZE.y		= j["Size"]["h"].Get<float>();
+	FPS			= j["FPS"].Get<float>();
+	APP_NAME	= j["Name"]["App"].Get<std::string>();
+	WND_NAME	= j["Name"]["Wnd"].Get<std::string>();
+	VERSION		= j["Version"].Get<std::string>();
+}
+
+//----------------------------.
+// Explore.
+//----------------------------.
+void Const::stConstExplore::Load()
+{
+	Json j = FileManager::JsonLoad( "Data\\Parameter\\Const\\Explore.json" );
+
+	// èâä˙âª
+	COMPLETE_SEC_PER_MB = j["COMPLETE_SEC_PER_MB"][_DATA].Get<float>();
+	COMPLETE_TIME_MAX = j["COMPLETE_TIME_MAX"][_DATA].Get<float>();
+	COMPLETE_TIME_MIN = j["COMPLETE_TIME_MIN"][_DATA].Get<float>();
+	EXPAND_TIME = j["EXPAND_TIME"][_DATA].Get<float>();
+	GAUGE_HEIGHT_RATE = j["GAUGE_HEIGHT_RATE"][_DATA].Get<float>();
+	GAUGE_OFFSET_Y_RATE = j["GAUGE_OFFSET_Y_RATE"][_DATA].Get<float>();
+	GAUGE_WIDTH_RATE = j["GAUGE_WIDTH_RATE"][_DATA].Get<float>();
+	ICON_POLL_INTERVAL = j["ICON_POLL_INTERVAL"][_DATA].Get<float>();
+	PEEK_INTERVAL_MAX = j["PEEK_INTERVAL_MAX"][_DATA].Get<float>();
+	PEEK_INTERVAL_MIN = j["PEEK_INTERVAL_MIN"][_DATA].Get<float>();
+	PEEK_LOOK_COUNT = j["PEEK_LOOK_COUNT"][_DATA].Get<int>();
+	PEEK_LOOK_TIME = j["PEEK_LOOK_TIME"][_DATA].Get<float>();
+	PEEK_RISE_RATE = j["PEEK_RISE_RATE"][_DATA].Get<float>();
+	PEEK_RISE_TIME = j["PEEK_RISE_TIME"][_DATA].Get<float>();
+	PEEK_SINK_TIME = j["PEEK_SINK_TIME"][_DATA].Get<float>();
+	PEEK_WAIT_TIME = j["PEEK_WAIT_TIME"][_DATA].Get<float>();
+	SHRINK_TIME = j["SHRINK_TIME"][_DATA].Get<float>();
+	SLIME_ICON_SCALE_RATE = j["SLIME_ICON_SCALE_RATE"][_DATA].Get<float>();
+	SMOKE_ALPHA_SPEED = j["SMOKE_ALPHA_SPEED"][_DATA].Get<float>();
+	SMOKE_SCALE_MAX = j["SMOKE_SCALE_MAX"][_DATA].Get<float>();
+	SMOKE_SCALE_MIN = j["SMOKE_SCALE_MIN"][_DATA].Get<float>();
+	SMOKE_SIZE_RATE = j["SMOKE_SIZE_RATE"][_DATA].Get<float>();
+	SMOKE_SPAWN_INTERVAL = j["SMOKE_SPAWN_INTERVAL"][_DATA].Get<float>();
+	SMOKE_SPREAD_RATE = j["SMOKE_SPREAD_RATE"][_DATA].Get<float>();
+	SMOKE_START_ALPHA = j["SMOKE_START_ALPHA"][_DATA].Get<float>();
+	TEXT_HEIGHT_RATE = j["TEXT_HEIGHT_RATE"][_DATA].Get<float>();
+	TEXT_OFFSET_Y_RATE = j["TEXT_OFFSET_Y_RATE"][_DATA].Get<float>();
+
+	Log::PushLogInfo( "Data\\Parameter\\Const\\Explore.json ì«Ç›çûÇ› : ê¨å˜" );
 }
 
 //----------------------------.
@@ -64,21 +103,21 @@ void Const::stConstGameWindow::Load()
 //----------------------------.
 void Const::stConstFlower::Load()
 {
-	json j = FileManager::JsonLoad( "Data\\Parameter\\Const\\Flower.json" );
+	Json j = FileManager::JsonLoad( "Data\\Parameter\\Const\\Flower.json" );
 
 	// èâä˙âª
-	COME_OUT_ANIM_ALPHA_SPEED = j["COME_OUT_ANIM_ALPHA_SPEED"][_DATA];
-	DELETE_DAY = j["DELETE_DAY"][_DATA];
-	REACTION_ANIM_SCALE = j["REACTION_ANIM_SCALE"][_DATA];
-	REACTION_ANIM_SPEED = j["REACTION_ANIM_SPEED"][_DATA];
-	SKIP_SHAKE_SPEED = j["SKIP_SHAKE_SPEED"][_DATA];
-	WATERING_ANIM_COOL_TIME_MAX = j["WATERING_ANIM_COOL_TIME_MAX"][_DATA];
-	WATERING_ANIM_COOL_TIME_MIN = j["WATERING_ANIM_COOL_TIME_MIN"][_DATA];
-	WATERING_ANIM_EFFECT_ALPHA_SPEED = j["WATERING_ANIM_EFFECT_ALPHA_SPEED"][_DATA];
-	WATER_OK_NUM = j["WATER_OK_NUM"][_DATA];
-	WITHER_DAY = j["WITHER_DAY"][_DATA];
+	COME_OUT_ANIM_ALPHA_SPEED = j["COME_OUT_ANIM_ALPHA_SPEED"][_DATA].Get<float>();
+	DELETE_DAY = j["DELETE_DAY"][_DATA].Get<int>();
+	REACTION_ANIM_SCALE = j["REACTION_ANIM_SCALE"][_DATA].Get<float>();
+	REACTION_ANIM_SPEED = j["REACTION_ANIM_SPEED"][_DATA].Get<float>();
+	SKIP_SHAKE_SPEED = j["SKIP_SHAKE_SPEED"][_DATA].Get<float>();
+	WATERING_ANIM_COOL_TIME_MAX = j["WATERING_ANIM_COOL_TIME_MAX"][_DATA].Get<float>();
+	WATERING_ANIM_COOL_TIME_MIN = j["WATERING_ANIM_COOL_TIME_MIN"][_DATA].Get<float>();
+	WATERING_ANIM_EFFECT_ALPHA_SPEED = j["WATERING_ANIM_EFFECT_ALPHA_SPEED"][_DATA].Get<float>();
+	WATER_OK_NUM = j["WATER_OK_NUM"][_DATA].Get<int>();
+	WITHER_DAY = j["WITHER_DAY"][_DATA].Get<int>();
 
-	Log::PushLog( "Data\\Parameter\\Const\\Flower.json ì«Ç›çûÇ› : ê¨å˜" );
+	Log::PushLogInfo( "Data\\Parameter\\Const\\Flower.json ì«Ç›çûÇ› : ê¨å˜" );
 }
 
 //----------------------------.
@@ -86,13 +125,13 @@ void Const::stConstFlower::Load()
 //----------------------------.
 void Const::stConstFreeCamera::Load()
 {
-	json j = FileManager::JsonLoad( "Data\\Parameter\\Const\\FreeCamera.json" );
+	Json j = FileManager::JsonLoad( "Data\\Parameter\\Const\\FreeCamera.json" );
 
 	// èâä˙âª
-	MOVE_SPEED = j["MOVE_SPEED"][_DATA];
-	ROTATION_SPEED = j["ROTATION_SPEED"][_DATA];
+	MOVE_SPEED = j["MOVE_SPEED"][_DATA].Get<float>();
+	ROTATION_SPEED = j["ROTATION_SPEED"][_DATA].Get<float>();
 
-	Log::PushLog( "Data\\Parameter\\Const\\FreeCamera.json ì«Ç›çûÇ› : ê¨å˜" );
+	Log::PushLogInfo( "Data\\Parameter\\Const\\FreeCamera.json ì«Ç›çûÇ› : ê¨å˜" );
 }
 
 //----------------------------.
@@ -100,12 +139,12 @@ void Const::stConstFreeCamera::Load()
 //----------------------------.
 void Const::stConstSystem::Load()
 {
-	json j = FileManager::JsonLoad( "Data\\Parameter\\Const\\System.json" );
+	Json j = FileManager::JsonLoad( "Data\\Parameter\\Const\\System.json" );
 
 	// èâä˙âª
-	AUTO_SAVE_TIME = j["AUTO_SAVE_TIME"][_DATA];
+	AUTO_SAVE_TIME = j["AUTO_SAVE_TIME"][_DATA].Get<float>();
 
-	Log::PushLog( "Data\\Parameter\\Const\\System.json ì«Ç›çûÇ› : ê¨å˜" );
+	Log::PushLogInfo( "Data\\Parameter\\Const\\System.json ì«Ç›çûÇ› : ê¨å˜" );
 }
 
 //----------------------------.
@@ -113,12 +152,12 @@ void Const::stConstSystem::Load()
 //----------------------------.
 void Const::stConstWaterFall::Load()
 {
-	json j = FileManager::JsonLoad( "Data\\Parameter\\Const\\WaterFall.json" );
+	Json j = FileManager::JsonLoad( "Data\\Parameter\\Const\\WaterFall.json" );
 
 	// èâä˙âª
-	WATER_FALL_W = j["WATER_FALL_W"][_DATA];
+	WATER_FALL_W = j["WATER_FALL_W"][_DATA].Get<int>();
 
-	Log::PushLog( "Data\\Parameter\\Const\\WaterFall.json ì«Ç›çûÇ› : ê¨å˜" );
+	Log::PushLogInfo( "Data\\Parameter\\Const\\WaterFall.json ì«Ç›çûÇ› : ê¨å˜" );
 }
 
 //----------------------------.
@@ -126,26 +165,26 @@ void Const::stConstWaterFall::Load()
 //----------------------------.
 void Const::stConstWateringCan::Load()
 {
-	json j = FileManager::JsonLoad( "Data\\Parameter\\Const\\WateringCan.json" );
+	Json j = FileManager::JsonLoad( "Data\\Parameter\\Const\\WateringCan.json" );
 
 	// èâä˙âª
-	FALL_MAX_VECTOR = j["FALL_MAX_VECTOR"][_DATA];
-	FULL_ANIM_COOL_TIME = j["FULL_ANIM_COOL_TIME"][_DATA];
-	FULL_ANIM_POWER_MAX = j["FULL_ANIM_POWER_MAX"][_DATA];
-	FULL_ANIM_POWER_MIN = j["FULL_ANIM_POWER_MIN"][_DATA];
-	GAUGE_DISP_ALPHA_SPEED = j["GAUGE_DISP_ALPHA_SPEED"][_DATA];
-	GAUGE_DISP_TIME_MAX = j["GAUGE_DISP_TIME_MAX"][_DATA];
-	GAUGE_HIDDEN_ALPHA_SPEED = j["GAUGE_HIDDEN_ALPHA_SPEED"][_DATA];
-	HIT_MAX_VEC_Y = j["HIT_MAX_VEC_Y"][_DATA];
-	HIT_VEC_Y = j["HIT_VEC_Y"][_DATA];
-	HIT_WATER_NUM_MAX = j["HIT_WATER_NUM_MAX"][_DATA];
-	HIT_WATER_POWER_MAX = j["HIT_WATER_POWER_MAX"][_DATA];
-	WATERING_POWER_MAX = j["WATERING_POWER_MAX"][_DATA];
-	WATERING_POWER_MIN = j["WATERING_POWER_MIN"][_DATA];
-	WATER_VEC_ROT_MAX = j["WATER_VEC_ROT_MAX"][_DATA];
-	WATER_VEC_ROT_MIN = j["WATER_VEC_ROT_MIN"][_DATA];
+	FALL_MAX_VECTOR = j["FALL_MAX_VECTOR"][_DATA].Get<float>();
+	FULL_ANIM_COOL_TIME = j["FULL_ANIM_COOL_TIME"][_DATA].Get<float>();
+	FULL_ANIM_POWER_MAX = j["FULL_ANIM_POWER_MAX"][_DATA].Get<float>();
+	FULL_ANIM_POWER_MIN = j["FULL_ANIM_POWER_MIN"][_DATA].Get<float>();
+	GAUGE_DISP_ALPHA_SPEED = j["GAUGE_DISP_ALPHA_SPEED"][_DATA].Get<float>();
+	GAUGE_DISP_TIME_MAX = j["GAUGE_DISP_TIME_MAX"][_DATA].Get<float>();
+	GAUGE_HIDDEN_ALPHA_SPEED = j["GAUGE_HIDDEN_ALPHA_SPEED"][_DATA].Get<float>();
+	HIT_MAX_VEC_Y = j["HIT_MAX_VEC_Y"][_DATA].Get<float>();
+	HIT_VEC_Y = j["HIT_VEC_Y"][_DATA].Get<float>();
+	HIT_WATER_NUM_MAX = j["HIT_WATER_NUM_MAX"][_DATA].Get<int>();
+	HIT_WATER_POWER_MAX = j["HIT_WATER_POWER_MAX"][_DATA].Get<float>();
+	WATERING_POWER_MAX = j["WATERING_POWER_MAX"][_DATA].Get<float>();
+	WATERING_POWER_MIN = j["WATERING_POWER_MIN"][_DATA].Get<float>();
+	WATER_VEC_ROT_MAX = j["WATER_VEC_ROT_MAX"][_DATA].Get<float>();
+	WATER_VEC_ROT_MIN = j["WATER_VEC_ROT_MIN"][_DATA].Get<float>();
 
-	Log::PushLog( "Data\\Parameter\\Const\\WateringCan.json ì«Ç›çûÇ› : ê¨å˜" );
+	Log::PushLogInfo( "Data\\Parameter\\Const\\WateringCan.json ì«Ç›çûÇ› : ê¨å˜" );
 }
 
 //----------------------------.
@@ -153,15 +192,15 @@ void Const::stConstWateringCan::Load()
 //----------------------------.
 void Const::stConstWeed::Load()
 {
-	json j = FileManager::JsonLoad( "Data\\Parameter\\Const\\Weed.json" );
+	Json j = FileManager::JsonLoad( "Data\\Parameter\\Const\\Weed.json" );
 
 	// èâä˙âª
-	COME_OUT_ANIM_ALPHA_SPEED = j["COME_OUT_ANIM_ALPHA_SPEED"][_DATA];
-	COME_OUT_ANIM_MOVE_SPEED = j["COME_OUT_ANIM_MOVE_SPEED"][_DATA];
-	COME_OUT_HEIGHT = j["COME_OUT_HEIGHT"][_DATA];
-	SKIP_SHAKE_SPEED = j["SKIP_SHAKE_SPEED"][_DATA];
+	COME_OUT_ANIM_ALPHA_SPEED = j["COME_OUT_ANIM_ALPHA_SPEED"][_DATA].Get<float>();
+	COME_OUT_ANIM_MOVE_SPEED = j["COME_OUT_ANIM_MOVE_SPEED"][_DATA].Get<float>();
+	COME_OUT_HEIGHT = j["COME_OUT_HEIGHT"][_DATA].Get<float>();
+	SKIP_SHAKE_SPEED = j["SKIP_SHAKE_SPEED"][_DATA].Get<float>();
 
-	Log::PushLog( "Data\\Parameter\\Const\\Weed.json ì«Ç›çûÇ› : ê¨å˜" );
+	Log::PushLogInfo( "Data\\Parameter\\Const\\Weed.json ì«Ç›çûÇ› : ê¨å˜" );
 }
 
 //----------------------------.
@@ -171,6 +210,7 @@ void Const::Load()
 {
 	Const* pI = GetInstance();
 
+	pI->ExploreData.Load();
 	pI->FlowerData.Load();
 	pI->FreeCameraData.Load();
 	pI->SystemData.Load();

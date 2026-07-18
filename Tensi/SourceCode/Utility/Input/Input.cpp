@@ -34,8 +34,8 @@ Input::Input()
 //	m_pKeyLog = std::make_unique<CKeyLog>( m_IsKeyLogPlay );
 
 	// ウィンドウの設定の取得.
-	json WndSetting		= FileManager::JsonLoad( WINDOW_SETTING_FILE_PATH );
-	m_IsNotActiveStop	= FileManager::JsonGet( WndSetting, "IsInputNotActiveStop", false );
+	Json WndSetting		= FileManager::JsonLoad( WINDOW_SETTING_FILE_PATH );
+	m_IsNotActiveStop	= WndSetting["IsInputNotActiveStop"].Get( false );
 
 	// 開始時のマウス速度の取得と復元保証の開始.
 	//	※前回異常終了していた場合は保存していた速度に自動で復元される.
@@ -90,7 +90,7 @@ HRESULT Input::Init()
 	Input* pI = GetInstance();
 
 	// 現在の設定を取得する.
-	json KeyBindData = FileManager::JsonLoad( KEY_BIND_FILE_PATH );
+	Json KeyBindData = FileManager::JsonLoad( KEY_BIND_FILE_PATH );
 	for ( auto& [ActionName, Obj] : KeyBindData.items() ) {
 		for ( auto& [KeyType, Value] : Obj.items() ) {
 			// キー割り当ての取得.
@@ -117,7 +117,7 @@ HRESULT Input::Init()
 		Random::IsRandLock( true );
 	}
 
-	Log::PushLog( "入力クラスの初期化 : 成功" );
+	Log::PushLogInfo( "入力クラスの初期化 : 成功" );
 	return S_OK;
 }
 

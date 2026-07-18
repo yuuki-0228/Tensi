@@ -103,7 +103,7 @@ private:
 	SSpriteState					m_SpriteState;			// スプライト情報.
 	SSpriteRenderState				m_SpriteRenderState;	// スプライトアニメーション情報.
 
-	json							m_SpriteStateData;		// スプライト情報データ.
+	Json							m_SpriteStateData;		// スプライト情報データ.
 	std::vector<std::string>*		m_pLogList;				// ログリスト.
 
 	bool							m_IsAnimPlay;			// アニメーションを行うか.

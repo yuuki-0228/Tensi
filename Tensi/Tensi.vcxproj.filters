@@ -166,6 +166,7 @@
     <ClCompile Include="SourceCode\Utility\Bool\DebugFlagWindow\DebugFlagWindow.cpp" />
     <ClCompile Include="SourceCode\Utility\Math\Math.cpp" />
     <ClCompile Include="SourceCode\Utility\FileManager\FileManager.cpp" />
+    <ClCompile Include="SourceCode\Utility\FileManager\Json\Json.cpp" />
     <ClCompile Include="SourceCode\Resource\MeshResource\MeshResource.cpp" />
     <ClCompile Include="SourceCode\Object\Object.cpp" />
     <ClCompile Include="SourceCode\Resource\SpriteResource\SpriteResource.cpp" />
@@ -276,6 +277,7 @@
     <ClCompile Include="SourceCode\Object\GameObject\Actor\BackGroundManager\ActorBackGround\WaterFall\WaterFallTile\WaterFallTile.cpp" />
     <ClCompile Include="SourceCode\Utility\Const\Const.cpp" />
     <ClCompile Include="SourceCode\Object\GameObject\Actor\WindowObjectManager\WindowObject\WateringCan\WateringCan.cpp" />
+    <ClCompile Include="SourceCode\Utility\WindowsMessageBox\WindowsMessageBox.cpp" />     <ClCompile Include="SourceCode\Object\GameObject\Actor\ActorEffect\IconSmokeEffectManager\IconSmokeEffectManager.cpp" />     <ClCompile Include="SourceCode\Object\GameObject\Actor\ActorEffect\IconSmokeEffectManager\IconSmokeEffect\IconSmokeEffect.cpp" />     <ClCompile Include="SourceCode\Object\GameObject\Actor\WindowObjectManager\WindowObject\Player\ExploreManager\ExploreManager.cpp" />
     <ClCompile Include="SourceCode\Object\GameObject\Actor\WindowObjectManager\WindowObject\WaterManager\Water\Water.cpp" />
     <ClCompile Include="SourceCode\Object\GameObject\Actor\WindowObjectManager\WindowObject\WaterManager\WaterManager.cpp" />
     <ClCompile Include="SourceCode\Object\GameObject\Actor\ActorEffect\WateringEffectManager\WateringEffect\WateringEffect.cpp" />
@@ -374,6 +376,7 @@
     <ClInclude Include="SourceCode\Utility\Bool\DebugFlagWindow\DebugFlagWindow.h" />
     <ClInclude Include="SourceCode\Utility\Math\Math.h" />
     <ClInclude Include="SourceCode\Utility\FileManager\FileManager.h" />
+    <ClInclude Include="SourceCode\Utility\FileManager\Json\Json.h" />
     <ClInclude Include="SourceCode\Resource\MeshResource\MeshResource.h" />
     <ClInclude Include="SourceCode\Common\Sprite\SpriteStruct.h" />
     <ClInclude Include="SourceCode\Object\Object.h" />
@@ -490,6 +493,7 @@
     <ClInclude Include="SourceCode\Object\GameObject\Actor\BackGroundManager\ActorBackGround\WaterFall\WaterFallTile\WaterFallTile.h" />
     <ClInclude Include="SourceCode\Utility\Const\Const.h" />
     <ClInclude Include="SourceCode\Object\GameObject\Actor\WindowObjectManager\WindowObject\WateringCan\WateringCan.h" />
+    <ClInclude Include="SourceCode\Utility\WindowsMessageBox\WindowsMessageBox.h" />     <ClInclude Include="SourceCode\Utility\SaveDataManager\ExploreSaveData.h" />     <ClInclude Include="SourceCode\Object\GameObject\Actor\ActorEffect\IconSmokeEffectManager\IconSmokeEffectManager.h" />     <ClInclude Include="SourceCode\Object\GameObject\Actor\ActorEffect\IconSmokeEffectManager\IconSmokeEffect\IconSmokeEffect.h" />     <ClInclude Include="SourceCode\Object\GameObject\Actor\WindowObjectManager\WindowObject\Player\ExploreManager\ExploreManager.h" />
     <ClInclude Include="SourceCode\Object\GameObject\Actor\WindowObjectManager\WindowObject\WaterManager\Water\Water.h" />
     <ClInclude Include="SourceCode\Object\GameObject\Actor\WindowObjectManager\WindowObject\WaterManager\WaterManager.h" />
     <ClInclude Include="SourceCode\Object\GameObject\Actor\WindowObjectManager\WindowObject\WaterManager\WaterData.h" />

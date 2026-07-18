@@ -16,7 +16,7 @@ namespace MasterData {
 using namespace MasterData;
 
 namespace MasterDataUtility {
-	std::unordered_map<std::string, std::unordered_map<ulong, std::any>> CreateCache( const std::vector<std::pair<std::string, json>>& data );
-	void CacheSetup( std::unordered_map<std::string, std::unordered_map<ulong, std::any>>& out, const std::string& Container, const json& File );
+	std::unordered_map<std::string, std::unordered_map<ulong, std::any>> CreateCache( const std::vector<std::pair<std::string, Json>>& data );
+	void CacheSetup( std::unordered_map<std::string, std::unordered_map<ulong, std::any>>& out, const std::string& Container, const Json& File );
 }
 #endif

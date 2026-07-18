@@ -37,11 +37,11 @@ HRESULT EffectResource::EffectLoad()
 	EffectResource* pI = GetInstance();
 	std::unique_lock<std::mutex> Lock( pI->m_Mutex );
 
-	auto EffectLoad = [&]( const std::filesystem::directory_entry& Entry )
+	auto EffectLoad = [&]( const std::string& EntryPath )
 	{
-		const std::string FilePath	= Entry.path().string();				// ファイルパス.
-		std::string		  Extension = Entry.path().extension().string();	// 拡張子.
-		std::string		  FileName	= Entry.path().stem().string();			// ファイル名.
+		const std::string FilePath	= EntryPath;				// ファイルパス.
+		std::string		  Extension = std::filesystem::path( EntryPath ).extension().string();	// 拡張子.
+		std::string		  FileName	= std::filesystem::path( EntryPath ).stem().string();			// ファイル名.
 
 #ifndef _DEBUG
 // 暗号化前の拡張しを取得.
@@ -62,10 +62,10 @@ HRESULT EffectResource::EffectLoad()
 		pI->m_EffectNames.emplace_back( FileName );
 	};
 
-	Log::PushLog( "------ エフェクト読み込み開始 ------" );
+	Log::PushLogInfo( "------ エフェクト読み込み開始 ------" );
 	try {
-		std::filesystem::recursive_directory_iterator Dir_itr( FILE_PATH ), End_itr;
-		std::for_each( Dir_itr, End_itr, EffectLoad );
+		const std::vector<std::string> Files = encrypt::EnumerateDataFiles( FILE_PATH );
+		std::for_each( Files.begin(), Files.end(), EffectLoad );
 	}
 	catch ( const std::filesystem::filesystem_error& e ) {
 		// ファイルが見つからないエラーは無視する.
@@ -75,7 +75,7 @@ HRESULT EffectResource::EffectLoad()
 		ErrorMessage( e.path1().string().c_str() );
 		return E_FAIL;
 	}
-	Log::PushLog( "------ エフェクト読み込み終了 ------" );
+	Log::PushLogInfo( "------ エフェクト読み込み終了 ------" );
 
 	// 読み込み終了.
 	pI->m_IsLoadEnd = true;

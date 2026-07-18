@@ -39,31 +39,31 @@ CWindowSetting::~CWindowSetting()
 void CWindowSetting::Init()
 {
 	// 現在の設定を取得する.
-	json WndData = FileManager::JsonLoad( WINDOW_SETTING_FILE_PATH );
-	m_Color.x				= FileManager::JsonGet( WndData, "BackColor", "R", 1.0f );
-	m_Color.y				= FileManager::JsonGet( WndData, "BackColor", "G", 1.0f );
-	m_Color.z				= FileManager::JsonGet( WndData, "BackColor", "B", 1.0f );
-	m_FPS					= FileManager::JsonGet( WndData, "FPS", 60.0f );
-	m_Size.x				= FileManager::JsonGet( WndData, "Size", "w", 1280.0f );
-	m_Size.y				= FileManager::JsonGet( WndData, "Size", "h", 720.0f );
-	m_Pos.x					= FileManager::JsonGet( WndData, "Pos", "x", 0.0f );
-	m_Pos.y					= FileManager::JsonGet( WndData, "Pos", "y", 0.0f );
-	m_AppName				= FileManager::JsonGet( WndData, "Name", "App", std::string() );
-	m_WndName				= FileManager::JsonGet( WndData, "Name", "Wnd", std::string() );
-	m_IsDispCenter			= FileManager::JsonGet( WndData, "IsDispCenter", false );
-	m_IsDispMouseCursor		= FileManager::JsonGet( WndData, "IsDispMouseCursor", true );
-	m_IsFPSRender			= FileManager::JsonGet( WndData, "IsFPSRender", false );
-	m_IsFullScreenLock		= FileManager::JsonGet( WndData, "IsFullScreenLock", false );
-	m_IsInputNotActiveStop	= FileManager::JsonGet( WndData, "IsInputNotActiveStop", false );
-	m_IsSizeLock			= FileManager::JsonGet( WndData, "IsSizeLock", false );
-	m_IsStartFullScreen		= FileManager::JsonGet( WndData, "IsStartFullScreen", false );
-	m_IsMaxLock				= FileManager::JsonGet( WndData, "IsMaxLock", false );
-	m_IsMinLock				= FileManager::JsonGet( WndData, "IsMinLock", false );
-	m_IsPopUpWnd			= FileManager::JsonGet( WndData, "IsPopUpWnd", false );
-	m_IsShowOnTop			= FileManager::JsonGet( WndData, "IsShowOnTop", false );
-	m_IsLogStop				= FileManager::JsonGet( WndData, "IsLogStop", false );
-	m_IsDispCloseMessage	= FileManager::JsonGet( WndData, "IsDispCloseMessage", true );
-	m_Version				= FileManager::JsonGet( WndData, "Version", std::string( "1.0.0" ) );
+	Json WndData = FileManager::JsonLoad( WINDOW_SETTING_FILE_PATH );
+	m_Color.x				= WndData["BackColor"]["R"].Get( 1.0f );
+	m_Color.y				= WndData["BackColor"]["G"].Get( 1.0f );
+	m_Color.z				= WndData["BackColor"]["B"].Get( 1.0f );
+	m_FPS					= WndData["FPS"].Get( 60.0f );
+	m_Size.x				= WndData["Size"]["w"].Get( 1280.0f );
+	m_Size.y				= WndData["Size"]["h"].Get( 720.0f );
+	m_Pos.x					= WndData["Pos"]["x"].Get( 0.0f );
+	m_Pos.y					= WndData["Pos"]["y"].Get( 0.0f );
+	m_AppName				= WndData["Name"]["App"].Get( std::string() );
+	m_WndName				= WndData["Name"]["Wnd"].Get( std::string() );
+	m_IsDispCenter			= WndData["IsDispCenter"].Get( false );
+	m_IsDispMouseCursor		= WndData["IsDispMouseCursor"].Get( true );
+	m_IsFPSRender			= WndData["IsFPSRender"].Get( false );
+	m_IsFullScreenLock		= WndData["IsFullScreenLock"].Get( false );
+	m_IsInputNotActiveStop	= WndData["IsInputNotActiveStop"].Get( false );
+	m_IsSizeLock			= WndData["IsSizeLock"].Get( false );
+	m_IsStartFullScreen		= WndData["IsStartFullScreen"].Get( false );
+	m_IsMaxLock				= WndData["IsMaxLock"].Get( false );
+	m_IsMinLock				= WndData["IsMinLock"].Get( false );
+	m_IsPopUpWnd			= WndData["IsPopUpWnd"].Get( false );
+	m_IsShowOnTop			= WndData["IsShowOnTop"].Get( false );
+	m_IsLogStop				= WndData["IsLogStop"].Get( false );
+	m_IsDispCloseMessage	= WndData["IsDispCloseMessage"].Get( true );
+	m_Version				= WndData["Version"].Get( std::string( "1.0.0" ) );
 
 	// 描画処理の設定.
 	m_RenderFunc = [&] () {
@@ -153,7 +153,7 @@ void CWindowSetting::Init()
 		ImGui::Separator();
 		if ( ImGuiManager::Button( u8"保存##WindowSettingSave" ) ) {
 			// 現在のウィンドウ設定をjson形式で保存する.
-			json j;
+			Json j;
 			j[".Comment"] = {
 				u8"ウィンドウの設定が行えます。",
 				u8"----------------------------------------------",

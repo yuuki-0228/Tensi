@@ -24,7 +24,7 @@ InputSetting::~InputSetting()
 void InputSetting::Init()
 {
 	// 現在の設定を取得する.
-	json KeyBindData = FileManager::JsonLoad( KEY_BIND_FILE_PATH );
+	Json KeyBindData = FileManager::JsonLoad( KEY_BIND_FILE_PATH );
 	for ( auto& [ActionName, Obj] : KeyBindData.items() ) {
 		for ( auto&[KeyType, Value] : Obj.items() ) {
 			// キー割り当ての取得.
@@ -133,7 +133,7 @@ void InputSetting::Init()
 		ImGui::Separator();
 		if ( ImGuiManager::Button( u8"保存##KeyBindSave" ) ) {
 			// 現在のキーバインドをjson形式で保存する.
-			json j;
+			Json j;
 			j[".Comment"] = {
 				u8"機能とその機能に対応したキーの設定が行えます。",
 				u8"ここで宣言した機能は 'Input.cpp' で使用できます。",

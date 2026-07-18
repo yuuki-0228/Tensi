@@ -9,6 +9,8 @@
 #include <sstream>
 #include <iostream>
 #include <encrypt/file.h>
+#include <type_traits>
+#include "Json\Json.h"
 
 // json型を作成.
 using json = nlohmann::json;
@@ -28,6 +30,73 @@ namespace FileManager {
 	// テキストファイルの書き込む.
 	HRESULT TextSave( const std::string& FilePath, const std::string& Data );
 
+	// ログファイルの読み込み (1行ずつ取得する).
+	std::vector<std::string> LogLoad( const std::string& FilePath );
+
+	// ログレベル.
+	enum class ELogLevel {
+		Debug,		// デバッグ情報.
+		Info,		// 通常の情報.
+		Warning,	// 警告.
+		Error,		// エラー.
+		Fatal,		// 致命的なエラー.
+	};
+
+	// ログファイルの書き込み.
+	//	行頭に [時:分:秒] [レベル] [呼び出し] を付けて1行追記する.
+	//	Level    : ログレベル.
+	//	Caller   : 呼び出し元 (クラス::関数名など).
+	//	IsAppend : 追記するか (false で新規作成).
+	//	IsDate   : タイムスタンプに日付も付けるか (起動ログなどで使用).
+	HRESULT LogSave(
+		const std::string&	FilePath,
+		const std::string&	Text,
+		const ELogLevel		Level,
+		const std::string&	Caller,
+		const bool			IsAppend	= true);
+
+	// iniデータ ( [セクション名][キー名] = 値 ).
+	//	セクションに属さないキーは空文字("")のセクションに格納する.
+	using IniData = std::unordered_map<std::string, std::unordered_map<std::string, std::string>>;
+
+	// iniファイルの読み込み.
+	//	";" "#" : 行頭コメントアウト.
+	IniData IniLoad( const std::string& FilePath );
+
+	// iniファイルの書き込み.
+	//	※unordered_map のためセクション・キーの順序は保存されない.
+	HRESULT IniSave( const std::string& FilePath, const IniData& Data );
+
+	// iniデータから安全に値を取得する.
+	template<class T>
+	T IniGet( const IniData& Ini, const std::string& Section, const std::string& Key, const T& Default )
+	{
+		// セクションとキーを検索する.
+		const auto sitr = Ini.find( Section );
+		if ( sitr == Ini.end() ) return Default;
+		const auto kitr = sitr->second.find( Key );
+		if ( kitr == sitr->second.end() ) return Default;
+		const std::string& Value = kitr->second;
+
+		// 文字列はそのまま返す.
+		if constexpr ( std::is_same_v<T, std::string> ) {
+			return Value;
+		}
+		// bool は "true" / "false" にも対応する.
+		else if constexpr ( std::is_same_v<T, bool> ) {
+			if ( Value == "true"  || Value == "1" ) return true;
+			if ( Value == "false" || Value == "0" ) return false;
+			return Default;
+		}
+		// それ以外は文字列から変換する.
+		else {
+			std::istringstream ss( Value );
+			T Out;
+			if ( ss >> Out ) return Out;
+			return Default;
+		}
+	}
+
 	// バイナリデータでの読み込み.
 	template<class T>
 	HRESULT BinaryLoad( const char* FilePath, T& Out, const int& SeekPoint = 0 );
@@ -41,46 +110,12 @@ namespace FileManager {
 	HRESULT BinarySave( const char* FilePath, const std::vector<T>& DataList );
 
 	// json形式でjsonファイルを開く.
-	json JsonLoad( const std::string& FilePath );
-
-	// jsonから安全に値を取得する。
-	template<class T>
-	T JsonGet( const json& Json, const T& Default )
-	{
-		try {
-			if ( Json.is_null() ) return Default;
-			return Json.get<T>();
-		}
-		catch ( ... ) {
-			return Default;
-		}
-	}
-	template<class T>
-	T JsonGet( const json& Json, const char* Key, const T& Default )
-	{
-		if ( Json.is_object() == false ) return Default;
-		const auto itr = Json.find( Key );
-		if ( itr == Json.end() ) return Default;
-		return JsonGet( *itr, Default );
-	}
-	template<class T>
-	T JsonGet( const json& Json, const char* Key1, const char* Key2, const T& Default )
-	{
-		if ( Json.is_object() == false ) return Default;
-		const auto itr = Json.find( Key1 );
-		if ( itr == Json.end() ) return Default;
-		return JsonGet( *itr, Key2, Default );
-	}
+	//	戻り値の Json は nlohmann::json と相互変換できるラッパー.
+	//	値の取得は Json::Get( Default ) / Json::Get<T>() を使用する.
+	Json JsonLoad( const std::string& FilePath );
 
 	// json形式をjsonファイルで書き込む.
 	HRESULT JsonSave( const std::string& FilePath, const json& Data );
-
-	// json を std::unordered_map に変換.
-	std::unordered_map<std::string, std::string> JsonToMap( const json& Json );
-
-	// std::unordered_map を json に変換.
-	json MapToJson( const std::unordered_map<std::string, std::string> Map );
-	json MapToJson( const std::unordered_map<std::string, std::vector<std::string>> Map );
 
 	// 足りないファイルディレクトリを作成する.
 	HRESULT CreateFileDirectory( const std::string& FilePath );
@@ -123,6 +158,10 @@ HRESULT FileManager::BinaryLoad( const char* FilePath, T& Out, const int& SeekPo
 	// 暗号化されているか取得.
 	std::string fp = encrypt::GetEncryptionFilePath( FilePath );
 	if ( encrypt::GetIsEncryption( fp ) ) return FileManager::EFile::EBinaryLoad( fp.c_str(), Out, SeekPoint );
+
+	// 実ファイルが無い場合はアーカイブから読み込む.
+	if ( FileManager::FileCheck( FilePath ) == false &&
+		 encrypt::GetIsArchiveFile( FilePath ) ) return FileManager::EFile::EBinaryLoad( FilePath, Out, SeekPoint );
 #endif
 
 	// ファイルを開く.
@@ -148,6 +187,10 @@ HRESULT FileManager::BinaryLoad( const char* FilePath, std::vector<T>& OutList )
 #ifndef _DEBUG
 	std::string fp = encrypt::GetEncryptionFilePath( FilePath );
 	if ( encrypt::GetIsEncryption( fp ) ) return FileManager::EFile::EBinaryLoad( fp.c_str(), OutList );
+
+	// 実ファイルが無い場合はアーカイブから読み込む.
+	if ( FileManager::FileCheck( FilePath ) == false &&
+		 encrypt::GetIsArchiveFile( FilePath ) ) return FileManager::EFile::EBinaryLoad( FilePath, OutList );
 #endif
 
 	// ファイルを開く.
@@ -227,7 +270,8 @@ template<class T>
 HRESULT FileManager::EFile::EBinaryLoad( const char* FilePath, T& Out, const int& SeekPoint )
 {
 	// ファイルを開く.
-	if ( encrypt::GetIsEncryption( FilePath ) == false ) return E_FAIL;
+	if ( encrypt::GetIsEncryption( FilePath ) == false &&
+		 encrypt::GetIsArchiveFile( FilePath ) == false ) return E_FAIL;
 	auto rf = encrypt::GetRestoreFile( FilePath );
 	if ( rf.first == nullptr ) return E_FAIL;
 	encrypt::membuf mb( rf );
@@ -250,7 +294,8 @@ template<class T>
 HRESULT FileManager::EFile::EBinaryLoad( const char* FilePath, std::vector<T>& OutList )
 {
 	// ファイルを開く.
-	if ( encrypt::GetIsEncryption( FilePath ) == false ) return E_FAIL;
+	if ( encrypt::GetIsEncryption( FilePath ) == false &&
+		 encrypt::GetIsArchiveFile( FilePath ) == false ) return E_FAIL;
 	auto rf = encrypt::GetRestoreFile( FilePath );
 	if ( rf.first == nullptr ) return E_FAIL;
 	encrypt::membuf mb( rf );

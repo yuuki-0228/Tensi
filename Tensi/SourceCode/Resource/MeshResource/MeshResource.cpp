@@ -46,11 +46,11 @@ HRESULT MeshResource::MeshLoad()
 	MeshResource* pI = GetInstance();
 	std::unique_lock<std::mutex> lock( pI->m_Mutex );
 
-	auto MeshLoad = [&]( const std::filesystem::directory_entry& Entry )
+	auto MeshLoad = [&]( const std::string& EntryPath )
 	{
-		std::string		  Extension = Entry.path().extension().string();	// 拡張子.
-		std::string		  FileName	= Entry.path().stem().string();			// ファイル名.
-		const std::string FilePath	= Entry.path().string();				// ファイルパス.
+		std::string		  Extension = std::filesystem::path( EntryPath ).extension().string();	// 拡張子.
+		std::string		  FileName	= std::filesystem::path( EntryPath ).stem().string();			// ファイル名.
+		const std::string FilePath	= EntryPath;				// ファイルパス.
 		const std::string LoadMsg	= FilePath + " 読み込み : 成功";			// あらかじめロード完了メッセージを設定する.
 		const std::string ErrorMsg	= FileName + " : X ファイル読み込み失敗";	// あらかじめエラーメッセージを設定する.
 
@@ -101,13 +101,13 @@ HRESULT MeshResource::MeshLoad()
 				throw ErrorMsg.c_str();
 			pI->m_StaticMeshNames.emplace_back( FileName );
 		}
-		Log::PushLog( LoadMsg.c_str() );
+		Log::PushLogInfo( LoadMsg.c_str() );
 	};
 
-	Log::PushLog( "------ メッシュ読み込み開始 ------" );
+	Log::PushLogInfo( "------ メッシュ読み込み開始 ------" );
 	try {
-		std::filesystem::recursive_directory_iterator dir_itr( FILE_PATH ), end_itr;
-		std::for_each( dir_itr, end_itr, MeshLoad );
+		const std::vector<std::string> Files = encrypt::EnumerateDataFiles( FILE_PATH );
+		std::for_each( Files.begin(), Files.end(), MeshLoad );
 	}
 	catch ( const std::filesystem::filesystem_error& e ) {
 		// ファイルが見つからないエラーは無視する.
@@ -122,7 +122,7 @@ HRESULT MeshResource::MeshLoad()
 		ErrorMessage( e );
 		return E_FAIL;
 	}
-	Log::PushLog( "------ メッシュ読み込み終了 ------" );
+	Log::PushLogInfo( "------ メッシュ読み込み終了 ------" );
 
 	// 読み込み終了.
 	pI->m_IsLoadEnd = true;

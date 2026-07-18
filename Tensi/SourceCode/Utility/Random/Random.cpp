@@ -4,7 +4,7 @@
 #include "..\FileManager\FileManager.h"
 
 namespace{
-	constexpr char BINARY_PATH[] = "Data\\Parameter\\Data\\rnd.bin";
+	constexpr char BINARY_PATH[] = "Data\\DataCache\\rnd.bin";
 }
 
 Random::Random()
@@ -49,7 +49,7 @@ HRESULT Random::Init()
 	std::mt19937 InitMt( InitNum );
 	GetInstance()->m_mt = InitMt;
 
-	Log::PushLog( "—”‚Ì‰Šú‰» : ¬Œ÷" );
+	Log::PushLogInfo( "—”‚Ì‰Šú‰» : ¬Œ÷" );
 	return S_OK;
 }
 

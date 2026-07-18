@@ -1,4 +1,5 @@
 #include "Player.h"
+#include "ExploreManager\ExploreManager.h"
 #include "..\..\..\ActorEffect\SleepEffectManager\SleepEffectManager.h"
 #include "..\..\..\ActorEffect\NoteEffectManager\NoteEffectManager.h"
 #include "..\..\..\..\..\..\Common\DirectX\DirectX11.h"
@@ -105,6 +106,11 @@ bool CPlayer::Init()
 
 	SaveDataManager::SetSaveData()->PlayerTransform = &m_SpriteState.Transform;
 
+	// 探索マネージャの初期化.
+	m_pExplore			= std::make_unique<CExploreManager>();
+	m_pExplore->Init( m_pSprite, &m_SpriteState, m_CollSize );
+	m_WasExploreActive	= false;
+
 	WindowObjectInit();
 	InitCollision();
 	return true;
@@ -117,6 +123,21 @@ void CPlayer::Update( const float& DeltaTime )
 {
 	m_DeltaTime = DeltaTime;
 	if ( m_IsDisp == false	) return;
+
+	// 探索マネージャの更新.
+	const bool WasActive = m_WasExploreActive;
+	m_pExplore->Update( DeltaTime );
+	const bool NowActive = m_pExplore->GetIsActive();
+	m_WasExploreActive	 = NowActive;
+
+	// 探索中はマネージャがスライムを制御するため通常処理は行わない.
+	if ( NowActive ) {
+		TransformUpdate( m_SpriteState.Transform );
+		return;
+	}
+
+	// 探索から通常に戻った瞬間は拡縮を元に戻す.
+	if ( WasActive ) ResetScale();
 
 	ActionUpdate();		// 行動の更新.
 	EffectUpdate();		// エフェクトの更新.
@@ -131,6 +152,8 @@ void CPlayer::Update( const float& DeltaTime )
 	TransformUpdate( m_SpriteState.Transform );
 	UpdateCollision();
 	if ( m_SpriteState.IsDisp == false ) return;
+	// 離した瞬間に探索を開始した場合は当たり判定に登録しない.
+	if ( m_pExplore->GetIsActive() ) return;
 	ActorCollisionManager::PushObject( this, ECollObjType::Both );
 }
 
@@ -148,10 +171,33 @@ void CPlayer::LateUpdate( const float& DeltaTime )
 void CPlayer::Render()
 {
 	if ( m_IsDisp == false ) return;
-	m_pSleepEffect->Render();
-	m_pNoteEffect->Render();
+
+	// 探索でスライムをサブに描画するフェーズはメインには描かない.
+	if ( m_pExplore->IsSlimeInSub() ) return;
+
+	// 通常時のみエフェクトを描画する.
+	if ( m_pExplore->GetIsActive() == false ) {
+		m_pSleepEffect->Render();
+		m_pNoteEffect->Render();
+	}
+
+	if ( m_SpriteState.IsDisp == false ) return;
 	if ( m_IsLandingWait )	m_pCollapsed->RenderUI( &m_CollapsedState );
 	else					m_pSprite->RenderUI( &m_SpriteState );
+}
+
+//---------------------------.
+// サブウィンドウ( アイコンの後ろ )への描画.
+//---------------------------.
+void CPlayer::SubRender()
+{
+	// 探索マネージャの描画( 煙・ゲージ・残り時間 ).
+	m_pExplore->SubRender();
+
+	// スライムをサブに描画するフェーズなら描画する.
+	if ( m_pExplore->IsSlimeInSub() && m_SpriteState.IsDisp ) {
+		m_pSprite->RenderUI( &m_SpriteState );
+	}
 }
 
 //---------------------------.
@@ -225,6 +271,10 @@ void CPlayer::GrabInit()
 //---------------------------.
 void CPlayer::SeparateInit()
 {
+	// フォルダのアイコンの上で離した場合は探索を試みる.
+	const D3DXPOSITION3 SlimeCenter = m_SpriteState.Transform.Position + m_pSprite->GetSpriteState().AddCenterPos;
+	if ( m_pExplore->TryStart( SlimeCenter ) ) return;
+
 	// 投げた速度を求める.
 	const float SpeedX	= m_OldMoveVector.x;
 	const float SpeedY	= m_OldMoveVector.y;

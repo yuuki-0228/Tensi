@@ -247,7 +247,7 @@ HRESULT CFont::FontStateDataLoad( const std::string& FilePath )
 		TextPath.insert( fp, n );
 	}
 #endif
-	json j = FileManager::JsonLoad( TextPath );
+	Json j = FileManager::JsonLoad( TextPath );
 
 	// 同じ名前のテキストが無かったため共有のファイルを読み込む.
 	if ( j.empty() ) {
@@ -259,9 +259,9 @@ HRESULT CFont::FontStateDataLoad( const std::string& FilePath )
 	}
 
 	// スプライト情報の取得.
-	m_FontState.LocalPosNo	= static_cast<ELocalPosition>( j["LocalPosition"] );
-	m_FontState.Disp.w		= j["Disp"]["w"];
-	m_FontState.Disp.h		= j["Disp"]["h"];
+	m_FontState.LocalPosNo	= static_cast<ELocalPosition>( j["LocalPosition"].Get<int>() );
+	m_FontState.Disp.w		= j["Disp"]["w"].Get<float>();
+	m_FontState.Disp.h		= j["Disp"]["h"].Get<float>();
 	return S_OK;
 }
 
@@ -620,8 +620,8 @@ void CFont::RenderFontUI( const char* c, SFontRenderState* pRenderState )
 		cb.vRenderArea	 = RenderArea;
 
 		// ビューポートの幅、高さを渡す.
-		cb.fViewPortWidth	= Const::GameWindow().SIZE.x;
-		cb.fViewPortHeight	= Const::GameWindow().SIZE.y;
+		cb.fViewPortWidth	= DirectX11::GetWndWidth();
+		cb.fViewPortHeight	= DirectX11::GetWndHeight();
 
 		// ディザ抜きを使用するか.
 		cb.vDitherFlag.x = m_DitherFlag == true ? 1.0f : 0.0f;

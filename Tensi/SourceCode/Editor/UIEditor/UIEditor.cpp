@@ -48,7 +48,7 @@ CUIEditor::~CUIEditor()
 	m_IsCreaterLog = false;
 	if ( m_IsAutoSave ) {
 		if ( FAILED( m_pUI->AllSpriteStateDataSave() ) ) return;
-		Log::PushLog( "自動で" + StringConversion::Enum( m_DispScene ) + "シーンのスプライト情報を全て保存しました。" );
+		Log::PushLogInfo( "自動で" + StringConversion::Enum( m_DispScene ) + "シーンのスプライト情報を全て保存しました。" );
 	}
 
 	// ファイルの削除.
@@ -78,33 +78,33 @@ bool CUIEditor::Init()
 	m_GridState = m_pGrid->GetRenderState();
 
 	// テキストの読み込み.
-	const json& Config = FileManager::JsonLoad( TEXT_PATH );
+	const Json Config = FileManager::JsonLoad( TEXT_PATH );
 	m_GridState.Color = {
-		Config["GridColor"]["R"],
-		Config["GridColor"]["G"],
-		Config["GridColor"]["B"],
-		Config["GridColor"]["A"]
+		Config["GridColor"]["R"].Get<float>(),
+		Config["GridColor"]["G"].Get<float>(),
+		Config["GridColor"]["B"].Get<float>(),
+		Config["GridColor"]["A"].Get<float>()
 	};
 	m_BackColor = {
-		Config["BackColor"]["R"],
-		Config["BackColor"]["G"],
-		Config["BackColor"]["B"],
-		Config["BackColor"]["A"]
+		Config["BackColor"]["R"].Get<float>(),
+		Config["BackColor"]["G"].Get<float>(),
+		Config["BackColor"]["B"].Get<float>(),
+		Config["BackColor"]["A"].Get<float>()
 	};
 	m_HitBoxColor = {
-		Config["HitBoxColor"]["R"],
-		Config["HitBoxColor"]["G"],
-		Config["HitBoxColor"]["B"],
-		Config["HitBoxColor"]["A"]
+		Config["HitBoxColor"]["R"].Get<float>(),
+		Config["HitBoxColor"]["G"].Get<float>(),
+		Config["HitBoxColor"]["B"].Get<float>(),
+		Config["HitBoxColor"]["A"].Get<float>()
 	};
-	m_GridSpace			= Config["GridSpace"];
-	m_IsAutoSave		= Config["IsAutoSave"];
-	m_IsCreaterLog		= Config["IsCreaterLog"];
-	m_IsDrag			= Config["IsDrag"];
-	m_IsDispHitBox		= Config["IsDispHitBox"];
-	m_IsFileDelete		= Config["IsFileDelete"];
-	m_IsWidgetUpdate	= Config["IsWidgetUpdate"];
-	m_LogMax			= Config["LogMax"];
+	m_GridSpace			= Config["GridSpace"].Get<int>();
+	m_IsAutoSave		= Config["IsAutoSave"].Get<bool>();
+	m_IsCreaterLog		= Config["IsCreaterLog"].Get<bool>();
+	m_IsDrag			= Config["IsDrag"].Get<bool>();
+	m_IsDispHitBox		= Config["IsDispHitBox"].Get<bool>();
+	m_IsFileDelete		= Config["IsFileDelete"].Get<bool>();
+	m_IsWidgetUpdate	= Config["IsWidgetUpdate"].Get<bool>();
+	m_LogMax			= Config["LogMax"].Get<int>();
 
 	// ログファイルの読み込み.
 	ZLogLoad();
@@ -274,7 +274,7 @@ void CUIEditor::ImGuiRender()
 
 			// 保存ボタン.
 			if ( ImGuiManager::Button( "Save" ) ) {
-				json j;
+				Json j;
 				j[".Comment"] = {
 					u8"UIエディタの詳細設定を行えます。",
 					u8"----------------------------------------------",
@@ -355,7 +355,7 @@ void CUIEditor::ChangeDispScene( const bool IsSaveStop )
 	// シーン情報を保存する.
 	if ( !IsSaveStop && m_IsAutoSave ) {
 		if ( FAILED( m_pUI->AllSpriteStateDataSave() ) ) return;
-		Log::PushLog( "自動で" + StringConversion::Enum( m_DispScene ) + "シーンのスプライト情報を全て保存しました。" );
+		Log::PushLogInfo( "自動で" + StringConversion::Enum( m_DispScene ) + "シーンのスプライト情報を全て保存しました。" );
 	}
 
 	// スプライト情報を読み込みなおす.
@@ -391,10 +391,10 @@ HRESULT CUIEditor::ZLogLoad()
 		// ログファイルを読み込む.
 		m_UndoLogList.emplace_back( FilePath );
 
-		Log::PushLog( LoadMsg.c_str() );
+		Log::PushLogInfo( LoadMsg.c_str() );
 	};
 
-	Log::PushLog( "------ ログファイル読み込み開始 -------" );
+	Log::PushLogInfo( "------ ログファイル読み込み開始 -------" );
 	try {
 		std::filesystem::recursive_directory_iterator Dir_itr( UNDO_LOG_FILE_PATH ), End_itr;
 		std::for_each( Dir_itr, End_itr, SoundLoad );
@@ -407,7 +407,7 @@ HRESULT CUIEditor::ZLogLoad()
 		ErrorMessage( e.path1().string().c_str() );
 		return E_FAIL;
 	}
-	Log::PushLog( "------ ログファイル読み込み終了 -------" );
+	Log::PushLogInfo( "------ ログファイル読み込み終了 -------" );
 	return S_OK;
 }
 
@@ -429,10 +429,10 @@ HRESULT CUIEditor::YLogLoad()
 		// ログファイルを読み込む.
 		m_ReduLogList.emplace_back( FilePath );
 
-		Log::PushLog( LoadMsg.c_str() );
+		Log::PushLogInfo( LoadMsg.c_str() );
 	};
 
-	Log::PushLog( "------ ログファイル読み込み開始 -------" );
+	Log::PushLogInfo( "------ ログファイル読み込み開始 -------" );
 	try {
 		std::filesystem::recursive_directory_iterator Dir_itr( REDU_LOG_FILE_PATH ), End_itr;
 		std::for_each( Dir_itr, End_itr, SoundLoad );
@@ -445,7 +445,7 @@ HRESULT CUIEditor::YLogLoad()
 		ErrorMessage( e.path1().string().c_str() );
 		return E_FAIL;
 	}
-	Log::PushLog( "------ ログファイル読み込み終了 -------" );
+	Log::PushLogInfo( "------ ログファイル読み込み終了 -------" );
 	return S_OK;
 }
 
@@ -468,7 +468,7 @@ void CUIEditor::Undo()
 
 	// ログファイルの読み込み.
 	std::string LogFilePath	 = m_UndoLogList.back();
-	std::string MoveFilePath = FileManager::JsonLoad( LogFilePath )["FilePath"];
+	std::string MoveFilePath = FileManager::JsonLoad( LogFilePath )["FilePath"].Get<std::string>();
 
 	// 現在の時間を取得.
 	auto now	= std::chrono::system_clock::now();
@@ -511,7 +511,7 @@ void CUIEditor::Redu()
 
 	// ログファイルの読み込み.
 	std::string LogFilePath	 = m_ReduLogList.back();
-	std::string MoveFilePath = FileManager::JsonLoad( LogFilePath )["FilePath"];
+	std::string MoveFilePath = FileManager::JsonLoad( LogFilePath )["FilePath"].Get<std::string>();
 
 	// 現在の時間を取得.
 	auto now	= std::chrono::system_clock::now();

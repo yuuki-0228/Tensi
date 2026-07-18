@@ -62,7 +62,7 @@ HRESULT WindowTextRenderer::Init()
 	if( FAILED( CreateSampler() ) ) return E_FAIL;
 	if( FAILED( CreateTexture( _T( "Data\\Sprite\\WindowText\\ascii.png" ) ) ) ) return E_FAIL;
 
-	Log::PushLog( "ウィンドウテキストの初期化 : 成功" );
+	Log::PushLogInfo( "ウィンドウテキストの初期化 : 成功" );
 	return S_OK;
 }
 

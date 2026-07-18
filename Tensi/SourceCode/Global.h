@@ -177,12 +177,12 @@ void ErrorMessage( const std::string& ErrorMsg, const HRESULT r = S_OK )
 	
 	// エラーメッセージの表示.
 	const std::wstring wMsg = StringConversion::to_wString( ErrorMsg );
-	Log::PushLog( ErrorMsg.c_str() );
+	Log::PushLogError( ErrorMsg.c_str() );
 	if ( FAILED( r ) ) {
 		// エラーコード出力
 		std::ostringstream ss;
 		ss << "ErrorCode : 0x" << std::hex << static_cast< int >( r );
-		Log::PushLog( ss.str() );
+		Log::PushLogError( ss.str() );
 	}
 	_ASSERT_EXPR( false, wMsg.c_str() );
 	MessageBox( nullptr, wMsg.c_str(), _T( "Warning" ), MB_OK );

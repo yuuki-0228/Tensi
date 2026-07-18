@@ -2,6 +2,7 @@
 #ifdef ENABLE_FONT
 #include "..\..\Common\Font\FontCreate\FontCreate.h"
 #include "..\..\Utility\FileManager\FileManager.h"
+#include <encrypt/file.h>
 
 namespace {
 	// フォントファイルパス.
@@ -44,11 +45,11 @@ HRESULT FontResource::FontLoad()
 	FontResource* pI = GetInstance();
 	std::unique_lock<std::mutex> Lock( pI->m_Mutex );
 
-	auto SpriteLoad = [&]( const std::filesystem::directory_entry& Entry )
+	auto SpriteLoad = [&]( const std::string& EntryPath )
 	{
-		const std::string FilePath	= Entry.path().string();				// ファイルパス.
-		std::string		  Extension = Entry.path().extension().string();	// 拡張子.
-		std::string		  FileName	= Entry.path().stem().string();			// ファイル名.
+		const std::string FilePath	= EntryPath;				// ファイルパス.
+		std::string		  Extension = std::filesystem::path( EntryPath ).extension().string();	// 拡張子.
+		std::string		  FileName	= std::filesystem::path( EntryPath ).stem().string();			// ファイル名.
 
 #ifndef _DEBUG
 // 暗号化前の拡張しを取得.
@@ -73,13 +74,13 @@ HRESULT FontResource::FontLoad()
 		if ( FAILED( pI->m_FontList[FileName]->Init( FilePath, FileName ) ) ) throw E_FAIL;
 		pI->m_FontNames.emplace_back( FileName );
 
-		Log::PushLog( FilePath + " 読み込み : 成功" );
+		Log::PushLogInfo( FilePath + " 読み込み : 成功" );
 	};
 
-	Log::PushLog( "------ フォント読み込み開始 ------" );
+	Log::PushLogInfo( "------ フォント読み込み開始 ------" );
 	try {
-		std::filesystem::recursive_directory_iterator Dir_itr( FILE_PATH ), End_itr;
-		std::for_each( Dir_itr, End_itr, SpriteLoad );
+		const std::vector<std::string> Files = encrypt::EnumerateDataFiles( FILE_PATH );
+		std::for_each( Files.begin(), Files.end(), SpriteLoad );
 	}
 	catch ( const std::filesystem::filesystem_error& e ) {
 		// ファイルが見つからないエラーは無視する.
@@ -89,7 +90,7 @@ HRESULT FontResource::FontLoad()
 		ErrorMessage( e.path1().string().c_str() );
 		return E_FAIL;
 	}
-	Log::PushLog( "------ フォント読み込み終了 ------" );
+	Log::PushLogInfo( "------ フォント読み込み終了 ------" );
 
 	// 読み込み終了.
 	pI->m_IsLoadEnd = true;
@@ -167,7 +168,7 @@ HRESULT FontResource::CreateTexture( const std::string& FileName, const std::str
 	std::unique_ptr<CFontCreate> pFontCreate = std::make_unique<CFontCreate>( pI->m_FontDataList[FileName], FileName );
 	pFontCreate->CreateFontTexture2D( f.c_str(), &pI->m_FontTextureList[FileName][f] );
 
-	Log::PushLog( "フォント「" + FileName + "」の「" + Key + "」テクスチャ作成 : 成功");
+	Log::PushLogInfo( "フォント「" + FileName + "」の「" + Key + "」テクスチャ作成 : 成功");
 	return S_OK;
 }
 #endif // ENABLE_FONT

@@ -7,14 +7,14 @@
 #include <string>
 
 namespace {
-	constexpr char	RECOVERY_FILE_PATH[]	= "Data\\Parameter\\Data\\msp.bin";		// 復帰用ファイルの保存場所.
-	constexpr char	WATCHDOG_OPTION[]		= "--mouse-speed-watchdog";				// 監視プロセス起動用のコマンドライン引数.
-	constexpr int	MOUSE_SPEED_MIN			= 1;	// マウス速度の最小値.
-	constexpr int	MOUSE_SPEED_MAX			= 20;	// マウス速度の最大値.
+	constexpr char	RECOVERY_FILE_PATH[]	= "Data\\DataCache\\msp.bin";	// 復帰用ファイルの保存場所.
+	constexpr char	WATCHDOG_OPTION[]		= "--mouse-speed-watchdog";		// 監視プロセス起動用のコマンドライン引数.
+	constexpr int	MOUSE_SPEED_MIN			= 1;							// マウス速度の最小値.
+	constexpr int	MOUSE_SPEED_MAX			= 20;							// マウス速度の最大値.
 
-	int								s_OriginalSpeed			= 0;		// 復元先のマウス速度.
-	std::terminate_handler			s_PrevTerminateHandler	= nullptr;	// 元の terminate ハンドラ.
-	LPTOP_LEVEL_EXCEPTION_FILTER	s_PrevExceptionFilter	= nullptr;	// 元の例外フィルタ.
+	int								s_OriginalSpeed			= 0;			// 復元先のマウス速度.
+	std::terminate_handler			s_PrevTerminateHandler	= nullptr;		// 元の terminate ハンドラ.
+	LPTOP_LEVEL_EXCEPTION_FILTER	s_PrevExceptionFilter	= nullptr;		// 元の例外フィルタ.
 
 	//---------------------------.
 	// マウス速度をOSに設定する.

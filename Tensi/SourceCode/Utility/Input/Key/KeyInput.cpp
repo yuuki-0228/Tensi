@@ -16,8 +16,8 @@ KeyInput::KeyInput()
 	, m_IsNotActiveStop	( false )
 {
 	// ウィンドウの設定の取得.
-	json WndSetting		= FileManager::JsonLoad( WINDOW_SETTING_FILE_PATH );
-	m_IsNotActiveStop	= FileManager::JsonGet( WndSetting, "IsInputNotActiveStop", false );
+	Json WndSetting		= FileManager::JsonLoad( WINDOW_SETTING_FILE_PATH );
+	m_IsNotActiveStop	= WndSetting["IsInputNotActiveStop"].Get( false );
 }
 
 KeyInput::~KeyInput()

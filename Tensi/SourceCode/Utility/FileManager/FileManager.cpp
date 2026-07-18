@@ -1,5 +1,31 @@
 #include "FileManager.h"
 #ifdef ENABLE_FILE
+#include <time.h>
+
+namespace {
+	// 文字列の前後の空白を取り除く.
+	std::string Trim( const std::string& Text )
+	{
+		constexpr char SPACE[] = " \t\r\n";
+		const size_t Begin = Text.find_first_not_of( SPACE );
+		if ( Begin == std::string::npos ) return "";
+		const size_t End = Text.find_last_not_of( SPACE );
+		return Text.substr( Begin, End - Begin + 1 );
+	}
+
+	// ログレベルを文字列に変換する.
+	const char* LogLevelToString( const FileManager::ELogLevel Level )
+	{
+		switch ( Level ) {
+		case FileManager::ELogLevel::Debug:		return "DEBUG";
+		case FileManager::ELogLevel::Info:		return "INFO";
+		case FileManager::ELogLevel::Warning:	return "WARN";
+		case FileManager::ELogLevel::Error:		return "ERROR";
+		case FileManager::ELogLevel::Fatal:		return "FATAL";
+		}
+		return "INFO";
+	}
+}
 
 //----------------------------.
 // テキストファイルの読み込み.
@@ -17,6 +43,10 @@ std::vector<std::string> FileManager::TextLoad(
 #ifndef _DEBUG
 	std::string fp = encrypt::GetEncryptionFilePath( FilePath );
 	if ( encrypt::GetIsEncryption( fp ) ) return FileManager::EFile::ETextLoad( fp, IsCommentOut, Delim );
+
+	// 実ファイルが無い場合はアーカイブから読み込む.
+	if ( FileManager::FileCheck( FilePath ) == false &&
+		 encrypt::GetIsArchiveFile( FilePath ) ) return FileManager::EFile::ETextLoad( FilePath, IsCommentOut, Delim );
 #endif
 
 	// ファイルを開く.
@@ -79,10 +109,128 @@ HRESULT FileManager::TextSave( const std::string& FilePath, const std::string& D
 	return S_OK;
 }
 
+//----------------------------.
+// ログファイルの読み込み.
+//----------------------------.
+std::vector<std::string> FileManager::LogLoad( const std::string& FilePath )
+{
+	// コメント処理を行わず1行ずつ読み込む.
+	return FileManager::TextLoad( FilePath, false );
+}
+
+//----------------------------.
+// ログファイルの書き込み.
+//	出力形式 : [時:分:秒] [レベル] [呼び出し] メッセージ.
+//----------------------------.
+HRESULT FileManager::LogSave(
+	const std::string&	FilePath,
+	const std::string&	Text,
+	const ELogLevel		Level,
+	const std::string&	Caller,
+	const bool			IsAppend)
+{
+	// ファイルを開く.
+	std::ofstream o( FilePath, IsAppend ? std::ios::app : std::ios::trunc );
+	if ( !o ) {
+		// 開けないためファイルディレクトリを作成する.
+		FileManager::CreateFileDirectory( FilePath );
+
+		// 書き込みなおす.
+		return FileManager::LogSave( FilePath, Text, Level, Caller, IsAppend );
+	}
+
+	// 現在の時間を取得.
+	time_t	nowTime = time( nullptr );
+	tm		timeData;
+	// ローカル時間に変換.
+	localtime_s( &timeData, &nowTime );
+
+	// [タイムスタンプ].
+	o << "[";
+	o << timeData.tm_year + 1900	<< "/";	// 1900 足すことで現在の年になる.
+	o << timeData.tm_mon + 1		<< "/";	// 1 足すことで現在の月になる.
+	o << timeData.tm_mday			<< " ";
+	o << timeData.tm_hour			<< ":";
+	o << timeData.tm_min			<< ":";
+	o << timeData.tm_sec;
+	o << "] ";
+
+	// [レベル] [呼び出し] メッセージ.
+	o << "[" << LogLevelToString( Level )	<< "] ";
+	o << "[" << Caller						<< "] ";
+	o << Text << std::endl;
+
+	// ファイルを閉じる.
+	o.close();
+	return S_OK;
+}
+
+//----------------------------.
+// iniファイルの読み込み.
+//----------------------------.
+FileManager::IniData FileManager::IniLoad( const std::string& FilePath )
+{
+	IniData Out;
+
+	// コメント処理を行わず1行ずつ読み込む.
+	const std::vector<std::string> Lines = FileManager::TextLoad( FilePath, false );
+
+	std::string Section = "";
+	for ( const std::string& RawLine : Lines ) {
+		// 前後の空白を取り除く.
+		const std::string Line = Trim( RawLine );
+		if ( Line.empty() ) continue;
+
+		// コメント行は読み飛ばす.
+		if ( Line[0] == ';' || Line[0] == '#' ) continue;
+
+		// セクション行.
+		if ( Line.front() == '[' && Line.back() == ']' ) {
+			Section = Trim( Line.substr( 1, Line.size() - 2 ) );
+			// 空のセクションも作成する.
+			Out[Section];
+			continue;
+		}
+
+		// キーと値に分割する.
+		const size_t Pos = Line.find( '=' );
+		if ( Pos == std::string::npos ) continue;
+		const std::string Key	= Trim( Line.substr( 0, Pos ) );
+		const std::string Value	= Trim( Line.substr( Pos + 1 ) );
+		if ( Key.empty() ) continue;
+		Out[Section][Key] = Value;
+	}
+	return Out;
+}
+
+//----------------------------.
+// iniファイルの書き込み.
+//----------------------------.
+HRESULT FileManager::IniSave( const std::string& FilePath, const IniData& Data )
+{
+	std::ostringstream ss;
+
+	// セクションに属さないキーを先に書き込む.
+	const auto gitr = Data.find( "" );
+	if ( gitr != Data.end() ) {
+		for ( const auto& [Key, Value] : gitr->second ) ss << Key << "=" << Value << std::endl;
+		ss << std::endl;
+	}
+
+	// セクションごとに書き込む.
+	for ( const auto& [Section, Keys] : Data ) {
+		if ( Section.empty() ) continue;
+		ss << "[" << Section << "]" << std::endl;
+		for ( const auto& [Key, Value] : Keys ) ss << Key << "=" << Value << std::endl;
+		ss << std::endl;
+	}
+	return FileManager::TextSave( FilePath, ss.str() );
+}
+
 //---------------------------.
 // jsonファイルを開く.
 //---------------------------.
-json FileManager::JsonLoad( const std::string& FilePath )
+Json FileManager::JsonLoad( const std::string& FilePath )
 {
 	json Out;
 
@@ -90,6 +238,10 @@ json FileManager::JsonLoad( const std::string& FilePath )
 #ifndef _DEBUG
 	std::string fp = encrypt::GetEncryptionFilePath( FilePath );
 	if ( encrypt::GetIsEncryption( fp ) ) return FileManager::EFile::EJsonLoad( fp );
+
+	// 実ファイルが無い場合はアーカイブから読み込む.
+	if ( FileManager::FileCheck( FilePath ) == false &&
+		 encrypt::GetIsArchiveFile( FilePath ) ) return FileManager::EFile::EJsonLoad( FilePath );
 #endif
 
 	// ファイルを開く.
@@ -101,7 +253,7 @@ json FileManager::JsonLoad( const std::string& FilePath )
 		i >> Out;
 	}
 	catch ( ... ) {
-		Log::PushLog( "Json parse error : " + FilePath );
+		Log::PushLogError( "Json parse error : " + FilePath );
 		Out = json();
 	}
 
@@ -132,52 +284,6 @@ HRESULT FileManager::JsonSave( const std::string& FilePath, const json& Data )
 	// ファイルを閉じる.
 	o.close();
 	return S_OK;
-}
-
-//---------------------------.
-// json を std::unordered_map に変換.
-//---------------------------.
-std::unordered_map<std::string, std::string> FileManager::JsonToMap( const json& Json )
-{
-	std::unordered_map<std::string, std::string> Out;
-	for ( auto& [Key, Value] : Json.items() ) Out[Key] = Value;
-	return Out;
-}
-
-//---------------------------.
-// std::unordered_map を json に変換.
-//---------------------------.
-json FileManager::MapToJson( const std::unordered_map<std::string, std::string> Map )
-{
-	json Out;
-	for ( auto&[Key, Value] : Map ) {
-		// 文字列から型を推測してその型に変換して保存する.
-		if (		Value == "nullptr"						) Out[Key] = nullptr;
-		else if (	Value == "true"							) Out[Key] = true;
-		else if (	Value == "false"						) Out[Key] = false;
-		else if (	Value.find_first_not_of( "0123456789.f" ) == std::string::npos ) {
-			if (	Value.find( "." ) != std::string::npos	) Out[Key] = std::stof( Value );
-			else											  Out[Key] = std::stoi( Value );
-		} else												  Out[Key] = Value;
-	}
-	return Out;
-}
-json FileManager::MapToJson( const std::unordered_map<std::string, std::vector<std::string>> Map )
-{
-	json Out;
-	for ( auto&[Key, vValue] : Map ) {
-		for ( auto& Value : vValue ) {
-			// 文字列から型を推測してその型に変換して保存する.
-			if (		Value == "nullptr"						) Out[Key].emplace_back( nullptr );
-			else if (	Value == "true"							) Out[Key].emplace_back( true );
-			else if (	Value == "false"						) Out[Key].emplace_back( false );
-			else if (	Value.find_first_not_of( "0123456789.f" ) == std::string::npos ) {
-				if (	Value.find( "." ) != std::string::npos	) Out[Key].emplace_back( std::stof( Value ) );
-				else											  Out[Key].emplace_back( std::stoi( Value ) );
-			} else												  Out[Key].emplace_back( Value );
-		}
-	}
-	return Out;
 }
 
 //---------------------------.
@@ -229,7 +335,8 @@ std::vector<std::string> FileManager::EFile::ETextLoad(
 	std::vector<std::string> OutList;
 
 	// ファイルを開く.
-	if ( encrypt::GetIsEncryption( FilePath ) == false ) return OutList;
+	if ( encrypt::GetIsEncryption( FilePath ) == false &&
+		 encrypt::GetIsArchiveFile( FilePath ) == false ) return OutList;
 	auto rf = encrypt::GetRestoreFile( FilePath );
 	if ( rf.first == nullptr ) return OutList;
 	encrypt::membuf mb( rf );
@@ -276,7 +383,8 @@ json FileManager::EFile::EJsonLoad( const std::string& FilePath )
 	json Out;
 
 	// ファイルを開く.
-	if ( encrypt::GetIsEncryption( FilePath ) == false ) return Out;
+	if ( encrypt::GetIsEncryption( FilePath ) == false &&
+		 encrypt::GetIsArchiveFile( FilePath ) == false ) return Out;
 	auto rf = encrypt::GetRestoreFile( FilePath );
 	if ( rf.first == nullptr ) return Out;
 	encrypt::membuf mb( rf );
@@ -288,7 +396,7 @@ json FileManager::EFile::EJsonLoad( const std::string& FilePath )
 		i >> Out;
 	}
 	catch ( ... ) {
-		Log::PushLog( "Json parse error : " + FilePath );
+		Log::PushLogError( "Json parse error : " + FilePath );
 		Out = json();
 	}
 

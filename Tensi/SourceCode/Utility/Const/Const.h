@@ -22,6 +22,39 @@ private:
 		stConstGameWindow() { Load(); }
 	} GameWindowData;
 
+	struct stConstExplore {
+		float		COMPLETE_SEC_PER_MB;	// 容量1MBあたりの探索完了秒数
+		float		COMPLETE_TIME_MAX;	// 探索完了時間の最大(秒)
+		float		COMPLETE_TIME_MIN;	// 探索完了時間の最小(秒)
+		float		EXPAND_TIME;	// スライムがアイコンから飛び出すまでの時間(秒)
+		float		GAUGE_HEIGHT_RATE;	// ゲージの高さ(アイコン高さに対する割合)
+		float		GAUGE_OFFSET_Y_RATE;	// クリック範囲の下端からゲージまでのYオフセット(アイコン高さに対する割合)
+		float		GAUGE_WIDTH_RATE;	// アイコンのクリック範囲幅に対するゲージ幅の割合
+		float		ICON_POLL_INTERVAL;	// 探索中に追跡中のフォルダの情報を再取得する間隔(秒)(負荷軽減のため間引く)
+		float		PEEK_INTERVAL_MAX;	// スライムが頭を出す間隔の最大(秒)
+		float		PEEK_INTERVAL_MIN;	// スライムが頭を出す間隔の最小(秒)
+		int			PEEK_LOOK_COUNT;	// 左右きょろきょろの回数
+		float		PEEK_LOOK_TIME;	// 左右きょろきょろの1方向あたりの時間(秒)
+		float		PEEK_RISE_RATE;	// 頭出しで上に移動する量(アイコン高さに対する割合)
+		float		PEEK_RISE_TIME;	// 頭出しで上に出るまでの時間(秒)
+		float		PEEK_SINK_TIME;	// 正面に戻って潜るまでの時間(秒)
+		float		PEEK_WAIT_TIME;	// 頭を出してから待機する時間(秒)
+		float		SHRINK_TIME;	// スライムがアイコンに縮小して入るまでの時間(秒)
+		float		SLIME_ICON_SCALE_RATE;	// スライムをアイコンに入れる時の大きさの倍率(アイコン幅に対する割合)
+		float		SMOKE_ALPHA_SPEED;	// 煙が透明になっていく速度(秒)
+		float		SMOKE_SCALE_MAX;	// 煙の終了時のスケール
+		float		SMOKE_SCALE_MIN;	// 煙の開始時のスケール
+		float		SMOKE_SIZE_RATE;	// 煙の大きさの倍率
+		float		SMOKE_SPAWN_INTERVAL;	// 煙を発生させる間隔(秒)
+		float		SMOKE_SPREAD_RATE;	// 煙の発生位置の上下左右のランダムずれ幅(アイコン幅に対する割合)
+		float		SMOKE_START_ALPHA;	// 煙の開始時のアルファ値
+		float		TEXT_HEIGHT_RATE;	// 残り時間テキストの高さ(アイコン高さに対する割合)
+		float		TEXT_OFFSET_Y_RATE;	// ゲージから残り時間テキストまでのYオフセット(アイコン高さに対する割合)
+
+		void Load();
+		stConstExplore() { Load(); }
+	} ExploreData; 
+
 	struct stConstFlower {
 		float		COME_OUT_ANIM_ALPHA_SPEED;	// 雑草が抜けた時の透明になっていくアニメーションの速度(秒)
 		int			DELETE_DAY;	// 水やりしていない日が何日続いたら消滅するか
@@ -100,6 +133,7 @@ public:
 
 	// 定数の取得
 	static inline stConstGameWindow GameWindow() { return GetInstance()->GameWindowData; }
+	static inline stConstExplore Explore() { return GetInstance()->ExploreData; }
 	static inline stConstFlower Flower() { return GetInstance()->FlowerData; }
 	static inline stConstFreeCamera FreeCamera() { return GetInstance()->FreeCameraData; }
 	static inline stConstSystem System() { return GetInstance()->SystemData; }

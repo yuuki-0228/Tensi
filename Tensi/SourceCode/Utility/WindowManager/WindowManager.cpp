@@ -110,6 +110,45 @@ namespace {
 
 		FindClose( hFind );
 	}
+
+	// 指定パスのファイルまたはフォルダの合計容量（バイト）を取得する.
+	//	フォルダの場合は配下のファイルを再帰的に合計する.
+	ULONGLONG GetPathTotalSize( const std::wstring& Path )
+	{
+		WIN32_FILE_ATTRIBUTE_DATA fad;
+		if ( GetFileAttributesExW( Path.c_str(), GetFileExInfoStandard, &fad ) == FALSE ) return 0;
+
+		// フォルダでない場合はファイルサイズをそのまま返す.
+		if ( ( fad.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY ) == 0 ) {
+			ULARGE_INTEGER Size;
+			Size.HighPart = fad.nFileSizeHigh;
+			Size.LowPart  = fad.nFileSizeLow;
+			return Size.QuadPart;
+		}
+
+		// フォルダの場合は配下のファイルを再帰的に合計する.
+		ULONGLONG Total = 0;
+		WIN32_FIND_DATAW fd;
+		HANDLE hFind = FindFirstFileW( ( Path + L"\\*" ).c_str(), &fd );
+		if ( hFind == INVALID_HANDLE_VALUE ) return Total;
+		do {
+			const std::wstring wName = fd.cFileName;
+			if ( wName == L"." || wName == L".." ) continue;
+			const std::wstring Child = Path + L"\\" + wName;
+			if ( fd.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY ) {
+				Total += GetPathTotalSize( Child );
+			}
+			else {
+				ULARGE_INTEGER Size;
+				Size.HighPart = fd.nFileSizeHigh;
+				Size.LowPart  = fd.nFileSizeLow;
+				Total += Size.QuadPart;
+			}
+		} while ( FindNextFileW( hFind, &fd ) );
+		FindClose( hFind );
+		return Total;
+	}
+
 }
 
 WindowManager::WindowManager()
@@ -492,6 +531,51 @@ std::string WindowManager::GetDesktopIconPath( const ICOINDEX Index )
 	// アイコンリストを更新していない場合更新する.
 	if ( pI->m_IsDesktopIconUpdate == false ) DesktopIconUpdate();
 	return "C:\\Users\\" + pI->m_UserName + "\\Desktop\\" + pI->m_IconNameMap[Index];
+}
+
+//---------------------------.
+// デスクトップのアイコンのファイル容量（バイト）を取得.
+//---------------------------.
+ULONGLONG WindowManager::GetDesktopIconFileSize( const ICOINDEX Index )
+{
+	WindowManager* pI = GetInstance();
+
+	// アイコンリストを更新していない場合更新する.
+	if ( pI->m_IsDesktopIconUpdate == false ) DesktopIconUpdate();
+
+	// インデックスが範囲外の場合は0を返す.
+	if ( Index < 0 || Index >= static_cast<ICOINDEX>( pI->m_IconList.size() ) ) return 0;
+
+	const SDesktopIcon& Icon = pI->m_IconList[Index];
+
+	// デスクトップ内の実ファイルを探すための候補パスを構築する.
+	const std::string UserDesktop   = "C:\\Users\\" + pI->m_UserName + "\\Desktop\\";
+	const std::string PublicDesktop = "C:\\Users\\Public\\Desktop\\";
+
+	// 表示名に管理用の拡張子が付いていない場合は補完する.
+	std::string FileName = Icon.Name;
+	if ( Icon.Extension.empty() == false ) {
+		const std::string Lower = ToLowerAscii( FileName );
+		if ( Lower.size() < Icon.Extension.size() ||
+			 Lower.compare( Lower.size() - Icon.Extension.size(), Icon.Extension.size(), Icon.Extension ) != 0 ) {
+			FileName += Icon.Extension;
+		}
+	}
+
+	// ユーザーデスクトップとパブリックデスクトップの順に実ファイルを探す.
+	const std::string Candidates[] = {
+		UserDesktop   + FileName,
+		PublicDesktop + FileName,
+		UserDesktop   + Icon.Name,
+		PublicDesktop + Icon.Name,
+	};
+	for ( const auto& Path : Candidates ) {
+		const std::wstring wPath = StringConversion::to_wString( Path );
+		if ( GetFileAttributesW( wPath.c_str() ) != INVALID_FILE_ATTRIBUTES ) {
+			return GetPathTotalSize( wPath );
+		}
+	}
+	return 0;
 }
 
 //---------------------------.

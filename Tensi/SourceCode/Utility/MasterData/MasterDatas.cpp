@@ -26,7 +26,7 @@ namespace {
 // “Ç‚İ‚İ
 //----------------------------.
 std::unordered_map<std::string, std::unordered_map<ulong, std::any>> MasterDataUtility::CreateCache(
-	const std::vector<std::pair<std::string, json>>& data )
+	const std::vector<std::pair<std::string, Json>>& data )
 {
 	std::unordered_map<std::string, std::unordered_map<ulong, std::any>> out;
 
@@ -43,7 +43,8 @@ std::unordered_map<std::string, std::unordered_map<ulong, std::any>> MasterDataU
 	}
 	return out;
 }
-void MasterDataUtility::CacheSetup( std::unordered_map<std::string, std::unordered_map<ulong, std::any>>& out, const std::string& Container, const json& File )
+void MasterDataUtility::CacheSetup( std::unordered_map<std::string, std::unordered_map<ulong, std::any>>& out, const std::string& Container, const Json& File )
 {
+	const ulong Id = File["Id"].Get<ulong>();
 }
 #endif

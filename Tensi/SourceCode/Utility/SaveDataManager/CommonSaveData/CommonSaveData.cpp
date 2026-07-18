@@ -2,7 +2,7 @@
 #include "..\..\FileManager\FileManager.h"
 
 namespace {
-	constexpr char FILE_PATH[] = "Data\\Parameter\\Data\\cms.bin";
+	constexpr char FILE_PATH[] = "Data\\DataCache\\cms.bin";
 }
 
 CCommonSaveData::CCommonSaveData()
@@ -26,6 +26,7 @@ void CCommonSaveData::Save()
 	m_SaveData.WaterFallTransform = *m_pSaveData.WaterFallTransform;
 	m_SaveData.WateringCanTransform = *m_pSaveData.WateringCanTransform;
 	m_SaveData.WateringCanWaterValue = *m_pSaveData.WateringCanWaterValue;
+	m_SaveData.ExploreData = *m_pSaveData.ExploreData;
 
 	// ポインタは保存するとバグるためnullにする
 	m_SaveData.PlayerTransform.pParent = nullptr;
@@ -51,4 +52,5 @@ void CCommonSaveData::Load()
 	*m_pSaveData.WaterFallTransform = m_SaveData.WaterFallTransform;
 	*m_pSaveData.WateringCanTransform = m_SaveData.WateringCanTransform;
 	*m_pSaveData.WateringCanWaterValue = m_SaveData.WateringCanWaterValue;
+	*m_pSaveData.ExploreData = m_SaveData.ExploreData;
 }

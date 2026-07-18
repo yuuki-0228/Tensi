@@ -91,7 +91,7 @@ HRESULT DirectX11::Create( std::vector<HWND> hWnd )
 	if ( FAILED( pI->CreateViewports()					) ) return E_FAIL;
 	if ( FAILED( pI->CreateRasterizer()					) ) return E_FAIL;
 
-	Log::PushLog( "DirectX11 デバイス作成 : 成功" );
+	Log::PushLogInfo( "DirectX11 デバイス作成 : 成功" );
 
 	return S_OK;
 }
@@ -179,8 +179,8 @@ HRESULT DirectX11::CreateDeviceAndSwapChain()
 	DirectX11* pI = GetInstance();
 
 	// ウィンドウの設定の取得.
-	json WndSetting = FileManager::JsonLoad( WINDOW_SETTING_FILE_PATH );
-	const float FPS = FileManager::JsonGet( WndSetting, "FPS", 60.0f );
+	Json WndSetting = FileManager::JsonLoad( WINDOW_SETTING_FILE_PATH );
+	const float FPS = WndSetting["FPS"].Get( 60.0f );
 
 	for ( int i = 0; i < pI->m_WindowNum; ++i ) {
 		// スワップチェーン構造体.
@@ -258,7 +258,7 @@ HRESULT DirectX11::CreateDeviceAndSwapChain()
 		}
 	
 		// フルスクリーンや一部の機能を無効化する.
-		if ( FileManager::JsonGet( WndSetting, "IsFullScreenLock", false ) ) {
+		if ( WndSetting["IsFullScreenLock"].Get( false ) ) {
 			// ALT + Enterでフルスクリーンを無効化する.
 			IDXGIFactory* pFactory = nullptr;
 			// 上で作ったIDXGISwapChainを使う.
@@ -271,9 +271,9 @@ HRESULT DirectX11::CreateDeviceAndSwapChain()
 
 	// 背景の色の設定.
 	m_InitBackColor = Color4::RGBA(
-		FileManager::JsonGet( WndSetting, "BackColor", "R", 1.0f ),
-		FileManager::JsonGet( WndSetting, "BackColor", "G", 1.0f ),
-		FileManager::JsonGet( WndSetting, "BackColor", "B", 1.0f )
+		WndSetting["BackColor"]["R"].Get( 1.0f ),
+		WndSetting["BackColor"]["G"].Get( 1.0f ),
+		WndSetting["BackColor"]["B"].Get( 1.0f )
 	);
 	m_BackColor = m_InitBackColor;
 	return S_OK;
@@ -1142,7 +1142,7 @@ HRESULT DirectX11::CreateDepthStencilBackBufferRTV()
 			ss	<< "DepthStencil create failed ( window " << i << " : "
 				<< Width << " x " << Height << " ), continue without depth."
 				<< " HRESULT : 0x" << std::hex << static_cast<unsigned long>( result );
-			Log::PushLog( ss.str() );
+			Log::PushLogInfo( ss.str() );
 			SAFE_RELEASE( m_pBackBuffer_DSTex[i] );
 		}
 

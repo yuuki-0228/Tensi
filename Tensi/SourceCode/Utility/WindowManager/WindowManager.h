@@ -150,6 +150,10 @@ public:
 	// デスクトップのアイコンのファイルパスを取得.
 	static std::string GetDesktopIconPath( const ICOINDEX Index );
 
+	// デスクトップのアイコンのファイル容量（バイト）を取得.
+	//	フォルダの場合は内部のファイルを再帰的に合計する.
+	static ULONGLONG GetDesktopIconFileSize( const ICOINDEX Index );
+
 	// マウスの下にあるウィンドウの取得.
 	static HWND GetMouseDownWindow() { return GetInstance()->m_MouseDownWindow; }
 

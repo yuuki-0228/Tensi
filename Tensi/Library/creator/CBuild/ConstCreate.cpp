@@ -274,15 +274,15 @@ void ConstCreate::cpp( const std::vector<std::pair<std::pair<std::string, std::s
 		"//----------------------------.\n"
 		"void Const::stConstGameWindow::Load()\n"
 		"{\n"
-		"	json j = FileManager::JsonLoad( \"Data\\\\Parameter\\\\Config\\\\WindowSetting.json\" );\n"
+		"	Json j = FileManager::JsonLoad( \"Data\\\\Parameter\\\\Config\\\\WindowSetting.json\" );\n"
 		"\n"
 		"	// èâä˙âª\n"
-		"	SIZE.x		= j[\"Size\"][\"w\"];\n"
-		"	SIZE.y		= j[\"Size\"][\"h\"];\n"
-		"	FPS			= j[\"FPS\"];\n"
-		"	APP_NAME	= j[\"Name\"][\"App\"];\n"
-		"	WND_NAME	= j[\"Name\"][\"Wnd\"];\n"
-		"	VERSION		= j[\"Version\"];\n"
+		"	SIZE.x		= j[\"Size\"][\"w\"].Get<float>();\n"
+		"	SIZE.y		= j[\"Size\"][\"h\"].Get<float>();\n"
+		"	FPS			= j[\"FPS\"].Get<float>();\n"
+		"	APP_NAME	= j[\"Name\"][\"App\"].Get<std::string>();\n"
+		"	WND_NAME	= j[\"Name\"][\"Wnd\"].Get<std::string>();\n"
+		"	VERSION		= j[\"Version\"].Get<std::string>();\n"
 		"}\n"
 		"\n";
 
@@ -306,7 +306,7 @@ void ConstCreate::cpp( const std::vector<std::pair<std::pair<std::string, std::s
 			"//----------------------------.\n"
 			"void Const::" + structName + "::Load()\n"
 			"{\n"
-			"	json j = FileManager::JsonLoad( \"" + Path + "\" );\n"
+			"	Json j = FileManager::JsonLoad( \"" + Path + "\" );\n"
 			"\n"
 			"	// èâä˙âª\n";
 
@@ -318,6 +318,14 @@ void ConstCreate::cpp( const std::vector<std::pair<std::pair<std::string, std::s
 			const auto isPair	= numf == 2 && nume == 2;
 			const auto m		= GetMold( Value[DATA], isPair );
 
+			// pairÇÃóvëfÇÃå^ÇéÊìæ
+			std::string fm = "";
+			std::string sm = "";
+			if ( m.find( "std::pair" ) != std::string::npos ) {
+				fm = GetMold( Value[DATA][0], isPair );
+				sm = GetMold( Value[DATA][1], isPair );
+			}
+
 			if ( size > 1 ) {
 				Text +=
 					"	const int " + Key + "_SIZE = GetSize( j[\"" + Key + "\"] );\n"
@@ -326,87 +334,87 @@ void ConstCreate::cpp( const std::vector<std::pair<std::pair<std::string, std::s
 					"		const int No = i + 1;\n";
 
 				if ( m == "std::string" ) {
-					Text += "		" + Key + "[i] = GetString( j[\"" + Key + "\"][No] ); \n";
+					Text += "		" + Key + "[i] = GetString( j[\"" + Key + "\"][No].Get<std::string>() ); \n";
 				}
 				else if ( m == "D3DXVECTOR2" ) {
-					Text += "		" + Key + "[i].x = j[\"" + Key + "\"][No][_X];\n";
-					Text += "		" + Key + "[i].y = j[\"" + Key + "\"][No][_Y];\n";
+					Text += "		" + Key + "[i].x = j[\"" + Key + "\"][No][_X].Get<float>();\n";
+					Text += "		" + Key + "[i].y = j[\"" + Key + "\"][No][_Y].Get<float>();\n";
 				}
 				else if ( m == "D3DXVECTOR3" ) {
-					Text += "		" + Key + "[i].x = j[\"" + Key + "\"][No][_X];\n";
-					Text += "		" + Key + "[i].y = j[\"" + Key + "\"][No][_Y];\n";
-					Text += "		" + Key + "[i].z = j[\"" + Key + "\"][No][_Z];\n";
+					Text += "		" + Key + "[i].x = j[\"" + Key + "\"][No][_X].Get<float>();\n";
+					Text += "		" + Key + "[i].y = j[\"" + Key + "\"][No][_Y].Get<float>();\n";
+					Text += "		" + Key + "[i].z = j[\"" + Key + "\"][No][_Z].Get<float>();\n";
 				}
 				else if ( m == "D3DXVECTOR4" ) {
-					Text += "		" + Key + "[i].x = j[\"" + Key + "\"][No][_X];\n";
-					Text += "		" + Key + "[i].y = j[\"" + Key + "\"][No][_Y];\n";
-					Text += "		" + Key + "[i].z = j[\"" + Key + "\"][No][_Z];\n";
-					Text += "		" + Key + "[i].w = j[\"" + Key + "\"][No][_W];\n";
+					Text += "		" + Key + "[i].x = j[\"" + Key + "\"][No][_X].Get<float>();\n";
+					Text += "		" + Key + "[i].y = j[\"" + Key + "\"][No][_Y].Get<float>();\n";
+					Text += "		" + Key + "[i].z = j[\"" + Key + "\"][No][_Z].Get<float>();\n";
+					Text += "		" + Key + "[i].w = j[\"" + Key + "\"][No][_W].Get<float>();\n";
 				}
 				else if ( m.find( "std::pair" ) != std::string::npos ) {
 					// first
-					if ( m.find( "<std::string, " ) != std::string::npos ) {
-						Text += "		" + Key + "[i].first  = GetString( j[\"" + Key + "\"][No][_FIRST] );\n";
+					if ( fm == "std::string" ) {
+						Text += "		" + Key + "[i].first  = GetString( j[\"" + Key + "\"][No][_FIRST].Get<std::string>() );\n";
 					}
 					else {
-						Text += "		" + Key + "[i].first  = j[\"" + Key + "\"][No][_FIRST];\n";
+						Text += "		" + Key + "[i].first  = j[\"" + Key + "\"][No][_FIRST].Get<" + fm + ">();\n";
 					}
 					// second
-					if ( m.find( ", std::string>" ) != std::string::npos ) {
-						Text += "		" + Key + "[i].second = GetString( j[\"" + Key + "\"][No][_SECOND] );\n";
+					if ( sm == "std::string" ) {
+						Text += "		" + Key + "[i].second = GetString( j[\"" + Key + "\"][No][_SECOND].Get<std::string>() );\n";
 					}
 					else {
-						Text += "		" + Key + "[i].second = j[\"" + Key + "\"][No][_SECOND];\n";
+						Text += "		" + Key + "[i].second = j[\"" + Key + "\"][No][_SECOND].Get<" + sm + ">();\n";
 					}
 				}
 				else {
-					Text += "		" + Key + "[i] = j[\"" + Key + "\"][No];\n";
+					Text += "		" + Key + "[i] = j[\"" + Key + "\"][No].Get<" + m + ">();\n";
 				}
 
 				Text += "	}\n";
 			}
 			else {
 				if ( m == "std::string" ){
-					Text += "	" + Key + " = GetString( j[\"" + Key + "\"][_DATA] );\n";
+					Text += "	" + Key + " = GetString( j[\"" + Key + "\"][_DATA].Get<std::string>() );\n";
 				}
 				else if ( m == "D3DXVECTOR2" ) {
-					Text += "	" + Key + ".x = j[\"" + Key + "\"][_DATA][_X];\n";
-					Text += "	" + Key + ".y = j[\"" + Key + "\"][_DATA][_Y];\n";
+					Text += "	" + Key + ".x = j[\"" + Key + "\"][_DATA][_X].Get<float>();\n";
+					Text += "	" + Key + ".y = j[\"" + Key + "\"][_DATA][_Y].Get<float>();\n";
 				}
 				else if ( m == "D3DXVECTOR3" ) {
-					Text += "	" + Key + ".x = j[\"" + Key + "\"][_DATA][_X];\n";
-					Text += "	" + Key + ".y = j[\"" + Key + "\"][_DATA][_Y];\n";
-					Text += "	" + Key + ".z = j[\"" + Key + "\"][_DATA][_Z];\n";
+					Text += "	" + Key + ".x = j[\"" + Key + "\"][_DATA][_X].Get<float>();\n";
+					Text += "	" + Key + ".y = j[\"" + Key + "\"][_DATA][_Y].Get<float>();\n";
+					Text += "	" + Key + ".z = j[\"" + Key + "\"][_DATA][_Z].Get<float>();\n";
 				}
 				else if ( m == "D3DXVECTOR4" ) {
-					Text += "	" + Key + ".x = j[\"" + Key + "\"][_DATA][_X];\n";
-					Text += "	" + Key + ".y = j[\"" + Key + "\"][_DATA][_Y];\n";
-					Text += "	" + Key + ".z = j[\"" + Key + "\"][_DATA][_Z];\n";
-					Text += "	" + Key + ".w = j[\"" + Key + "\"][_DATA][_W];\n";
+					Text += "	" + Key + ".x = j[\"" + Key + "\"][_DATA][_X].Get<float>();\n";
+					Text += "	" + Key + ".y = j[\"" + Key + "\"][_DATA][_Y].Get<float>();\n";
+					Text += "	" + Key + ".z = j[\"" + Key + "\"][_DATA][_Z].Get<float>();\n";
+					Text += "	" + Key + ".w = j[\"" + Key + "\"][_DATA][_W].Get<float>();\n";
 				}
 				else if ( m.find( "std::pair" ) != std::string::npos ) {
 					// first
-					if ( m.find( "<std::string, " ) != std::string::npos ) {
-						Text += "	" + Key + ".first  = GetString( j[\"" + Key + "\"][_DATA][_FIRST] );\n";
+					if ( fm == "std::string" ) {
+						Text += "	" + Key + ".first  = GetString( j[\"" + Key + "\"][_DATA][_FIRST].Get<std::string>() );\n";
 					} else {
-						Text += "	" + Key + ".first  = j[\"" + Key + "\"][_DATA][_FIRST];\n";
+						Text += "	" + Key + ".first  = j[\"" + Key + "\"][_DATA][_FIRST].Get<" + fm + ">();\n";
 					}
 					// second
-					if ( m.find( ", std::string>" ) != std::string::npos ) {
-						Text += "	" + Key + ".second = GetString( j[\"" + Key + "\"][_DATA][_SECOND] );\n";
+					if ( sm == "std::string" ) {
+						Text += "	" + Key + ".second = GetString( j[\"" + Key + "\"][_DATA][_SECOND].Get<std::string>() );\n";
 					} else {
-						Text += "	" + Key + ".second = j[\"" + Key + "\"][_DATA][_SECOND];\n";
+						Text += "	" + Key + ".second = j[\"" + Key + "\"][_DATA][_SECOND].Get<" + sm + ">();\n";
 					}
 				}
 				else {
-					Text += "	" + Key + " = j[\"" + Key + "\"][_DATA];\n";
+					Text += "	" + Key + " = j[\"" + Key + "\"][_DATA].Get<" + m + ">();\n";
 				}
 			}
 		}
 
 		Text +=
 			"\n"
-			"	Log::PushLog( \"" + Path + " ì«Ç›çûÇ› : ê¨å˜\" );\n"
+			"	Log::PushLogInfo( \"" + Path + " ì«Ç›çûÇ› : ê¨å˜\" );\n"
 			"}\n"
 			"\n";
 	}

@@ -51,7 +51,7 @@ private:
 	static std::string CashSave( const std::string& key, T value );
 
 private:
-	const std::string CAHS_FILE_PATH = "Data/Parameter/Cash/";
+	const std::string CAHS_FILE_PATH = "Data/Cash/";
 
 private:
 	std::unordered_map<std::string, std::pair<std::any, std::string>> m_Cashs;
@@ -106,7 +106,7 @@ inline std::string CashManager::CashSave( const std::string& key, T value )
 	std::string filePath = GetInstance()->CAHS_FILE_PATH + key + ".bin";
 	FileManager::BinarySave( filePath.c_str(), value );
 
-	Log::PushLog( filePath + " ï€ë∂ : ê¨å˜" );
+	Log::PushLogInfo( filePath + " ï€ë∂ : ê¨å˜" );
 	return filePath;
 }
 

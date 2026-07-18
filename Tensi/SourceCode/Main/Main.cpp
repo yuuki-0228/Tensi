@@ -194,8 +194,8 @@ HRESULT CMain::Create()
 	DirectX11::SetDepth( false );
 
 	// フルスクリーンで起動するか.
-	json WndSetting = FileManager::JsonLoad( WINDOW_SETTING_FILE_PATH );
-	if ( FileManager::JsonGet( WndSetting, "IsStartFullScreen", false ) ) {
+	Json WndSetting = FileManager::JsonLoad( WINDOW_SETTING_FILE_PATH );
+	if ( WndSetting["IsStartFullScreen"].Get( false ) ) {
 		// フルスクリーンに設定.
 		DirectX11::SetFullScreen( true );
 	}
@@ -226,7 +226,7 @@ HRESULT CMain::Create()
 	//	※ std::string をそのまま BinarySave すると文字列ではなくオブジェクトの生メモリ
 	//	   ( 内部ポインタや未初期化領域 )が書き込まれ、毎回ファイル差分が出てしまうため、
 	//	   決定的な形式( [サイズ][文字列データ] )になる std::vector<char> で読み書きする.
-	const std::string appv = FileManager::JsonGet( WndSetting, "Version", std::string() );
+	const std::string appv = WndSetting["Version"].Get( std::string() );
 	const std::string fp   = PARAMETER_FILE_PATH + std::string( "v.bin" );
 
 	// 保存されているバージョンの読み込み( ファイルが無い場合は空のまま ).
@@ -281,7 +281,7 @@ void CMain::Loop()
 			}
 		}
 	}
-	Log::PushLog( "------ メインループ終了 ------" );
+	Log::PushLogInfo( "------ メインループ終了 ------" );
 }
 
 //---------------------------.
@@ -290,14 +290,14 @@ void CMain::Loop()
 HRESULT CMain::InitWindow( HINSTANCE hInstance )
 {
 	// ウィンドウの設定の取得.
-	json WndSetting = FileManager::JsonLoad( WINDOW_SETTING_FILE_PATH );
+	Json WndSetting = FileManager::JsonLoad( WINDOW_SETTING_FILE_PATH );
 	
 	// アプリ名/ウィンドウ名を取得.
-	const std::wstring wAppName = StringConversion::to_wString( FileManager::JsonGet( WndSetting, "Name", "App", std::string( "Tensi" ) ), ECodePage::UTF8 );
-	const std::wstring wWndName = StringConversion::to_wString( FileManager::JsonGet( WndSetting, "Name", "Wnd", std::string( "Tensi" ) ), ECodePage::UTF8 );
+	const std::wstring wAppName = StringConversion::to_wString( WndSetting["Name"]["App"].Get( std::string( "Tensi" ) ), ECodePage::UTF8 );
+	const std::wstring wWndName = StringConversion::to_wString( WndSetting["Name"]["Wnd"].Get( std::string( "Tensi" ) ), ECodePage::UTF8 );
 
 	// FPSを描画するか.
-	m_IsFPSRender = FileManager::JsonGet( WndSetting, "IsFPSRender", false );
+	m_IsFPSRender = WndSetting["IsFPSRender"].Get( false );
 
 	// ウィンドウの定義.
 	WNDCLASSEX wc;
@@ -339,10 +339,10 @@ HRESULT CMain::InitWindow( HINSTANCE hInstance )
 #else
 	dwExStyle	= WS_EX_TOOLWINDOW;									// ウィンドウ拡張機能.
 #endif // ENABLE_TRANSPARENT_WINDOW
-	if ( FileManager::JsonGet( WndSetting, "IsSizeLock", false )	) dwStyle ^= WS_THICKFRAME;		// サイズの変更を禁止するか.
-	if ( FileManager::JsonGet( WndSetting, "IsMaxLock", false )	) dwStyle ^= WS_MAXIMIZEBOX;	// 拡大化を禁止するか.
-	if ( FileManager::JsonGet( WndSetting, "IsMinLock", false )	) dwStyle ^= WS_MINIMIZEBOX;	// 拡大化を禁止するか.
-	if ( FileManager::JsonGet( WndSetting, "IsPopUpWnd", false )	) dwStyle  = WS_POPUP;			// 枠無しウィンドウ.
+	if ( WndSetting["IsSizeLock"].Get( false )	) dwStyle ^= WS_THICKFRAME;		// サイズの変更を禁止するか.
+	if ( WndSetting["IsMaxLock"].Get( false )	) dwStyle ^= WS_MAXIMIZEBOX;	// 拡大化を禁止するか.
+	if ( WndSetting["IsMinLock"].Get( false )	) dwStyle ^= WS_MINIMIZEBOX;	// 拡大化を禁止するか.
+	if ( WndSetting["IsPopUpWnd"].Get( false )	) dwStyle  = WS_POPUP;			// 枠無しウィンドウ.
 
 	if ( AdjustWindowRect(
 		&rect,	// (in)画面サイズが入った矩形構造体.(out)計算結果.
@@ -451,7 +451,7 @@ HRESULT CMain::InitWindow( HINSTANCE hInstance )
 	SetWindowPos( m_hWnd, HWND_BOTTOM, 0, 0, 0, 0, ( SWP_NOMOVE | SWP_NOSIZE | SWP_SHOWWINDOW ) );
 
 	// マウスカーソルを表示するか.
-	if ( FileManager::JsonGet( WndSetting, "IsDispMouseCursor", true ) == false ) {
+	if ( WndSetting["IsDispMouseCursor"].Get( true ) == false ) {
 		DirectX11::SetIsDispMouseCursor( false );
 		ShowCursor( FALSE );
 	}
@@ -479,8 +479,8 @@ LRESULT CALLBACK CMain::MsgProc(
 	case WM_KEYDOWN:// キーボードが押されたとき.
 	{
 		// ウィンドウの設定の取得.
-		json WndSetting = FileManager::JsonLoad( WINDOW_SETTING_FILE_PATH );
-		if ( FileManager::JsonGet( WndSetting, "IsDispCloseMessage", true ) == false ) break;
+		Json WndSetting = FileManager::JsonLoad( WINDOW_SETTING_FILE_PATH );
+		if ( WndSetting["IsDispCloseMessage"].Get( true ) == false ) break;
 		
 		// キー別の処理.
 		switch ( static_cast<char>( wParam ) ) {

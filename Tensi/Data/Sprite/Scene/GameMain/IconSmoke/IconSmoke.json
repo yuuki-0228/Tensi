@@ -1,0 +1,20 @@
+{
+  "Base": {
+    "h": 560.0,
+    "w": 560.0
+  },
+  "Disp": {
+    "h": 280.0,
+    "w": 280.0
+  },
+  "FilePath": "Data\\Sprite\\Scene\\GameMain\\IconSmoke.json",
+  "IsLock": false,
+  "LocalPosition": 8,
+  "Scene": [
+    "None"
+  ],
+  "Stride": {
+    "h": 280.0,
+    "w": 280.0
+  }
+}

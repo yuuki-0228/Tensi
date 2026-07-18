@@ -101,35 +101,33 @@ INT WINAPI WinMain(
 	if ( CheckDirectXRuntime() == false ) return 0;
 
 	try {
+		Log::OpenLogText();
 
-	Log::OpenLogText();
+		// 初期化＆クラス宣言.
+		g_pCMain = std::make_unique<CMain>();
 
-	// 初期化＆クラス宣言.
-	g_pCMain = std::make_unique<CMain>();
+		if ( g_pCMain != nullptr ) {
 
-	if ( g_pCMain != nullptr ) {
-
-		// ウィンドウ作成成功したら.
-		if ( SUCCEEDED( g_pCMain->InitWindow( hInstance ) ) )
-		{
-			// Dx11用の初期化.
-			if ( SUCCEEDED( g_pCMain->Create() ) )
+			// ウィンドウ作成成功したら.
+			if ( SUCCEEDED( g_pCMain->InitWindow( hInstance ) ) )
 			{
-				// メッセージループ.
-				g_pCMain->Loop();
+				// Dx11用の初期化.
+				if ( SUCCEEDED( g_pCMain->Create() ) )
+				{
+					// メッセージループ.
+					g_pCMain->Loop();
+				}
 			}
 		}
-	}
-	Log::CloseLogText();
-
+		Log::CloseLogText();
 	}
 	catch ( const std::exception& e ) {
 		// Do not die silently : leave the reason in the log and tell the user.
-		Log::PushLog( std::string( "Unhandled exception : " ) + e.what() );
+		Log::PushLogFatal( std::string( "Unhandled exception : " ) + e.what() );
 		MessageBoxA( nullptr, e.what(), "Fatal Error", MB_OK | MB_ICONERROR );
 	}
 	catch ( ... ) {
-		Log::PushLog( "Unhandled exception : unknown" );
+		Log::PushLogFatal( "Unhandled exception : unknown" );
 		MessageBoxA( nullptr, "An unknown fatal error occurred.", "Fatal Error", MB_OK | MB_ICONERROR );
 	}
 

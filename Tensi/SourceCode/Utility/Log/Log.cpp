@@ -5,8 +5,7 @@
 #include <sstream>
 
 namespace {
-	typedef tm TIME_DATA;
-	constexpr char LOG_TEXT_FILE_PATH[]			= "Data\\$Log.txt";									// ログテキストのファイルパス.
+	constexpr char LOG_TEXT_FILE_PATH[]			= "Data\\$system.log";								// ログテキストのファイルパス.
 	constexpr char WINDOW_SETTING_FILE_PATH[]	= "Data\\Parameter\\Config\\WindowSetting.json";	// ウィンドウの設定のファイルパス.
 }
 
@@ -34,35 +33,12 @@ Log* Log::GetInstance()
 HRESULT Log::OpenLogText()
 {
 	// ログを停止するか取得.
-	json WndSetting			= FileManager::JsonLoad( WINDOW_SETTING_FILE_PATH );
-	GetInstance()->m_Stop	= FileManager::JsonGet( WndSetting, "IsLogStop", false );
+	Json WndSetting			= FileManager::JsonLoad( WINDOW_SETTING_FILE_PATH );
+	GetInstance()->m_Stop	= WndSetting["IsLogStop"].Get( false );
 	if ( GetInstance()->m_Stop ) return S_OK;
 
-	// ファイルを開く.
-	std::ofstream LogText;
-	LogText.open( LOG_TEXT_FILE_PATH, std::ios::trunc );
-
-	// ファイルが読み込めてなかったら終了.
-	if( !LogText.is_open() ) return E_FAIL;
-
-	// 現在の時間を獲得.
-	time_t		nowTime	= time( nullptr );
-	TIME_DATA	timeData;	
-	// ローカル時間に変換.
-	localtime_s( &timeData, &nowTime );
-
-	// 現在の時間をテキストに入力.
-	LogText << "[";
-	LogText << timeData.tm_year + 1900	<< "/";	// 1900 足すことで現在の年になる.
-	LogText << timeData.tm_mon + 1		<< "/";	// 1 足すことで現在の年になる.
-	LogText << timeData.tm_mday			<< " ";
-	LogText << timeData.tm_hour			<< ":";
-	LogText << timeData.tm_min;
-	LogText << "]" << " >> App launch" << std::endl << std::endl;
-
-	// ファイルを閉じる.
-	LogText.close();
-	return S_OK;
+	// アプリ起動ログを日付付きで新規作成する.
+	return FileManager::LogSave( LOG_TEXT_FILE_PATH, "App launch", FileManager::ELogLevel::Info, __FUNCTION__, false );
 }
 
 //----------------------------.
@@ -72,29 +48,8 @@ HRESULT Log::CloseLogText()
 {
 	if ( GetInstance()->m_Stop ) return S_OK;
 
-	// ファイルを読み込む.
-	std::ofstream LogText( LOG_TEXT_FILE_PATH, std::ios::app );
-
-	// ファイルが読み込めてなかったら終了.
-	if( !LogText.is_open() ) return E_FAIL;
-
-	// 現在の時間を獲得.
-	time_t		nowTime = time( nullptr );
-	TIME_DATA	timeData;
-	// ローカル時間に変換.
-	localtime_s( &timeData, &nowTime );
-
-	// 現在の時間をテキストに入力.
-	LogText << std::endl		<<  "[";
-	LogText << timeData.tm_hour	<< ":";
-	LogText << timeData.tm_min	<< ":";
-	LogText << timeData.tm_sec;
-	LogText << "]" << " >> App End" << std::endl;
-
-	// ファイルを閉じる.
-	LogText.close();
-
-	return S_OK;
+	// アプリ終了ログを追記する.
+	return FileManager::LogSave( LOG_TEXT_FILE_PATH, "App End", FileManager::ELogLevel::Info, __FUNCTION__ );
 }
 
 //----------------------------.
@@ -107,63 +62,51 @@ HRESULT Log::DeleteLogText()
 }
 
 //----------------------------.
-// ログの入力.
+// ログの入力 : デバッグ.
+//	Releaseでは書き出さない.
 //----------------------------.
-HRESULT Log::PushLog( const char* Log )
+HRESULT Log::PushLogDebugImpl( const std::string& Log, const char* Caller )
 {
+#ifdef _DEBUG
 	if ( GetInstance()->m_Stop ) return S_OK;
-
-	// ファイルを開く.
-	std::ofstream LogText( LOG_TEXT_FILE_PATH, std::ios::app );
-
-	// ファイルが読み込めてなかったら終了.
-	if( !LogText.is_open() ) return E_FAIL;
-
-	// 現在の時間を獲得.
-	time_t		nowTime = time( nullptr );
-	TIME_DATA	timeData;
-	// ローカル時間に変換.
-	localtime_s( &timeData, &nowTime );
-
-	// 現在の時間をテキストに入力.
-	LogText << "[";
-	LogText << timeData.tm_hour << ":";
-	LogText << timeData.tm_min	<< ":";
-	LogText << timeData.tm_sec;
-	// ログの入力.
-	LogText << "]" << " >> " << Log << std::endl;
-
-	// ファイルを閉じる.
-	LogText.close();
-
+	return FileManager::LogSave( LOG_TEXT_FILE_PATH, Log, FileManager::ELogLevel::Debug, Caller );
+#else
 	return S_OK;
+#endif
 }
-HRESULT Log::PushLog( const std::string& Log )
+
+//----------------------------.
+// ログの入力 : 情報.
+//----------------------------.
+HRESULT Log::PushLogInfoImpl( const std::string& Log, const char* Caller )
 {
 	if ( GetInstance()->m_Stop ) return S_OK;
+	return FileManager::LogSave( LOG_TEXT_FILE_PATH, Log, FileManager::ELogLevel::Info, Caller );
+}
 
-	// ファイルを開く.
-	std::ofstream LogText( LOG_TEXT_FILE_PATH, std::ios::app );
+//----------------------------.
+// ログの入力 : 警告.
+//----------------------------.
+HRESULT Log::PushLogWarningImpl( const std::string& Log, const char* Caller )
+{
+	if ( GetInstance()->m_Stop ) return S_OK;
+	return FileManager::LogSave( LOG_TEXT_FILE_PATH, Log, FileManager::ELogLevel::Warning, Caller );
+}
 
-	// ファイルが読み込めてなかったら終了.
-	if( !LogText.is_open() ) return E_FAIL;
+//----------------------------.
+// ログの入力 : エラー.
+//----------------------------.
+HRESULT Log::PushLogErrorImpl( const std::string& Log, const char* Caller )
+{
+	if ( GetInstance()->m_Stop ) return S_OK;
+	return FileManager::LogSave( LOG_TEXT_FILE_PATH, Log, FileManager::ELogLevel::Error, Caller );
+}
 
-	// 現在の時間を獲得.
-	time_t		nowTime = time( nullptr );
-	TIME_DATA	timeData;
-	// ローカル時間に変換.
-	localtime_s( &timeData, &nowTime );
-
-	// 現在の時間をテキストに入力.
-	LogText << "[";
-	LogText << timeData.tm_hour << ":";
-	LogText << timeData.tm_min	<< ":";
-	LogText << timeData.tm_sec;
-	// ログの入力.
-	LogText << "]" << " >> " << Log.c_str() << std::endl;
-
-	// ファイルを閉じる.
-	LogText.close();
-
-	return S_OK;
+//----------------------------.
+// ログの入力 : 致命的なエラー.
+//----------------------------.
+HRESULT Log::PushLogFatalImpl( const std::string& Log, const char* Caller )
+{
+	if ( GetInstance()->m_Stop ) return S_OK;
+	return FileManager::LogSave( LOG_TEXT_FILE_PATH, Log, FileManager::ELogLevel::Fatal, Caller );
 }

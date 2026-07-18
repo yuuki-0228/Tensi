@@ -198,10 +198,10 @@ void MDataCreate::h( const std::vector<std::pair<std::string, json>>& Container 
 			}
 		}
 
-		Text += 
+		Text +=
 			"\n"
 			"		" + structName + "();\n"
-			"		" + structName + "( const json& j );\n"
+			"		" + structName + "( const Json& j );\n"
 			"	} typedef " + Name + "Data;\n"
 			"\n";
 
@@ -214,8 +214,8 @@ void MDataCreate::h( const std::vector<std::pair<std::string, json>>& Container 
 		"using namespace MasterData;\n"
 		"\n"
 		"namespace MasterDataUtility {\n"
-		"	std::unordered_map<std::string, std::unordered_map<ulong, std::any>> CreateCache( const std::vector<std::pair<std::string, json>>& data );\n"
-		"	void CacheSetup( std::unordered_map<std::string, std::unordered_map<ulong, std::any>>& out, const std::string& Container, const json& File );\n"
+		"	std::unordered_map<std::string, std::unordered_map<ulong, std::any>> CreateCache( const std::vector<std::pair<std::string, Json>>& data );\n"
+		"	void CacheSetup( std::unordered_map<std::string, std::unordered_map<ulong, std::any>>& out, const std::string& Container, const Json& File );\n"
 		"}\n"
 		"#endif\n";
 
@@ -278,9 +278,9 @@ void MDataCreate::cpp( const std::vector<std::pair<std::pair<std::string, std::s
 			"}\n";
 
 		Text +=
-			Struct + "::" + Struct + "( const json& j )\n"
+			Struct + "::" + Struct + "( const Json& j )\n"
 			"{\n"
-			"	Id = j[\"Id\"];\n";
+			"	Id = j[\"Id\"].Get<ulong>();\n";
 
 		for ( auto& [Key, Value] : File.items() ) {
 			if ( Key == "ID" || Key == "Id" || Key == "id" ) continue;
@@ -291,7 +291,16 @@ void MDataCreate::cpp( const std::vector<std::pair<std::pair<std::string, std::s
 			const auto nume		= std::count( comment.begin(), comment.end(), '>' );
 			const auto isPair	= numf == 2 && nume == 2;
 			const auto m		= GetMold( Value[DATA], isPair );
+			const auto isId		= comment.find( "id" ) != std::string::npos || comment.find("Id") != std::string::npos || comment.find( "iD" ) != std::string::npos || comment.find( "ID" ) != std::string::npos;
 			const auto Enum		= File.find( Key + "_enum" );
+
+			// pair‚Ì—v‘f‚ÌŒ^‚ðŽæ“¾
+			std::string fm = "";
+			std::string sm = "";
+			if ( m.find( "std::pair" ) != std::string::npos ) {
+				fm = GetMold( Value[DATA][0], isPair );
+				sm = GetMold( Value[DATA][1], isPair );
+			}
 
 			if ( size > 1 ) {
 				Text +=
@@ -300,84 +309,90 @@ void MDataCreate::cpp( const std::vector<std::pair<std::pair<std::string, std::s
 					"	for ( int i = 0; i < " + Key + "Size; ++i ) {\n";
 
 				if ( m == "std::string" ){
-					Text += "		" + Key + "[i] = GetString( j[\"" + Key + "\"][i] );\n";
+					Text += "		" + Key + "[i] = GetString( j[\"" + Key + "\"][i].Get<std::string>() );\n";
 				}
 				else if ( m == "D3DXVECTOR2" ) {
-					Text += "		" + Key + "[i].x = j[\"" + Key + "\"][i][_X];\n";
-					Text += "		" + Key + "[i].y = j[\"" + Key + "\"][i][_Y];\n";
+					Text += "		" + Key + "[i].x = j[\"" + Key + "\"][i][_X].Get<float>();\n";
+					Text += "		" + Key + "[i].y = j[\"" + Key + "\"][i][_Y].Get<float>();\n";
 				}
 				else if ( m == "D3DXVECTOR3" ) {
-					Text += "		" + Key + "[i].x = j[\"" + Key + "\"][i][_X];\n";
-					Text += "		" + Key + "[i].y = j[\"" + Key + "\"][i][_Y];\n";
-					Text += "		" + Key + "[i].z = j[\"" + Key + "\"][i][_Z];\n";
+					Text += "		" + Key + "[i].x = j[\"" + Key + "\"][i][_X].Get<float>();\n";
+					Text += "		" + Key + "[i].y = j[\"" + Key + "\"][i][_Y].Get<float>();\n";
+					Text += "		" + Key + "[i].z = j[\"" + Key + "\"][i][_Z].Get<float>();\n";
 				}
 				else if ( m == "D3DXVECTOR4" ) {
-					Text += "		" + Key + "[i].x = j[\"" + Key + "\"][i][_X];\n";
-					Text += "		" + Key + "[i].y = j[\"" + Key + "\"][i][_Y];\n";
-					Text += "		" + Key + "[i].z = j[\"" + Key + "\"][i][_Z];\n";
-					Text += "		" + Key + "[i].w = j[\"" + Key + "\"][i][_W];\n";
+					Text += "		" + Key + "[i].x = j[\"" + Key + "\"][i][_X].Get<float>();\n";
+					Text += "		" + Key + "[i].y = j[\"" + Key + "\"][i][_Y].Get<float>();\n";
+					Text += "		" + Key + "[i].z = j[\"" + Key + "\"][i][_Z].Get<float>();\n";
+					Text += "		" + Key + "[i].w = j[\"" + Key + "\"][i][_W].Get<float>();\n";
 				}
 				else if ( m.find( "std::pair" ) != std::string::npos ) {
 					// first
-					if ( m.find( "<std::string, " ) != std::string::npos ) {
-						Text += "		" + Key + "[i].first  = GetString( j[\"" + Key + "\"][i][_FIRST] );\n";
+					if ( fm == "std::string" ) {
+						Text += "		" + Key + "[i].first  = GetString( j[\"" + Key + "\"][i][_FIRST].Get<std::string>() );\n";
 					} else {
-						Text += "		" + Key + "[i].first  = j[\"" + Key + "\"][i][_FIRST];\n";
+						Text += "		" + Key + "[i].first  = j[\"" + Key + "\"][i][_FIRST].Get<" + fm + ">();\n";
 					}
 					// second
-					if ( m.find( ", std::string>" ) != std::string::npos ) {
-						Text += "		" + Key + "[i].second = GetString( j[\"" + Key + "\"][i][_SECOND] );\n";
+					if ( sm == "std::string" ) {
+						Text += "		" + Key + "[i].second = GetString( j[\"" + Key + "\"][i][_SECOND].Get<std::string>() );\n";
 					} else {
-						Text += "		" + Key + "[i].second = j[\"" + Key + "\"][i][_SECOND];\n";
+						Text += "		" + Key + "[i].second = j[\"" + Key + "\"][i][_SECOND].Get<" + sm + ">();\n";
 					}
 				}
 				else if ( Enum != File.end() ) {
-					Text += "		" + Key + "[i] = " + "static_cast<" + Key + "s>( " + "j[\"" + Key + "\"][i] );\n";
+					Text += "		" + Key + "[i] = " + "static_cast<" + Key + "s>( " + "j[\"" + Key + "\"][i].Get<int>() );\n";
+				}
+				else if ( isId ) {
+					Text += "		" + Key + "[i] = j[\"" + Key + "\"][i].Get<ulong>();\n";
 				}
 				else {
-					Text += "		" + Key + "[i] = j[\"" + Key + "\"][i];\n";
+					Text += "		" + Key + "[i] = j[\"" + Key + "\"][i].Get<" + m + ">();\n";
 				}
 
 				Text += "	}\n";
 			}
 			else {
 				if ( m == "std::string" ){
-					Text += "	" + Key + " = GetString( j[\"" + Key + "\"] );\n";
+					Text += "	" + Key + " = GetString( j[\"" + Key + "\"].Get<std::string>() );\n";
 				}
 				else if ( m == "D3DXVECTOR2" ) {
-					Text += "	" + Key + ".x = j[\"" + Key + "\"][_X];\n";
-					Text += "	" + Key + ".y = j[\"" + Key + "\"][_Y];\n";
+					Text += "	" + Key + ".x = j[\"" + Key + "\"][_X].Get<float>();\n";
+					Text += "	" + Key + ".y = j[\"" + Key + "\"][_Y].Get<float>();\n";
 				}
 				else if ( m == "D3DXVECTOR3" ) {
-					Text += "	" + Key + ".x = j[\"" + Key + "\"][_X];\n";
-					Text += "	" + Key + ".y = j[\"" + Key + "\"][_Y];\n";
-					Text += "	" + Key + ".z = j[\"" + Key + "\"][_Z];\n";
+					Text += "	" + Key + ".x = j[\"" + Key + "\"][_X].Get<float>();\n";
+					Text += "	" + Key + ".y = j[\"" + Key + "\"][_Y].Get<float>();\n";
+					Text += "	" + Key + ".z = j[\"" + Key + "\"][_Z].Get<float>();\n";
 				}
 				else if ( m == "D3DXVECTOR4" ) {
-					Text += "	" + Key + ".x = j[\"" + Key + "\"][_X];\n";
-					Text += "	" + Key + ".y = j[\"" + Key + "\"][_Y];\n";
-					Text += "	" + Key + ".z = j[\"" + Key + "\"][_Z];\n";
-					Text += "	" + Key + ".w = j[\"" + Key + "\"][_W];\n";
+					Text += "	" + Key + ".x = j[\"" + Key + "\"][_X].Get<float>();\n";
+					Text += "	" + Key + ".y = j[\"" + Key + "\"][_Y].Get<float>();\n";
+					Text += "	" + Key + ".z = j[\"" + Key + "\"][_Z].Get<float>();\n";
+					Text += "	" + Key + ".w = j[\"" + Key + "\"][_W].Get<float>();\n";
 				}
 				else if ( m.find( "std::pair" ) != std::string::npos ) {
 					// first
-					if ( m.find( "<std::string, " ) != std::string::npos ) {
-						Text += "	" + Key + ".first  = GetString( j[\"" + Key + "\"][_FIRST] );\n";
+					if ( fm == "std::string" ) {
+						Text += "	" + Key + ".first  = GetString( j[\"" + Key + "\"][_FIRST].Get<std::string>() );\n";
 					} else {
-						Text += "	" + Key + ".first  = j[\"" + Key + "\"][_FIRST];\n";
+						Text += "	" + Key + ".first  = j[\"" + Key + "\"][_FIRST].Get<" + fm + ">();\n";
 					}
 					// second
-					if ( m.find( ", std::string>" ) != std::string::npos ) {
-						Text += "	" + Key + ".second = GetString( j[\"" + Key + "\"][_SECOND] );\n";
+					if ( sm == "std::string" ) {
+						Text += "	" + Key + ".second = GetString( j[\"" + Key + "\"][_SECOND].Get<std::string>() );\n";
 					} else {
-						Text += "	" + Key + ".second = j[\"" + Key + "\"][_SECOND];\n";
+						Text += "	" + Key + ".second = j[\"" + Key + "\"][_SECOND].Get<" + sm + ">();\n";
 					}
 				}
 				else if ( Enum != File.end() ) {
-					Text += "	" + Key + " = " + "static_cast<" + Key + "s>( " + "j[\"" + Key + "\"] );\n";
+					Text += "	" + Key + " = " + "static_cast<" + Key + "s>( " + "j[\"" + Key + "\"].Get<int>() );\n";
+				}
+				else if ( isId ) {
+					Text += "	" + Key + " = j[\"" + Key + "\"].Get<ulong>();\n";
 				}
 				else {
-					Text += "	" + Key + " = j[\"" + Key + "\"];\n";
+					Text += "	" + Key + " = j[\"" + Key + "\"].Get<" + m + ">();\n";
 				}
 			}
 		}
@@ -392,7 +407,7 @@ void MDataCreate::cpp( const std::vector<std::pair<std::pair<std::string, std::s
 		"// “Ç‚Ýž‚Ý\n"
 		"//----------------------------.\n"
 		"std::unordered_map<std::string, std::unordered_map<ulong, std::any>> MasterDataUtility::CreateCache(\n"
-		"	const std::vector<std::pair<std::string, json>>& data )\n"
+		"	const std::vector<std::pair<std::string, Json>>& data )\n"
 		"{\n"
 		"	std::unordered_map<std::string, std::unordered_map<ulong, std::any>> out;\n"
 		"\n"
@@ -409,19 +424,20 @@ void MDataCreate::cpp( const std::vector<std::pair<std::pair<std::string, std::s
 		"	}\n"
 		"	return out;\n"
 		"}\n"
-		"void MasterDataUtility::CacheSetup( std::unordered_map<std::string, std::unordered_map<ulong, std::any>>& out, const std::string& Container, const json& File )\n"
-		"{\n";
+		"void MasterDataUtility::CacheSetup( std::unordered_map<std::string, std::unordered_map<ulong, std::any>>& out, const std::string& Container, const Json& File )\n"
+		"{\n"
+		"	const ulong Id = File[\"Id\"].Get<ulong>();\n";
 
 	bool isFirst = true;
 	for ( auto& [Data, File] : List ) {
 		auto& [Name, Struct] = Data;
 
 		if ( isFirst ) {
-			Text += "	if (	  Container == \"" + Name + "\" ) out[typeid( " + Struct + " ).name()][File[\"Id\"]] = " + Struct + "( File );\n";
+			Text += "	if (	  Container == \"" + Name + "\" ) out[typeid( " + Struct + " ).name()][Id] = " + Struct + "( File );\n";
 			isFirst = false;
 		}
 		else {
-			Text += "	else if ( Container == \"" + Name + "\" ) out[typeid( " + Struct + " ).name()][File[\"Id\"]] = " + Struct + "( File );\n";
+			Text += "	else if ( Container == \"" + Name + "\" ) out[typeid( " + Struct + " ).name()][Id] = " + Struct + "( File );\n";
 		}
 	}
 

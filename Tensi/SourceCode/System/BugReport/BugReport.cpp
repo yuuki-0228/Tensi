@@ -7,7 +7,7 @@
 #include <filesystem>
 
 namespace {
-	constexpr char SAVE_FILE_PATH[]			= "Data\\BugReport";	// 保存する場所のファイルパス.
+	constexpr char SAVE_FILE_PATH[]			= "Data\\Debug\\BugReport";	// 保存する場所のファイルパス.
 	constexpr int  BUG_TEXT_NORMAL_COLUMN	= 10;					// バグ報告テキストの通常時(内容に改行を含まない時)の列数.
 	constexpr int  BUG_TEXT_TITLE_POS		= 1;					// バグ報告テキストのタイトルの位置.
 	constexpr int  BUG_TEXT_LV_POS			= 4;					// バグ報告テキストのレベルの位置.
@@ -40,8 +40,8 @@ void CBugReport::Init()
 	m_RenderFunc = [&] () {
 		ImGui::Text( u8"発生したバグを記入し管理することができます。" );
 		ImGui::Text( u8"発生したバグの「タイトル」、「バグレベル」、「内容」を記入してください。" );
-		ImGui::Text( u8"記入したバグは「Data\\BugReport」の中に保存されます。" );
-		ImGui::Text( u8"「修正完了」ボタンを押すことで「Data\\BugReport\\Fixed」の中に移動されます。" );
+		ImGui::Text( u8"記入したバグは「Data\\Debug\\BugReport」の中に保存されます。" );
+		ImGui::Text( u8"「修正完了」ボタンを押すことで「Data\\Debug\\BugReport\\Fixed」の中に移動されます。" );
 		ImGui::Separator();
 
 		// バグの報告.
@@ -196,6 +196,10 @@ void CBugReport::Init()
 //---------------------------.
 HRESULT CBugReport::BugListLoad()
 {
+#ifndef _DEBUG
+	// バグ報告はデバッグ時のみ使用する.
+	return S_OK;
+#else
 	bool IsFixedFile = false;
 	auto ListLoad = [&]( const std::filesystem::directory_entry& Entry )
 	{
@@ -241,4 +245,5 @@ HRESULT CBugReport::BugListLoad()
 	}
 
 	return S_OK;
+#endif	// #ifndef _DEBUG.
 }

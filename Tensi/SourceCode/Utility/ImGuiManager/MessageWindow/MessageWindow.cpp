@@ -213,16 +213,16 @@ void MessageWindow::ColorBlock()
 //----------------------.
 void MessageWindow::SetColorTable()
 {
-	const json& Config = FileManager::JsonLoad( TEXT_PATH );
+	const Json Config = FileManager::JsonLoad( TEXT_PATH );
 	m_ColorBlockFlags.resize( EColor::Max, true );
-	m_ColorBlockFlags[Red]		= Config["Red"];
-	m_ColorBlockFlags[Green]	= Config["Green"];
-	m_ColorBlockFlags[Blue]		= Config["Blue"];
-	m_ColorBlockFlags[Yellow]	= Config["Yellow"];
-	m_ColorBlockFlags[Cyan]		= Config["Cyan"];
-	m_ColorBlockFlags[Magenta]	= Config["Magenta"];
-	m_ColorBlockFlags[white]	= Config["white"];
-	m_ColorBlockFlags[Gray]		= Config["Gray"];
+	m_ColorBlockFlags[Red]		= Config["Red"].Get( true );
+	m_ColorBlockFlags[Green]	= Config["Green"].Get( true );
+	m_ColorBlockFlags[Blue]		= Config["Blue"].Get( true );
+	m_ColorBlockFlags[Yellow]	= Config["Yellow"].Get( true );
+	m_ColorBlockFlags[Cyan]		= Config["Cyan"].Get( true );
+	m_ColorBlockFlags[Magenta]	= Config["Magenta"].Get( true );
+	m_ColorBlockFlags[white]	= Config["white"].Get( true );
+	m_ColorBlockFlags[Gray]		= Config["Gray"].Get( true );
 
 	m_ColorTable = {
 		Color4::Red,

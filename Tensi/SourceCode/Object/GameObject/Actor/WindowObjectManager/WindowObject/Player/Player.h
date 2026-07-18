@@ -3,6 +3,7 @@
 
 class CSleepEffectManager;
 class CNoteEffectManager;
+class CExploreManager;
 
 /************************************************
 *	プレイヤークラス.
@@ -24,6 +25,8 @@ public:
 
 	// 描画.
 	virtual void Render() override;
+	// サブウィンドウ( アイコンの後ろ )への描画.
+	virtual void SubRender() override;
 
 	// 当たり判定関数.
 	virtual void Collision( CActor* pActor ) override;
@@ -91,10 +94,12 @@ private:
 	SSpriteRenderState						m_CollapsedState;	// つぶれた画像の情報.
 	std::unique_ptr<CSleepEffectManager>	m_pSleepEffect;		// 眠りエフェクト.
 	std::unique_ptr<CNoteEffectManager>		m_pNoteEffect;		// 音符エフェクト.
+	std::unique_ptr<CExploreManager>		m_pExplore;			// 探索マネージャ.
 	float									m_ActionTime;		// 行動の時間.
 	float									m_MoveTimeCnt;		// 移動時間.
 	float									m_CoolTime;			// クールタイム.
 	int										m_Action;			// 現在の行動.
 	bool									m_IsLandingWait;	// 着地硬直中か.
 	bool									m_IsOldMoveLeft;	// 前回左方向に移動していたか.
+	bool									m_WasExploreActive;	// 前フレーム探索中だったか.
 };

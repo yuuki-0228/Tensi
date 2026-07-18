@@ -76,7 +76,7 @@ bool BackGroundManager::LoginInit( const std::tm& now, const std::tm& diff )
 		if ( pI->m_pWeedManager->GetNum() < 300 && Random::Probability( 1, 2 ) ) {
 			const int Num = Random::GetRand( 5, 10 );
 			pI->m_pWeedManager->Fill( Num );
-			Log::PushLog( "G‘‚ğ" + std::to_string( Num ) + "–{¶‚â‚µ‚Ü‚µ‚½" );
+			Log::PushLogInfo( "G‘‚ğ" + std::to_string( Num ) + "–{¶‚â‚µ‚Ü‚µ‚½" );
 		}
 	}
 
@@ -84,7 +84,7 @@ bool BackGroundManager::LoginInit( const std::tm& now, const std::tm& diff )
 	if ( pI->m_pFlowerManager->GetNum() < 100 && Random::Probability( 1, 10 ) ) {
 		const int Num = Random::GetRand( 1, 2 );
 		pI->m_pFlowerManager->Fill( Num );
-		Log::PushLog( "‰Ô‚ğ" + std::to_string( Num ) + "–{A‚¦‚Ü‚µ‚½" );
+		Log::PushLogInfo( "‰Ô‚ğ" + std::to_string( Num ) + "–{A‚¦‚Ü‚µ‚½" );
 	}
 	return false;
 }

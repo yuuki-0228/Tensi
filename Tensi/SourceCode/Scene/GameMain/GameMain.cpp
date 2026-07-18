@@ -84,7 +84,7 @@ bool CGameMain::LoginInit( std::tm lastDay )
 	const std::tm& now  = TimeManager::GetTime();
 	const std::tm& diff = TimeManager::GetTimediff( now, lastDay );
 
-	Log::PushLog( "前回のログインから" + std::to_string(diff.tm_mday) + "日空いています");
+	Log::PushLogInfo( "前回のログインから" + std::to_string(diff.tm_mday) + "日空いています");
 
 	BackGroundManager::LoginInit( now, diff );
 	return false;

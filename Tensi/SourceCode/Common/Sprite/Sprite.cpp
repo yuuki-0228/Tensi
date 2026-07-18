@@ -83,7 +83,7 @@ HRESULT CSprite::Init( const std::string& FilePath )
 	if ( FAILED( CreateTexture() ) ) return E_FAIL;
 	if ( FAILED( CreateSampler() ) ) return E_FAIL;
 
-	Log::PushLog( m_SpriteState.FilePath + " 読み込み : 成功" );
+	Log::PushLogInfo( m_SpriteState.FilePath + " 読み込み : 成功" );
 	return S_OK;
 }
 
@@ -342,7 +342,7 @@ HRESULT CSprite::SpriteStateDataLoad()
 	// 補正値テキストの読み込み.
 	std::string TextPath	= m_SpriteState.FilePath;
 	TextPath.erase( TextPath.rfind( "\\" ), TextPath.size() ) += "\\OffSet.json";
-	json OffSetData			= FileManager::JsonLoad( TextPath );
+	Json OffSetData			= FileManager::JsonLoad( TextPath );
 	
 	// 同じ名前のテキストの読み込み.
 	TextPath = m_SpriteState.FilePath;
@@ -364,11 +364,11 @@ HRESULT CSprite::SpriteStateDataLoad()
 	// ファイルが無いためファイルを作成する.
 	if ( m_SpriteStateData.empty() ) {
 #ifdef _DEBUG
-		Log::PushLog( TextPath + " が無いため作成します。" );
+		Log::PushLogWarning( TextPath + " が無いため作成します。" );
 		if ( FAILED( CreateSpriteState() ) ) return E_FAIL;
 
 		// 作成できたためもう一度読み込み直す.
-		Log::PushLog( m_SpriteState.FilePath + " をもう一度読み込み直します。" );
+		Log::PushLogWarning( m_SpriteState.FilePath + " をもう一度読み込み直します。" );
 		SpriteStateDataLoad();
 		return S_OK;
 #else
@@ -377,20 +377,20 @@ HRESULT CSprite::SpriteStateDataLoad()
 	}
 
 	// スプライト情報の取得.
-	m_SpriteState.LocalPosNo	= static_cast<ELocalPosition>( m_SpriteStateData["LocalPosition"] );
-	m_SpriteState.Disp.w		= m_SpriteStateData["Disp"]["w"];
-	m_SpriteState.Disp.h		= m_SpriteStateData["Disp"]["h"];
-	m_SpriteState.Base.w		= m_SpriteStateData["Base"]["w"];
-	m_SpriteState.Base.h		= m_SpriteStateData["Base"]["h"];
-	m_SpriteState.Stride.w		= m_SpriteStateData["Stride"]["w"];
-	m_SpriteState.Stride.h		= m_SpriteStateData["Stride"]["h"];
+	m_SpriteState.LocalPosNo	= static_cast<ELocalPosition>( m_SpriteStateData["LocalPosition"].Get<int>() );
+	m_SpriteState.Disp.w		= m_SpriteStateData["Disp"]["w"].Get<float>();
+	m_SpriteState.Disp.h		= m_SpriteStateData["Disp"]["h"].Get<float>();
+	m_SpriteState.Base.w		= m_SpriteStateData["Base"]["w"].Get<float>();
+	m_SpriteState.Base.h		= m_SpriteStateData["Base"]["h"].Get<float>();
+	m_SpriteState.Stride.w		= m_SpriteStateData["Stride"]["w"].Get<float>();
+	m_SpriteState.Stride.h		= m_SpriteStateData["Stride"]["h"].Get<float>();
 	m_SpriteState.AddCenterPos	= GetAddCenterPosition();
 
 	// 補正値の設定.
 	if ( OffSetData.empty() ) m_SpriteState.OffSet = { 0.0f, 0.0f };
 	else {
-		m_SpriteState.OffSet.x	= OffSetData["x"];
-		m_SpriteState.OffSet.y	= OffSetData["y"];
+		m_SpriteState.OffSet.x	= OffSetData["x"].Get<float>();
+		m_SpriteState.OffSet.y	= OffSetData["y"].Get<float>();
 	}
 	return S_OK;
 }
@@ -774,7 +774,7 @@ HRESULT CSprite::CreateSpriteState()
 	const D3DXVECTOR2& BaseSize = ImageSize::GetImageSize( m_SpriteState.FilePath );
 
 	// 情報を追加していく.
-	json SpriteState;
+	Json SpriteState;
 	SpriteState["LocalPosition"]		= 0;
 	SpriteState["Disp"]["w"]			= BaseSize.x;
 	SpriteState["Disp"]["h"]			= BaseSize.y;
@@ -785,7 +785,7 @@ HRESULT CSprite::CreateSpriteState()
 
 	// スプライト情報の作成.
 	if( FAILED( FileManager::JsonSave( TextPath, SpriteState ) ) ) return E_FAIL;
-	Log::PushLog( TextPath + " ファイルの作成 : 成功" );
+	Log::PushLogInfo( TextPath + " ファイルの作成 : 成功" );
 
 	// 作成成功.
 	return S_OK;

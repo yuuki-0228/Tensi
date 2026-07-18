@@ -54,7 +54,7 @@ HRESULT DirectX9::Create( HWND hWnd )
 			D3DCREATE_SOFTWARE_VERTEXPROCESSING | D3DCREATE_MULTITHREADED,
 			&d3dpp, &pI->m_pDevice9 ) ) )
 		{
-			//Log::PushLog( "HALモードでDIRECT3Dデバイス作成できません。REFモードで再試行します" );
+			//Log::PushLogInfo( "HALモードでDIRECT3Dデバイス作成できません。REFモードで再試行します" );
 			//MessageBox( nullptr,
 			//	_T( "HALモードでDIRECT3Dデバイス作成できません\nREFモードで再試行します" ),
 			//	_T( "警告 "), MB_OK );

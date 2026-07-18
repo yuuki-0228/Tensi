@@ -34,7 +34,7 @@ void CLoadManager::LoadResource( HWND hWnd )
 	auto Load = [&]( HWND hWnd ) {
 		std::unique_lock<std::mutex> lock( m_Mutex );
 
-		Log::PushLog( "------ スレッドロード開始 ------" );
+		Log::PushLogInfo( "------ スレッドロード開始 ------" );
 #ifdef ENABLE_SPRITE
 		if ( FAILED( SpriteResource::SpriteLoad() ) ){
 			m_isLoadFailed = true;
@@ -72,8 +72,8 @@ void CLoadManager::LoadResource( HWND hWnd )
 		}
 #endif
 		m_isLoadEnd = true;
-		Log::PushLog( "------ スレッドロード終了 ------" );
-		Log::PushLog( "------ メインループ開始 ------" );
+		Log::PushLogInfo( "------ スレッドロード終了 ------" );
+		Log::PushLogInfo( "------ メインループ開始 ------" );
 	};
 
 	// 読み込み.

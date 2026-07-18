@@ -1,5 +1,6 @@
 #pragma once
 #include "..\..\Global.h"
+#include "ExploreSaveData.h"
 
 //---------------------------.
 //	セーブデータリスト.
@@ -14,5 +15,6 @@ namespace SaveData{
 		STransform* WaterFallTransform;		// 滝のトランスフォーム.
 		STransform* WateringCanTransform;	// ジョウロのトランスフォーム.
 		float* WateringCanWaterValue;		// ジョウロの水の量.
+		SExploreSaveData* ExploreData;		// 探索の保存データ.
 	} typedef SSetSaveDataList;
 }

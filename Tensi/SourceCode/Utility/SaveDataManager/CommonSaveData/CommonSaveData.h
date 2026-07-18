@@ -27,6 +27,7 @@ private:
 		STransform WaterFallTransform;
 		STransform WateringCanTransform;
 		float WateringCanWaterValue;
+		SExploreSaveData ExploreData;
 	} typedef SSaveDataList;
 
 private:

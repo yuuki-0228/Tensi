@@ -35,7 +35,7 @@ SceneManager::SceneManager()
 		// 初回起動時の初期化.
 		m_pScene->FirstPlayInit();
 		SaveDataManager::Save();
-		Log::PushLog( "初回起動設定 : 成功" );
+		Log::PushLogInfo( "初回起動設定 : 成功" );
 	}
 
 	std::tm lastDay;
@@ -43,7 +43,7 @@ SceneManager::SceneManager()
 		// 初めてのログインの設定.
 		m_pScene->LoginInit( lastDay );
 		SaveDataManager::LoginSave();
-		Log::PushLog( "初回ログイン設定 : 成功" );
+		Log::PushLogInfo( "初回ログイン設定 : 成功" );
 	}
 }
 

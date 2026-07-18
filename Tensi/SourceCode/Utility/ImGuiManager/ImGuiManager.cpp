@@ -100,7 +100,7 @@ HRESULT ImGuiManager::Init( HWND hWnd )
 	if ( ImGui_ImplWin32_Init( hWnd ) == false ) return E_FAIL;
 	if ( ImGui_ImplDX11_Init( DirectX11::GetDevice(), DirectX11::GetContext() ) == false ) return E_FAIL;
 
-	Log::PushLog( "Imgui‚Ì‰Šú‰» : ¬Œ÷" );
+	Log::PushLogInfo( "Imgui‚Ì‰Šú‰» : ¬Œ÷" );
 
 	return S_OK;
 }

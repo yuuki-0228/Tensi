@@ -5,16 +5,17 @@
 #include "..\..\Global.h"
 #include "..\..\Utility\ImGuiManager\MessageWindow\MessageWindow.h"
 #include "..\..\Utility\ImGuiManager\DebugWindow\DebugWindow.h"
+#include <encrypt/file.h>
 
 namespace fs = std::filesystem;
 
 namespace {
-	constexpr char	FILE_PATH[]							= "Data\\Sound";					// Soundデータが入っているディレクトリパス.
-	constexpr char	BINARY_FILE_PATH[]					= "Data\\Parameter\\Data\\adv.bin";	// バイナリデータが入ってるパス.
-	constexpr SoundManager::SSoundVolume INIT_VOLUME	= { 0.5f, 0.5f, 0.5f, 0.5f };		// バイナリデータが存在しない際に設定する初期音量.
-	constexpr float	DEFAULT_SOUND_VOLUME				= 1.0f;								// サウンドデータのデフォルトの音量
-	constexpr float	DEFAULT_MAX_PITCH					= 2.0f;								// サウンドデータのデフォルトの最大ピッチ数
-	constexpr float	DEFAULT_START_PITCH					= 1.0f;								// サウンドデータのデフォルトの初期のピッチ数
+	constexpr char	FILE_PATH[]							= "Data\\Sound";				// Soundデータが入っているディレクトリパス.
+	constexpr char	BINARY_FILE_PATH[]					= "Data\\DataCache\\adv.bin";	// バイナリデータが入ってるパス.
+	constexpr SoundManager::SSoundVolume INIT_VOLUME	= { 0.5f, 0.5f, 0.5f, 0.5f };	// バイナリデータが存在しない際に設定する初期音量.
+	constexpr float	DEFAULT_SOUND_VOLUME				= 1.0f;							// サウンドデータのデフォルトの音量
+	constexpr float	DEFAULT_MAX_PITCH					= 2.0f;							// サウンドデータのデフォルトの最大ピッチ数
+	constexpr float	DEFAULT_START_PITCH					= 1.0f;							// サウンドデータのデフォルトの初期のピッチ数
 }
 
 SoundManager::SoundManager()
@@ -105,11 +106,22 @@ void SoundManager::CreateSoundData()
 		return;
 	}
 
-	auto eachLoad = [&]( const fs::directory_entry& entry )
+	auto eachLoad = [&]( const std::string& entryPath )
 	{
-		const std::string extension = entry.path().extension().string();	// 拡張子.
-		const std::string filePath = entry.path().string();					// ファイルパス.
-		const std::string fileName = entry.path().stem().string();			// ファイル名.
+		std::string		  extension = fs::path( entryPath ).extension().string();	// 拡張子.
+		const std::string filePath = entryPath;					// ファイルパス.
+		std::string		  fileName = fs::path( entryPath ).stem().string();			// ファイル名.
+
+#ifndef _DEBUG
+		// 暗号化ファイルの場合暗号化前の拡張子に戻す.
+		if ( encrypt::GetIsEncryption( filePath ) ) {
+			extension = encrypt::GetExtension( filePath );
+
+			// 不要な文字を削除.
+			fileName.erase( 0, 1 );
+			fileName.erase( fileName.length() - 2 );
+		}
+#endif
 
 		// 拡張子がOggでなければ終了.
 		if ( extension != ".ogg" && extension != ".OGG" ) return;
@@ -127,7 +139,7 @@ void SoundManager::CreateSoundData()
 			// フォルダの名前をBGM名前リストに入れる.
 			pI->m_BGMNameList.emplace_back( fileName );
 
-			Log::PushLog( filePath + "(BGM) 読み込み : 成功" );
+			Log::PushLogInfo( filePath + "(BGM) 読み込み : 成功" );
 		}
 		// ファイルパス内にVoiceがあればVoiceを作成をする.
 		else if ( filePath.find( "Voice" ) != std::string::npos ) {
@@ -142,7 +154,7 @@ void SoundManager::CreateSoundData()
 			// フォルダの名前をVoice名前リストに入れる.
 			pI->m_VoiceNameList.emplace_back( fileName );
 
-			Log::PushLog( filePath + "(Voice) 読み込み : 成功" );
+			Log::PushLogInfo( filePath + "(Voice) 読み込み : 成功" );
 		} 
 		// SEを作成する
 		else {
@@ -157,14 +169,14 @@ void SoundManager::CreateSoundData()
 			// フォルダの名前をSE名前リストに入れる.
 			pI->m_SENameList.emplace_back( fileName );
 
-			Log::PushLog( filePath + "(SE) 読み込み : 成功" );
+			Log::PushLogInfo( filePath + "(SE) 読み込み : 成功" );
 		}
 	};
 
-	Log::PushLog( "------ サウンド読み込み開始 ------" );
+	Log::PushLogInfo( "------ サウンド読み込み開始 ------" );
 	try {
-		fs::recursive_directory_iterator dir_itr( FILE_PATH ), end_itr;
-		std::for_each( dir_itr, end_itr, eachLoad );
+		const std::vector<std::string> Files = encrypt::EnumerateDataFiles( FILE_PATH );
+		std::for_each( Files.begin(), Files.end(), eachLoad );
 	}
 	catch ( const fs::filesystem_error& e ) {
 		// ファイルが見つからないエラーは無視する.
@@ -172,7 +184,7 @@ void SoundManager::CreateSoundData()
 			ErrorMessage( std::string( "サウンドデータ作成失敗(" + e.path1().string() + ")" ) );
 		}
 	}
-	Log::PushLog( "------ サウンド読み込み終了 ------" );
+	Log::PushLogInfo( "------ サウンド読み込み終了 ------" );
 
 	// 音量設定.
 	VolumeInit();
@@ -842,19 +854,19 @@ HRESULT SoundManager::AudioInterfaceInit()
 	SoundManager* pI = GetInstance();
 
 	if ( FAILED( CoInitialize( NULL ) ) ) {
-		Log::PushLog( "CoInitialize : 失敗（サウンドメーターが無効化されています）" );
+		Log::PushLogWarning( "CoInitialize : 失敗（サウンドメーターが無効化されています）" );
 		return S_OK;
 	}
 	if ( FAILED( CoCreateInstance( __uuidof( MMDeviceEnumerator ), NULL, CLSCTX_INPROC_SERVER, __uuidof( IMMDeviceEnumerator ), (void**) &pI->m_pEnumerator ) ) || pI->m_pEnumerator == NULL ) {
-		Log::PushLog( "MMDeviceEnumerator create : 失敗 (SoundMeterが無効)" );
+		Log::PushLogWarning( "MMDeviceEnumerator create : 失敗 (SoundMeterが無効)" );
 		return S_OK;
 	}
 	if ( FAILED( pI->m_pEnumerator->GetDefaultAudioEndpoint( eRender, eConsole, &pI->m_pDevice ) ) || pI->m_pDevice == NULL ) {
-		Log::PushLog( "GetDefaultAudioEndpoint : 失敗 (オーディオデバイスがありません )" );
+		Log::PushLogWarning( "GetDefaultAudioEndpoint : 失敗 (オーディオデバイスがありません )" );
 		return S_OK;
 	}
 	if ( FAILED( pI->m_pDevice->Activate( __uuidof( IAudioMeterInformation ), CLSCTX_ALL, NULL, (void**) &pI->m_pMeterInfo ) ) ) {
-		Log::PushLog( "IAudioMeterInformation activate : 失敗" );
+		Log::PushLogWarning( "IAudioMeterInformation activate : 失敗" );
 		pI->m_pMeterInfo = NULL;
 	}
 	return S_OK;
@@ -921,16 +933,16 @@ json SoundManager::LoadSoundDataFile( const std::string filePath )
 		dataPath.insert( fp, n );
 	}
 #endif
-	json spriteStateData = FileManager::JsonLoad( dataPath );
+	Json spriteStateData = FileManager::JsonLoad( dataPath );
 
 #ifdef _DEBUG
 	// ファイルが無いためファイルを作成する.
 	if ( spriteStateData.empty() ) {
-		Log::PushLog( dataPath + " が無いため作成します。" );
+		Log::PushLogWarning( dataPath + " が無いため作成します。" );
 		if ( FAILED( CreateSoundDataFile( dataPath ) ) ) return E_FAIL;
 
 		// 作成できたためもう一度読み込み直す.
-		Log::PushLog( dataPath + " をもう一度読み込み直します。" );
+		Log::PushLogWarning( dataPath + " をもう一度読み込み直します。" );
 		return LoadSoundDataFile( filePath );
 	}
 #endif
@@ -943,14 +955,14 @@ json SoundManager::LoadSoundDataFile( const std::string filePath )
 HRESULT SoundManager::CreateSoundDataFile( const std::string filePath )
 {
 	// 情報を追加していく.
-	json soundDataFile;
+	Json soundDataFile;
 	soundDataFile["SoundVolume"]	= DEFAULT_SOUND_VOLUME;
 	soundDataFile["MaxPitch"]		= DEFAULT_MAX_PITCH;
 	soundDataFile["StartPitch"]		= DEFAULT_START_PITCH;
 
 	// スプライト情報の作成.
 	if ( FAILED( FileManager::JsonSave( filePath, soundDataFile ) ) ) return E_FAIL;
-	Log::PushLog( filePath + " ファイルの作成 : 成功" );
+	Log::PushLogInfo( filePath + " ファイルの作成 : 成功" );
 
 	// 作成成功.
 	return S_OK;
