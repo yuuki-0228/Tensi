@@ -56,6 +56,11 @@ public:
 	// テクスチャの設定.
 	inline void SetTexture( ID3D11ShaderResourceView* pTexture ) { m_pTexture = pTexture; }
 
+	// 中心座標(基準位置)の設定.
+	//	※共有の描画情報(m_SpriteRenderState)に対する設定のため、
+	//	  個別の描画情報を使用する場合は SSpriteRenderState::LocalPosNo を直接設定する.
+	inline void SetLocalPosition( const ELocalPosition PosNo ) { m_SpriteRenderState.LocalPosNo = PosNo; }
+
 	// アニメーションを行うかの設定.
 	inline void SetIsAnimPlay( const bool Flag ) { m_IsAnimPlay = Flag; }
 	// この画像を全て表示するかの設定.
@@ -84,6 +89,12 @@ private:
 	// 中心座標に変換するための追加座標の取得.
 	D3DXPOSITION3 GetAddCenterPosition();
 
+	// 描画に使用するローカル座標の番号を取得.
+	//	描画情報側が未設定(Default)の場合はスプライト情報の値を使用する.
+	ELocalPosition GetLocalPosition( const SSpriteRenderState* pRenderState ) const;
+	// 中央基準の頂点を指定のローカル座標の位置へずらす平行移動量の取得.
+	D3DXVECTOR2 GetPivotOffset( const ELocalPosition PosNo, const SSize& Size ) const;
+
 private:
 	ID3D11Device*					m_pDevice;				// デバイスオブジェクト.
 	ID3D11DeviceContext*			m_pContext;				// デバイスコンテキスト.
@@ -100,6 +111,8 @@ private:
 	ID3D11SamplerState*				m_pSampleLinears[static_cast<Sampler>( ESamplerState::Max )]; // サンプラ:テクスチャに各種フィルタをかける.
 
 	SVertex							m_Vertices[4];			// 頂点作成用.
+	SSize							m_VertexSizeUI;			// 頂点作成時のサイズ(UI用).
+	SSize							m_VertexSize3D;			// 頂点作成時のサイズ(3D用:高さは反転済み).
 	SSpriteState					m_SpriteState;			// スプライト情報.
 	SSpriteRenderState				m_SpriteRenderState;	// スプライトアニメーション情報.
 

@@ -154,6 +154,12 @@ public:
 	//	フォルダの場合は内部のファイルを再帰的に合計する.
 	static ULONGLONG GetDesktopIconFileSize( const ICOINDEX Index );
 
+	// デスクトップのアイコンの実ファイルパスを取得( 見つからない場合は空文字 ).
+	static std::string GetDesktopIconFilePath( const ICOINDEX Index );
+	// パスの容量（バイト）を取得. フォルダの場合は内部のファイルを再帰的に合計する.
+	//	インスタンスの状態に触れないため、別スレッドから呼んでも安全.
+	static ULONGLONG GetPathTotalSize( const std::string& Path );
+
 	// マウスの下にあるウィンドウの取得.
 	static HWND GetMouseDownWindow() { return GetInstance()->m_MouseDownWindow; }
 

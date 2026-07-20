@@ -5,11 +5,11 @@
 
 namespace {
 #ifdef _DEBUG
-	const std::string STRUCT_DATA_PATH	= "..\\..\\..\\SourceCode\\Utility\\SaveDataManager\\SaveData.h";
+	const std::string STRUCT_DATA_PATH	= "..\\..\\..\\SourceCode\\Utility\\SaveDataManager\\SaveDatas.h";
 	const std::string H_PATH			= "..\\..\\..\\SourceCode\\Utility\\SaveDataManager\\CommonSaveData\\dCommonSaveData.h";
 	const std::string CPP_PATH			= "..\\..\\..\\SourceCode\\Utility\\SaveDataManager\\CommonSaveData\\dCommonSaveData.cpp";
 #else
-	const std::string STRUCT_DATA_PATH	= "SourceCode\\Utility\\SaveDataManager\\SaveData.h";
+	const std::string STRUCT_DATA_PATH	= "SourceCode\\Utility\\SaveDataManager\\SaveDatas.h";
 	const std::string H_PATH			= "SourceCode\\Utility\\SaveDataManager\\CommonSaveData\\CommonSaveData.h";
 	const std::string CPP_PATH			= "SourceCode\\Utility\\SaveDataManager\\CommonSaveData\\CommonSaveData.cpp";
 #endif
@@ -60,7 +60,7 @@ int SaveCreate::main()
 
 	auto file = FileManager::TextLoad( STRUCT_DATA_PATH );
 	if ( file.size() == 0 ) {
-		return ErrorMessage( "1>Error : ファイルの読み込み失敗", "SaveData.h" );
+		return ErrorMessage( "1>Error : ファイルの読み込み失敗", "SaveDatas.h" );
 	}
 
 	h( file );
@@ -80,7 +80,7 @@ void SaveCreate::h( const std::vector<std::string>& File ) {
 
 	Text +=
 		"#pragma once\n"
-		"#include \"..\\SaveData.h\"\n"
+		"#include \"..\\SaveDatas.h\"\n"
 		"\n"
 		"/************************************************\n"
 		"*	共通のセーブデータクラス\n"

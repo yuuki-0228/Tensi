@@ -1,7 +1,7 @@
 #pragma once
 #include "..\..\ActorBackGround.h"
 #include "WeedSaveData.h"
-#include "..\..\..\..\..\..\..\Utility\Animation\SpringScale\SpringScale.h"
+#include "..\..\..\..\..\..\..\Utility\Animation\SpringAnimation\SpringAnimation.h"
 
 /************************************************
 *	雑草クラス.
@@ -62,7 +62,7 @@ private:
 private:
 	CSprite*			m_pWeed;				// 雑草の画像.
 	SSpriteRenderState	m_WeedState;			// 雑草の画像の情報.
-	CSpringScale		m_ScaleAnim;			// 拡縮アニメーション.
+	CSpringAnimation		m_ScaleAnim;			// 拡縮アニメーション.
 	D3DXPOSITION3		m_AddCenterPosition;	// 中心座標に変換するため用の座標.
 	float				m_WeedSize;				// 雑草の画像サイズ.
 	bool				m_IsGrab;				// つかんでいるか.

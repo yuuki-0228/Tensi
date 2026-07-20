@@ -1,18 +1,9 @@
 #pragma once
 #include "..\..\Global.h"
 #include "..\FadeManager\FadeManager.h"
+#include "..\Scenes.h"
 
 class CSceneBase;
-
-// シーンリスト.
-enum class enSceneList : unsigned char
-{
-	None,
-
-	GameMain,
-
-	Max
-} typedef ESceneList;
 
 /************************************************
 *	シーンマネージャー.

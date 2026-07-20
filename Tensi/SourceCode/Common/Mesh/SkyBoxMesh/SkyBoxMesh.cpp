@@ -42,10 +42,16 @@ CSkyBoxMesh::~CSkyBoxMesh()
 //----------------------------.
 // 初期化関数.
 //----------------------------.
-HRESULT CSkyBoxMesh::Init( LPCTSTR lpFileName )
+HRESULT CSkyBoxMesh::Init( LPCTSTR lpFileName, const EMeshType Type )
 {
 	// ファイル読み込み.
-	if (FAILED(LoadXMesh( lpFileName ) )	) return E_FAIL;
+	const EMeshType MeshType = Type == EMeshType::Auto ? FbxLoader::GetMeshType( lpFileName ) : Type;	// メッシュの種類を判定する.
+	if ( MeshType == EMeshType::FBX ) {
+		if( FAILED( LoadFbxMesh( lpFileName ) )		) return E_FAIL;
+	}
+	else {
+		if( FAILED( LoadXMesh( lpFileName ) )		) return E_FAIL;
+	}
 	// モデル作成.
 	if( FAILED( CreateModel() )				) return E_FAIL;
 	// シェーダ作成.
@@ -96,6 +102,42 @@ HRESULT CSkyBoxMesh::LoadXMesh( LPCTSTR lpFileName )
 		&m_ModelForRay.pMesh ) ) )		// (out)メッシュオブジェクト.
 	{
 		ErrorMessage( "Xファイル読込失敗" );
+		return E_FAIL;
+	}
+	return S_OK;
+}
+
+//----------------------------.
+// FBXメッシュ読み込み.
+//----------------------------.
+HRESULT CSkyBoxMesh::LoadFbxMesh( LPCTSTR lpFileName )
+{
+	// ファイル名をコピー.
+	lstrcpy( m_Model.FileName, lpFileName );
+	lstrcpy( m_ModelForRay.FileName, lpFileName );
+
+	// FBXファイルのロード.
+	if( FAILED( FbxLoader::LoadStaticMesh(
+		lpFileName,					// ファイル名.
+		D3DXMESH_SYSTEMMEM			// システムメモリに読み込む.
+		| D3DXMESH_32BIT,			// 32bit.
+		DirectX9::GetDevice(),
+		&m_Model.pD3DXMtrlBuffer,	// (out)マテリアル情報.
+		&m_Model.NumMaterials,		// (out)マテリアル数.
+		&m_Model.pMesh ) ) )		// (out)メッシュオブジェクト.
+	{
+		return E_FAIL;
+	}
+
+	// FBXファイルのロード(レイとの判定用に別設定で読み込む).
+	if( FAILED( FbxLoader::LoadStaticMesh(
+		lpFileName,						// ファイル名.
+		D3DXMESH_SYSTEMMEM,				// システムメモリに読み込む.
+		DirectX9::GetDevice(),
+		&m_ModelForRay.pD3DXMtrlBuffer,	// (out)マテリアル情報.
+		&m_ModelForRay.NumMaterials,	// (out)マテリアル数.
+		&m_ModelForRay.pMesh ) ) )		// (out)メッシュオブジェクト.
+	{
 		return E_FAIL;
 	}
 	return S_OK;

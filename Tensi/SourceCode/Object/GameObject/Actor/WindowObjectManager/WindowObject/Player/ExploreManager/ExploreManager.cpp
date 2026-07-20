@@ -11,6 +11,7 @@
 #include "..\..\..\..\..\..\..\Utility\Random\Random.h"
 #include "..\..\..\..\..\..\..\Utility\Color\Color.h"
 #include "..\..\..\..\..\..\..\Utility\Log\Log.h"
+#include "..\..\..\..\..\..\..\Utility\ThreadManager\ThreadManager.h"
 #include <ctime>
 #include <cstring>
 #include <algorithm>
@@ -430,16 +431,9 @@ void CExploreManager::ExpandOutUpdate( const float& DeltaTime )
 //---------------------------.
 void CExploreManager::StartExplore()
 {
-	// フォルダの容量から完了時間を求める.
-	double DurationSec = Const::Explore().COMPLETE_TIME_MIN;
-	if ( LocateTargetIcon() ) {
-		const ULONGLONG Bytes = WindowManager::GetDesktopIconFileSize( m_IconIndex );
-		const double MegaByte = static_cast<double>( Bytes ) / MEGA_BYTE;
-		DurationSec = MegaByte * Const::Explore().COMPLETE_SEC_PER_MB;
-	}
-	DurationSec = std::clamp( DurationSec,
-		static_cast<double>( Const::Explore().COMPLETE_TIME_MIN ),
-		static_cast<double>( Const::Explore().COMPLETE_TIME_MAX ) );
+	// 完了時間は最短時間で仮置きして開始し、フォルダ容量の計算後に確定する.
+	//	( フォルダ容量の計算は中身の再帰走査で重いことがあるため、ワーカースレッドで行う ).
+	const double DurationSec = Const::Explore().COMPLETE_TIME_MIN;
 
 	// セーブデータに探索情報を設定.
 	m_SaveData.IsExploring	= true;
@@ -465,6 +459,29 @@ void CExploreManager::StartExplore()
 
 	// すぐにセーブする.
 	SaveDataManager::Save();
+
+	// フォルダの容量をワーカースレッドで計算し、完了時間を確定する.
+	if ( LocateTargetIcon() ) {
+		const std::string SizePath = WindowManager::GetDesktopIconFilePath( m_IconIndex );
+		if ( SizePath.empty() == false ) {
+			const std::string FolderPath = m_FolderPath;
+			ThreadManager::StartResult(
+				[SizePath]() { return WindowManager::GetPathTotalSize( SizePath ); },
+				[this, FolderPath]( const ULONGLONG& Bytes ) {
+					// 計算中に探索が中断・別フォルダに変更された場合は反映しない.
+					if ( m_SaveData.IsExploring == false )	return;
+					if ( FolderPath != m_FolderPath )		return;
+
+					// 容量から完了時間を求めてセーブデータへ反映する.
+					const double MegaByte	= static_cast<double>( Bytes ) / MEGA_BYTE;
+					const double NewSec		= std::clamp( MegaByte * Const::Explore().COMPLETE_SEC_PER_MB,
+						static_cast<double>( Const::Explore().COMPLETE_TIME_MIN ),
+						static_cast<double>( Const::Explore().COMPLETE_TIME_MAX ) );
+					m_SaveData.EndTime = m_SaveData.StartTime + static_cast<long long>( NewSec );
+					SaveDataManager::Save();
+				} );
+		}
+	}
 }
 
 //---------------------------.

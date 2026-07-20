@@ -538,13 +538,24 @@ std::string WindowManager::GetDesktopIconPath( const ICOINDEX Index )
 //---------------------------.
 ULONGLONG WindowManager::GetDesktopIconFileSize( const ICOINDEX Index )
 {
+	// 実ファイルパスを解決してから容量を求める.
+	const std::string Path = GetDesktopIconFilePath( Index );
+	if ( Path.empty() ) return 0;
+	return GetPathTotalSize( Path );
+}
+
+//---------------------------.
+// デスクトップのアイコンの実ファイルパスを取得.
+//---------------------------.
+std::string WindowManager::GetDesktopIconFilePath( const ICOINDEX Index )
+{
 	WindowManager* pI = GetInstance();
 
 	// アイコンリストを更新していない場合更新する.
 	if ( pI->m_IsDesktopIconUpdate == false ) DesktopIconUpdate();
 
-	// インデックスが範囲外の場合は0を返す.
-	if ( Index < 0 || Index >= static_cast<ICOINDEX>( pI->m_IconList.size() ) ) return 0;
+	// インデックスが範囲外の場合は空文字を返す.
+	if ( Index < 0 || Index >= static_cast<ICOINDEX>( pI->m_IconList.size() ) ) return std::string();
 
 	const SDesktopIcon& Icon = pI->m_IconList[Index];
 
@@ -572,10 +583,19 @@ ULONGLONG WindowManager::GetDesktopIconFileSize( const ICOINDEX Index )
 	for ( const auto& Path : Candidates ) {
 		const std::wstring wPath = StringConversion::to_wString( Path );
 		if ( GetFileAttributesW( wPath.c_str() ) != INVALID_FILE_ATTRIBUTES ) {
-			return GetPathTotalSize( wPath );
+			return Path;
 		}
 	}
-	return 0;
+	return std::string();
+}
+
+//---------------------------.
+// パスの容量（バイト）を取得.
+//---------------------------.
+ULONGLONG WindowManager::GetPathTotalSize( const std::string& Path )
+{
+	// 無名名前空間側の実装を呼ぶ( インスタンスの状態には触れない ).
+	return ::GetPathTotalSize( StringConversion::to_wString( Path ) );
 }
 
 //---------------------------.

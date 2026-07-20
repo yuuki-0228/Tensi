@@ -6,6 +6,14 @@
 ・定数プログラム（Const.h / Const.cpp）  
 ・セーブプログラム（CommonSaveData.h / CommonSaveData.cpp）  
 ・マスターデータプログラム（MasterData.h / MasterData.cpp）  
+・シーンプログラム（Scene/Scenes.h を参照）  
+　シーンの宣言（None、Max 以外のコメントで囲まれているエリア）を読み込み  
+　以下がなければ最低限の内容で作成します  
+　　・SourceCode\Scene\シーン名\シーン名.h / .cpp（CSceneBase を継承）  
+　　・SourceCode\Object\GameObject\Widget\SceneWidget\シーン名Widget\シーン名Widget.h / .cpp（CSceneWidget を継承）  
+　　・SourceCode\Object\GameObject\Widget\UIWidget\シーン名 ディレクトリ  
+　また、シーンの宣言に存在しないディレクトリがあれば最後に報告します（削除などはしません）  
+　※作成されたファイルの Tensi.vcxproj への追加（VS のプロジェクトへの登録）は手動で行ってください  
   
 ■設定方法  
 ・プラグイン導入  

@@ -19,6 +19,8 @@
 #include "..\Utility\WindowManager\WindowManager.h"
 #include "..\Utility\WindowsShortCutManager\WindowsShortCutManager.h"
 #include "..\Utility\WindowsMenuManager\WindowsMenuManager.h"
+#include "..\Utility\WindowsMessageBox\WindowsMessageBox.h"
+#include "..\Utility\ThreadManager\ThreadManager.h"
 #include "..\System\SystemWindowManager\SystemWindowManager.h"
 #include <dwmapi.h>
 #include "../Utility/Const/Const.h"
@@ -273,6 +275,11 @@ void CMain::Loop()
 			// フレームレートの待機処理.
 			if ( m_pFrameRate->Wait() ) continue;
 
+#ifdef ENABLE_THREAD
+			// スレッドマネージャーの更新( 完了コールバックの実行など ).
+			ThreadManager::Update();
+#endif // ENABLE_THREAD
+
 			// ロード中の更新処理.
 			m_IsGameLoad = m_pLoadManager->ThreadRelease();
 			//更新処理.
@@ -282,6 +289,15 @@ void CMain::Loop()
 		}
 	}
 	Log::PushLogInfo( "------ メインループ終了 ------" );
+
+	// 表示中のメッセージボックスを閉じる.
+	//	( 閉じられるまで戻らないため、スレッドの終了を待つ前に閉じる ).
+	WindowsMessageBox::Release();
+
+#ifdef ENABLE_THREAD
+	// 全スレッドの終了を待つ.
+	ThreadManager::Release();
+#endif // ENABLE_THREAD
 }
 
 //---------------------------.
@@ -520,12 +536,25 @@ LRESULT CALLBACK CMain::MsgProc(
 			//	( 以前の「パスから "Desktop\" 以降を切り出す」方式は、
 			//	  デスクトップ以外からのドロップで壊れたパスになるため ).
 			const std::wstring FileName = std::filesystem::path( DropPath ).filename().wstring();
-			std::filesystem::create_directories( "Data\\DropFile" );
 			std::string FilePath = "Data\\DropFile\\" + StringConversion::to_String( FileName );
 
+#ifdef ENABLE_THREAD
+			// ファイルの移動は重いことがある( 別ドライブからのドロップ等 )ためワーカースレッドで行い、
+			//	移動が終わってからパスを登録する( 同タグの直列実行で複数ファイルの順番も保つ ).
+			const std::wstring wSrcPath = DropPath;
+			const std::wstring wDstPath = StringConversion::to_wString( FilePath );
+			ThreadManager::StartSequential( "DropFile",
+				[wSrcPath, wDstPath]() {
+					std::filesystem::create_directories( "Data\\DropFile" );
+					MoveFile( wSrcPath.c_str(), wDstPath.c_str() );
+				},
+				[FilePath]() { DragAndDrop::AddFilePath( FilePath ); } );
+#else
 			// ファイルを一時的に移動させファイルパスを保存する.
+			std::filesystem::create_directories( "Data\\DropFile" );
 			MoveFile( DropPath, StringConversion::to_wString( FilePath ).c_str() );
 			DragAndDrop::AddFilePath( FilePath );
+#endif // ENABLE_THREAD
 		}
 		DragFinish( hDrop );
 		break;

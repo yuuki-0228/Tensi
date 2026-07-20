@@ -17,7 +17,7 @@ namespace
 ImGuiManager::ImGuiManager()
 	: m_RenderQueue		()
 #ifdef _DEBUG
-	, m_IsRender		( false )
+	, m_IsRender		( true )
 #else	// #ifdef _DEBUG.
 	, m_IsRender		( false )
 	, m_pImGuiFontData	( nullptr )

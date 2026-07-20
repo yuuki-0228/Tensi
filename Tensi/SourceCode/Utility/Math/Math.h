@@ -1,4 +1,6 @@
 #pragma once
+#include "..\..\SystemSetting.h"
+#ifdef ENABLE_MATH
 #include "..\..\Global.h"
 #include <cmath>
 
@@ -82,3 +84,5 @@ namespace Math {
 	// ”½ŽËƒxƒNƒgƒ‹‚ÌŽæ“¾.
 	D3DXVECTOR3 GetReflectVector( const D3DXVECTOR3& Front, const D3DXVECTOR3& Normal, D3DXVECTOR3* NormalizeOut = nullptr );
 }
+
+#endif

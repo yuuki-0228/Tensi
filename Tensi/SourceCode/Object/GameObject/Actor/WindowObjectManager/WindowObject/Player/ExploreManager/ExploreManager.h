@@ -2,7 +2,7 @@
 #include "..\..\..\..\..\..\..\Global.h"
 #include "..\..\..\..\..\..\..\Common\Sprite\SpriteStruct.h"
 #include "..\..\..\..\..\..\..\Common\Font\FontStruct.h"
-#include "..\..\..\..\..\..\..\Utility\SaveDataManager\ExploreSaveData.h"
+#include "..\..\..\..\..\..\..\Utility\SaveDataManager\SaveDatas.h"
 #include <memory>
 #include <string>
 #include <atomic>
@@ -90,7 +90,7 @@ private:
 	SSpriteRenderState						m_GaugeState;		// ゲージ( 黄 )の状態.
 	CFont*									m_pFont;			// 残り時間の文字.
 	SFontRenderState						m_FontState;		// 残り時間の文字の状態.
-	SExploreSaveData						m_SaveData;			// 探索のセーブデータ.
+	CommonSaveDatas::SExploreSaveData						m_SaveData;			// 探索のセーブデータ.
 	std::string								m_FolderPath;		// 対象フォルダのフルパス.
 	enState									m_State;			// 現在の状態.
 	RECT									m_IconClickRect;	// 対象アイコンのクリック範囲.

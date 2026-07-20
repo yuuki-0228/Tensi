@@ -1,4 +1,5 @@
 #include "Math.h"
+#ifdef ENABLE_MATH
 
 //----------------------------.
 // 度数(度) を ラジアン(rad) に変換.
@@ -378,3 +379,5 @@ D3DXVECTOR3 Math::GetReflectVector( const D3DXVECTOR3& Front, const D3DXVECTOR3&
 	}
 	return Out;
 }
+
+#endif

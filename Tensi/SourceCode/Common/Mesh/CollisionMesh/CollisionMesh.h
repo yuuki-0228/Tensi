@@ -3,6 +3,7 @@
 #ifdef ENABLE_MESH
 #include "..\..\Common.h"
 #include "..\..\..\Global.h"
+#include "..\FbxLoader\FbxLoader.h"
 
 /************************************************
 *	コリジョンメッシュクラス	
@@ -75,7 +76,7 @@ public:
 	CCollisionMesh();
 	~CCollisionMesh();
 
-	HRESULT Init( LPCTSTR lpFileName );
+	HRESULT Init( LPCTSTR lpFileName, const EMeshType Type = EMeshType::Auto );
 
 	// 解放関数.
 	void Release();
@@ -99,6 +100,8 @@ public:
 private:
 	// メッシュ読み込み.
 	HRESULT LoadXMesh( LPCTSTR lpFileName );
+	// FBXメッシュ読み込み.
+	HRESULT LoadFbxMesh( LPCTSTR lpFileName );
 	// シェーダ作成.
 	HRESULT CreateShader();
 	// モデル作成.

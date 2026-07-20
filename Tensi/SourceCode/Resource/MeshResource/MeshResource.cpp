@@ -52,7 +52,7 @@ HRESULT MeshResource::MeshLoad()
 		std::string		  FileName	= std::filesystem::path( EntryPath ).stem().string();			// ファイル名.
 		const std::string FilePath	= EntryPath;				// ファイルパス.
 		const std::string LoadMsg	= FilePath + " 読み込み : 成功";			// あらかじめロード完了メッセージを設定する.
-		const std::string ErrorMsg	= FileName + " : X ファイル読み込み失敗";	// あらかじめエラーメッセージを設定する.
+		const std::string ErrorMsg	= FileName + " : メッシュファイル読み込み失敗";	// あらかじめエラーメッセージを設定する.
 
 #ifndef _DEBUG
 // 暗号化前の拡張しを取得.
@@ -60,12 +60,13 @@ HRESULT MeshResource::MeshLoad()
 #endif
 
 		// 拡張子が ".x" ではない場合読み込まない.
-		if ( Extension != ".x" && Extension != ".X" ) return;
+		if ( Extension != ".x"   && Extension != ".X" &&
+			 Extension != ".fbx" && Extension != ".FBX" ) return;
 
 #ifndef _DEBUG
 		// 不要な文字を削除s
 		FileName.erase( 0, 1 );
-		FileName.erase( FileName.length() - 2 );
+		FileName.erase( FileName.length() - Extension.length() );
 #endif
 
 		// ファイル名の最後に "_s" があるためスキンメッシュとして保存.

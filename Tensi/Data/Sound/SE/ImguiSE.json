@@ -7,7 +7,9 @@
     "[SiteURL]   : ダウンロードしてきたサイトのURL",
     "----------------------------------------------"
   ],
-  "MaxVolume": 1000,
+  "SoundVolume": 1000,
+  "MaxPitch": 1,
+  "StartPitch": 1,
   "PlayMax": 5,
   "SiteName": "効果音ラボ",
   "SiteURL": "https://soundeffect-lab.info/"

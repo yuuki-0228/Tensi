@@ -54,4 +54,7 @@ namespace Easing {
 	// イージングリストからイージングを行う.
 	float Easing( const std::string& Name, float Time, float TotalTime, float Back, float Max = 1.0f, float Min = 0.0f );
 };
+
+// イージング関数の型( Easing 名前空間の Back 系以外の関数を指す ).
+typedef float ( *EasingFunc )( float Time, float TotalTime, float Max, float Min );
 #endif

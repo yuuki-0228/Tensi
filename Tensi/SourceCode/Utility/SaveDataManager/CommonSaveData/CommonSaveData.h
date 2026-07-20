@@ -1,5 +1,5 @@
 #pragma once
-#include "..\SaveData.h"
+#include "..\SaveDatas.h"
 
 /************************************************
 *	共通のセーブデータクラス
@@ -27,7 +27,7 @@ private:
 		STransform WaterFallTransform;
 		STransform WateringCanTransform;
 		float WateringCanWaterValue;
-		SExploreSaveData ExploreData;
+		CommonSaveDatas::SExploreSaveData ExploreData;
 	} typedef SSaveDataList;
 
 private:

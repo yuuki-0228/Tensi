@@ -39,6 +39,8 @@ CSprite::CSprite()
 	, m_pSampleLinears			()
 	, m_pTexture				( nullptr )
 	, m_Vertices				()
+	, m_VertexSizeUI			()
+	, m_VertexSize3D			()
 	, m_SpriteState				()
 	, m_SpriteRenderState		()
 	, m_SpriteStateData			()
@@ -113,6 +115,15 @@ void CSprite::RenderUI( SSpriteRenderState* pRenderState )
 
 	// ワールド行列を取得.
 	D3DXMATRIX mWorld = RenderState->Transform.GetWorldMatrix() * mOffSet;
+
+	// 中心座標(基準位置)分の平行移動をローカル空間で適用する.
+	const ELocalPosition LocalPosNo = GetLocalPosition( RenderState );
+	if ( LocalPosNo != ELocalPosition::Center ) {
+		const D3DXVECTOR2& Pivot = GetPivotOffset( LocalPosNo, m_VertexSizeUI );
+		D3DXMATRIX mPivot;
+		D3DXMatrixTranslation( &mPivot, Pivot.x, Pivot.y, 0.0f );
+		mWorld = mPivot * mWorld;
+	}
 
 	// 使用するシェーダの登録.
 	const int PSShaderNo = RenderState->RuleTexture == nullptr ? RenderState->MaskTexture == nullptr || RenderState->IsColorMask ? 0 : 1 : 2;
@@ -235,6 +246,15 @@ void CSprite::Render3D( SSpriteRenderState* pRenderState, const bool IsBillBoard
 		// CancelRotationの逆行列を求めます.
 		D3DXMatrixInverse( &CancelRotation, nullptr, &CancelRotation );
 		mWorld = CancelRotation * mWorld;
+	}
+
+	// 中心座標(基準位置)分の平行移動をローカル空間で適用する.
+	const ELocalPosition LocalPosNo = GetLocalPosition( RenderState );
+	if ( LocalPosNo != ELocalPosition::Center ) {
+		const D3DXVECTOR2& Pivot = GetPivotOffset( LocalPosNo, m_VertexSize3D );
+		D3DXMATRIX mPivot;
+		D3DXMatrixTranslation( &mPivot, Pivot.x, Pivot.y, 0.0f );
+		mWorld = mPivot * mWorld;
 	}
 
 	// 使用するシェーダの登録.
@@ -406,7 +426,7 @@ D3DXVECTOR3 CSprite::GetSpriteUpperLeftPos( SSpriteRenderState* pRenderState )
 	const D3DXSCALE3		Scale		= RenderState->Transform.Scale;
 
 	// 左上の座標を計算して返す.
-	switch ( m_SpriteState.LocalPosNo ) {
+	switch ( GetLocalPosition( RenderState ) ) {
 	case ELocalPosition::Left:		return D3DXPOSITION3( Pos.x,							Pos.y - ( Size.h / 2 ) * Scale.y,	Pos.z );
 	case ELocalPosition::LeftDown:	return D3DXPOSITION3( Pos.x,							Pos.y - Size.h * Scale.y,			Pos.z );
 	case ELocalPosition::Down:		return D3DXPOSITION3( Pos.x - ( Size.w / 2 ) * Scale.x,	Pos.y - Size.h * Scale.y,			Pos.z );
@@ -579,6 +599,7 @@ HRESULT CSprite::CreateModelUI()
 	// 板ポリ(四角形)の頂点を作成.
 	//	頂点座標(x,y,z), UV座標(u,v).
 	CreateVertex( w, h, u, v );
+	m_VertexSizeUI = { w, h };	// 描画時の基準位置計算用にサイズを保持.
 	// 最大要素数を算出する.
 	UINT uVerMax = sizeof(m_Vertices) / sizeof(m_Vertices[0]);
 
@@ -620,6 +641,7 @@ HRESULT CSprite::CreateModel3D()
 	// 板ポリ(四角形)の頂点を作成.
 	//	頂点座標(x,y,z), UV座標(u,v).
 	CreateVertex( w, -h, u, v );
+	m_VertexSize3D = { w, -h };	// 描画時の基準位置計算用にサイズを保持.
 	// 最大要素数を算出する.
 	UINT uVerMax = sizeof( m_Vertices ) / sizeof( m_Vertices[0] );
 
@@ -701,63 +723,11 @@ HRESULT CSprite::CreateVertex( const float w, const float h, const float u, cons
 {
 	// 板ポリ(四角形)の頂点を作成.
 	//	頂点座標(x,y,z), UV座標(u,v).
-	switch ( m_SpriteState.LocalPosNo ) {
-	case ELocalPosition::LeftUp:
-		m_Vertices[0] = { D3DXPOSITION3( 0.0f,    h, 0.0f ),	D3DXVECTOR2( 0.0f,    v ) };	// 頂点１(左下).
-		m_Vertices[1] = { D3DXPOSITION3( 0.0f, 0.0f, 0.0f ),	D3DXVECTOR2( 0.0f, 0.0f ) };	// 頂点１(左下).
-		m_Vertices[2] = { D3DXPOSITION3(    w,    h, 0.0f ),	D3DXVECTOR2(    u,    v ) };	// 頂点１(左下).
-		m_Vertices[3] = { D3DXPOSITION3(    w, 0.0f, 0.0f ),	D3DXVECTOR2(    u, 0.0f ) };	// 頂点１(左下).
-		break;
-	case ELocalPosition::Left:
-		m_Vertices[0] = { D3DXPOSITION3( 0.0f,  h / 2, 0.0f ),	D3DXVECTOR2( 0.0f,    v ) };	// 頂点１(左下).
-		m_Vertices[1] = { D3DXPOSITION3( 0.0f, -h / 2, 0.0f ),	D3DXVECTOR2( 0.0f, 0.0f ) };	// 頂点１(左下).
-		m_Vertices[2] = { D3DXPOSITION3(    w,  h / 2, 0.0f ),	D3DXVECTOR2(    u,    v ) };	// 頂点１(左下).
-		m_Vertices[3] = { D3DXPOSITION3(    w, -h / 2, 0.0f ),	D3DXVECTOR2(    u, 0.0f ) };	// 頂点１(左下).
-		break;
-	case ELocalPosition::LeftDown:
-		m_Vertices[0] = { D3DXPOSITION3( 0.0f, 0.0f, 0.0f ),	D3DXVECTOR2( 0.0f,    v ) };	// 頂点１(左下).
-		m_Vertices[1] = { D3DXPOSITION3( 0.0f,   -h, 0.0f ),	D3DXVECTOR2( 0.0f, 0.0f ) };	// 頂点１(左下).
-		m_Vertices[2] = { D3DXPOSITION3(    w, 0.0f, 0.0f ),	D3DXVECTOR2(    u,    v ) };	// 頂点１(左下).
-		m_Vertices[3] = { D3DXPOSITION3(    w,   -h, 0.0f ),	D3DXVECTOR2(    u, 0.0f ) };	// 頂点１(左下).
-		break;
-	case ELocalPosition::Down:
-		m_Vertices[0] = { D3DXPOSITION3( -w / 2, 0.0f, 0.0f ),	D3DXVECTOR2( 0.0f,    v ) };	// 頂点１(左下).
-		m_Vertices[1] = { D3DXPOSITION3( -w / 2,   -h, 0.0f ),	D3DXVECTOR2( 0.0f, 0.0f ) };	// 頂点１(左下).
-		m_Vertices[2] = { D3DXPOSITION3(  w / 2, 0.0f, 0.0f ),	D3DXVECTOR2(    u,    v ) };	// 頂点１(左下).
-		m_Vertices[3] = { D3DXPOSITION3(  w / 2,   -h, 0.0f ),	D3DXVECTOR2(    u, 0.0f ) };	// 頂点１(左下).
-		break;
-	case ELocalPosition::RightDown:
-		m_Vertices[0] = { D3DXPOSITION3(   -w, 0.0f, 0.0f ),	D3DXVECTOR2( 0.0f,    v ) };	// 頂点１(左下).
-		m_Vertices[1] = { D3DXPOSITION3(   -w,   -h, 0.0f ),	D3DXVECTOR2( 0.0f, 0.0f ) };	// 頂点１(左下).
-		m_Vertices[2] = { D3DXPOSITION3( 0.0f, 0.0f, 0.0f ),	D3DXVECTOR2(    u,    v ) };	// 頂点１(左下).
-		m_Vertices[3] = { D3DXPOSITION3( 0.0f,   -h, 0.0f ),	D3DXVECTOR2(    u, 0.0f ) };	// 頂点１(左下).
-		break;
-	case ELocalPosition::Right:
-		m_Vertices[0] = { D3DXPOSITION3(   -w,  h / 2, 0.0f ),	D3DXVECTOR2( 0.0f,    v ) };	// 頂点１(左下).
-		m_Vertices[1] = { D3DXPOSITION3(   -w, -h / 2, 0.0f ),	D3DXVECTOR2( 0.0f, 0.0f ) };	// 頂点１(左下).
-		m_Vertices[2] = { D3DXPOSITION3( 0.0f,  h / 2, 0.0f ),	D3DXVECTOR2(    u,    v ) };	// 頂点１(左下).
-		m_Vertices[3] = { D3DXPOSITION3( 0.0f, -h / 2, 0.0f ),	D3DXVECTOR2(    u, 0.0f ) };	// 頂点１(左下).
-		break;
-	case ELocalPosition::RightUp:
-		m_Vertices[0] = { D3DXPOSITION3(   -w,    h, 0.0f ),	D3DXVECTOR2( 0.0f,    v ) };	// 頂点１(左下).
-		m_Vertices[1] = { D3DXPOSITION3(   -w, 0.0f, 0.0f ),	D3DXVECTOR2( 0.0f, 0.0f ) };	// 頂点１(左下).
-		m_Vertices[2] = { D3DXPOSITION3( 0.0f,    h, 0.0f ),	D3DXVECTOR2(    u,    v ) };	// 頂点１(左下).
-		m_Vertices[3] = { D3DXPOSITION3( 0.0f, 0.0f, 0.0f ),	D3DXVECTOR2(    u, 0.0f ) };	// 頂点１(左下).
-		break;
-	case ELocalPosition::Up:
-		m_Vertices[0] = { D3DXPOSITION3( -w / 2,    h, 0.0f ),	D3DXVECTOR2( 0.0f,    v ) };	// 頂点１(左下).
-		m_Vertices[1] = { D3DXPOSITION3( -w / 2, 0.0f, 0.0f ),	D3DXVECTOR2( 0.0f, 0.0f ) };	// 頂点１(左下).
-		m_Vertices[2] = { D3DXPOSITION3(  w / 2,    h, 0.0f ),	D3DXVECTOR2(    u,    v ) };	// 頂点１(左下).
-		m_Vertices[3] = { D3DXPOSITION3(  w / 2, 0.0f, 0.0f ),	D3DXVECTOR2(    u, 0.0f ) };	// 頂点１(左下).
-		break;
-	case ELocalPosition::Center:
-	default: 
-		m_Vertices[0] = { D3DXVECTOR3( -w / 2,  h / 2, 0.0f ),	D3DXVECTOR2( 0.0f,    v ) };	// 頂点１(左下).
-		m_Vertices[1] = { D3DXVECTOR3( -w / 2, -h / 2, 0.0f ),	D3DXVECTOR2( 0.0f, 0.0f ) };	// 頂点１(左下).
-		m_Vertices[2] = { D3DXVECTOR3(  w / 2,  h / 2, 0.0f ),	D3DXVECTOR2(    u,    v ) };	// 頂点１(左下).
-		m_Vertices[3] = { D3DXVECTOR3(  w / 2, -h / 2, 0.0f ),	D3DXVECTOR2(    u, 0.0f ) };	// 頂点１(左下).
-		break;
-	}
+	//	基準位置は常に中央で作成し、描画時にローカル座標の番号分だけ平行移動させる.
+	m_Vertices[0] = { D3DXPOSITION3( -w / 2,  h / 2, 0.0f ),	D3DXVECTOR2( 0.0f,    v ) };	// 頂点１(左下).
+	m_Vertices[1] = { D3DXPOSITION3( -w / 2, -h / 2, 0.0f ),	D3DXVECTOR2( 0.0f, 0.0f ) };	// 頂点１(左下).
+	m_Vertices[2] = { D3DXPOSITION3(  w / 2,  h / 2, 0.0f ),	D3DXVECTOR2(    u,    v ) };	// 頂点１(左下).
+	m_Vertices[3] = { D3DXPOSITION3(  w / 2, -h / 2, 0.0f ),	D3DXVECTOR2(    u, 0.0f ) };	// 頂点１(左下).
 	return S_OK;
 }
 
@@ -815,6 +785,38 @@ D3DXPOSITION3 CSprite::GetAddCenterPosition()
 		return D3DXPOSITION3(  0.0f,						 m_SpriteState.Disp.h / 2.0f,	0.0f );
 	default:
 		return INIT_FLOAT3;
+	}
+}
+
+//---------------------------.
+// 描画に使用するローカル座標の番号を取得.
+//---------------------------.
+ELocalPosition CSprite::GetLocalPosition( const SSpriteRenderState* pRenderState ) const
+{
+	// 描画情報側が未設定の場合はスプライト情報の値を使用する.
+	if ( pRenderState == nullptr )								return m_SpriteState.LocalPosNo;
+	if ( pRenderState->LocalPosNo == ELocalPosition::Default )	return m_SpriteState.LocalPosNo;
+	return pRenderState->LocalPosNo;
+}
+
+//---------------------------.
+// 中央基準の頂点を指定のローカル座標の位置へずらす平行移動量の取得.
+//	※高さが反転しているサイズ(3D用)でも同じ式で成立する.
+//---------------------------.
+D3DXVECTOR2 CSprite::GetPivotOffset( const ELocalPosition PosNo, const SSize& Size ) const
+{
+	const float w = Size.w / 2.0f;
+	const float h = Size.h / 2.0f;
+	switch ( PosNo ) {
+	case ELocalPosition::LeftUp:	return D3DXVECTOR2(  w,		 h	  );
+	case ELocalPosition::Left:		return D3DXVECTOR2(  w,		 0.0f );
+	case ELocalPosition::LeftDown:	return D3DXVECTOR2(  w,		-h	  );
+	case ELocalPosition::Down:		return D3DXVECTOR2(  0.0f,	-h	  );
+	case ELocalPosition::RightDown:	return D3DXVECTOR2( -w,		-h	  );
+	case ELocalPosition::Right:		return D3DXVECTOR2( -w,		 0.0f );
+	case ELocalPosition::RightUp:	return D3DXVECTOR2( -w,		 h	  );
+	case ELocalPosition::Up:		return D3DXVECTOR2(  0.0f,	 h	  );
+	default:						return D3DXVECTOR2(  0.0f,	 0.0f );
 	}
 }
 #endif // ENABLE_SPRITE

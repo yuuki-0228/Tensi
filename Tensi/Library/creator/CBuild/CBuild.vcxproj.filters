@@ -23,6 +23,9 @@
     <Filter Include="Main\MData">
       <UniqueIdentifier>{03aabd22-9346-4794-a1cd-0da3722e8155}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Main\Scene">
+      <UniqueIdentifier>{5b2c9e41-7d63-4a8f-b1e2-9c04d7f31a6b}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="error.h">
@@ -43,6 +46,9 @@
     <ClInclude Include="MDataCreate.h">
       <Filter>Main\MData</Filter>
     </ClInclude>
+    <ClInclude Include="SceneCreate.h">
+      <Filter>Main\Scene</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -62,6 +68,9 @@
     </ClCompile>
     <ClCompile Include="MDataCreate.cpp">
       <Filter>Main\MData</Filter>
+    </ClCompile>
+    <ClCompile Include="SceneCreate.cpp">
+      <Filter>Main\Scene</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

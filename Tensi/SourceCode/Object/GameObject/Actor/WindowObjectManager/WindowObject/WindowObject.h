@@ -4,7 +4,7 @@
 #include "..\..\..\..\..\Common\Sprite\Sprite.h"
 #include "..\..\..\..\..\Resource\SpriteResource\SpriteResource.h"
 #include "..\..\..\..\..\Utility\WindowManager\WindowManager.h"
-#include "..\..\..\..\..\Utility\Animation\SpringScale\SpringScale.h"
+#include "..\..\..\..\..\Utility\Animation\SpringAnimation\SpringAnimation.h"
 
 /************************************************
 *	ウィンドウのオブジェクト.
@@ -128,7 +128,7 @@ private:
 protected:
 	CSprite*					m_pSprite;			// 画像.
 	SSpriteRenderState			m_SpriteState;		// 画像の情報.
-	CSpringScale				m_ScaleAnim;		// 拡縮アニメーション.
+	CSpringAnimation				m_ScaleAnim;		// 拡縮アニメーション.
 	bool						m_IsUseImpactSquash;// 衝突時に拡縮させるか.
 	std::vector<D3DXVECTOR3>	m_VectorList;		// ベクトルリスト.
 	D3DXVECTOR3					m_OldMoveVector;	// 前回の移動ベクトル.

@@ -9,6 +9,7 @@
 #include <string.h>
 #include <crtdbg.h>
 #include "..\..\..\DirectX\DirectX11.h"
+#include "..\..\FbxLoader\FbxLoader.h"
 
 //----------------------------.
 // フレームを作成する.
@@ -302,6 +303,34 @@ HRESULT D3DXPARSER::LoadMeshFromX( LPDIRECT3DDEVICE9 pDevice9, LPCTSTR fileName 
 
 	DWORD iAnimMax = m_pAnimController->GetNumAnimationSets();
 	// アニメーションセットを得る.
+	for( DWORD i = 0; i < iAnimMax; i++ )
+	{
+		m_pAnimController->GetAnimationSet( i, &m_pAnimSet[i] );
+	}
+
+	return S_OK;
+}
+
+//----------------------------.
+// FBXファイルからメッシュを読み込む.
+//----------------------------.
+HRESULT D3DXPARSER::LoadMeshFromFbx( LPDIRECT3DDEVICE9 pDevice9, LPCTSTR fileName )
+{
+	// FBXファイルからアニメーションメッシュを読み込み作成する.
+	m_pHierarchy = new MY_HIERARCHY();
+	if ( FAILED(
+		FbxLoader::LoadSkinnedMesh(
+			fileName, pDevice9, m_pHierarchy, &m_pFrameRoot, &m_pAnimController )))
+	{
+		ErrorMessage( "FBXファイルの読み込みに失敗しました" );
+		return E_FAIL;
+	}
+	// ボーン情報処理あり.
+	AllocateAllBoneMatrices( m_pFrameRoot );
+
+	// アニメーションセットを得る.
+	DWORD iAnimMax = m_pAnimController->GetNumAnimationSets();
+	if ( iAnimMax > static_cast<DWORD>( MAX_ANIM_SET ) ) iAnimMax = MAX_ANIM_SET;
 	for( DWORD i = 0; i < iAnimMax; i++ )
 	{
 		m_pAnimController->GetAnimationSet( i, &m_pAnimSet[i] );

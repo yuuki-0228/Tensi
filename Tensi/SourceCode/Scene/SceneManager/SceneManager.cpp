@@ -90,11 +90,11 @@ void SceneManager::Update( const float& DeltaTime )
 	// UIの表示の切り替え.
 	if ( DebugKeyInput::IsANDKeyDown( VK_CONTROL, VK_F10 ) ) pI->m_IsUIRender.Inversion();
 
-//	DebugWindow::PushProc( u8"SceneManager",
-//	[&] {
-//		if ( ImGuiManager::Button( u8"ゲームメインへ移動"		) ) SceneChange( ESceneList::GameMain	);
-//		if ( ImGuiManager::Button( u8"UIエディタへ移動"			) ) SceneChange( ESceneList::UIEdit		);
-//	} );
+	DebugWindow::PushProc( u8"SceneManager",
+	[&] {
+		if ( ImGuiManager::Button( u8"ゲームメインへ移動"		) ) SceneChange( ESceneList::GameMain	);
+		if ( ImGuiManager::Button( u8"UIエディタへ移動"		) ) SceneChange( ESceneList::UIEdit		);
+	} );
 }
 
 //---------------------------.

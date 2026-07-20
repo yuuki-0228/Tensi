@@ -86,13 +86,19 @@ CSkinMesh::~CSkinMesh()
 //----------------------------.
 // 初期化.
 //----------------------------.
-HRESULT CSkinMesh::Init( LPCTSTR fileName )
+HRESULT CSkinMesh::Init( LPCTSTR fileName, const EMeshType Type )
 {
 	const std::wstring	wFileName	= fileName;
 	const std::string	FileName	= StringConversion::to_String( wFileName );
 
 	// モデル読み込み.
-	if( FAILED( LoadXMesh( fileName ) )														) return E_FAIL;
+	const EMeshType MeshType = Type == EMeshType::Auto ? FbxLoader::GetMeshType( fileName ) : Type;	// メッシュの種類を判定する.
+	if( MeshType == EMeshType::FBX ) {
+		if( FAILED( LoadFbxMesh( fileName ) )												) return E_FAIL;
+	}
+	else {
+		if( FAILED( LoadXMesh( fileName ) )													) return E_FAIL;
+	}
 	// シェーダの作成.
 	if( FAILED( CreateShader() )															) return E_FAIL;
 	// コンスタントバッファ(メッシュごと).
@@ -340,6 +346,24 @@ HRESULT CSkinMesh::LoadXMesh( LPCTSTR lpFileName )
 	m_pD3dxMesh = new D3DXPARSER();
 	m_pD3dxMesh->LoadMeshFromX( DirectX9::GetDevice(), lpFileName );
 
+
+	// 全てのメッシュを作成する.
+	BuildAllMesh( m_pD3dxMesh->m_pFrameRoot );
+
+	return S_OK;
+}
+
+//----------------------------.
+// FBXからスキンメッシュを作成する.
+//----------------------------.
+HRESULT CSkinMesh::LoadFbxMesh( LPCTSTR lpFileName )
+{
+	// ファイル名をパスごと取得.
+	lstrcpy( m_FilePath, lpFileName );
+
+	// FBXファイル読み込み.
+	m_pD3dxMesh = new D3DXPARSER();
+	if( FAILED( m_pD3dxMesh->LoadMeshFromFbx( DirectX9::GetDevice(), lpFileName ) ) ) return E_FAIL;
 
 	// 全てのメッシュを作成する.
 	BuildAllMesh( m_pD3dxMesh->m_pFrameRoot );

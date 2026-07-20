@@ -13,14 +13,17 @@ namespace WindowsMessageBox {
 	void Info( const std::string& Text, const std::string& Caption );
 
 
-	// アプリを止めずに「はい・いいえ」のメッセージボックスを表示する( 別スレッドで表示 ).
-	//	応答結果をワーカースレッド上で OnResult に渡します( Yes=true / No=false ).
-	//	コールバックは結果をフラグに控える等の軽い処理のみを渡し、実処理は独自の Update() で行うこと.
-	//	注意: OnResult で控えるフラグはワーカースレッドから書き込まれメインスレッドで読むため.
-	//	std::atomic か volatile にしておくことを推奨.
-	// （bool でも可能だが、最適化での取りこぼしを避けるなら std::atomic）.
+	// アプリを止めずに「はい・いいえ」のメッセージボックスを表示する( 専用スレッドで表示 ).
+	//	応答結果を OnResult に渡します( Yes=true / No=false ).
+	//	OnResult はメインスレッド( ThreadManager::Update )で実行されるため、
+	//	ゲームオブジェクトの操作など通常の処理をそのまま書いてよい.
 	void YesNoAsync( const std::string& Text, const std::string& Caption, std::function<void(bool)> OnResult );
 
-	// アプリを止めずに OK のみのメッセージボックスを表示する( 別スレッドで表示 ).
+	// アプリを止めずに OK のみのメッセージボックスを表示する( 専用スレッドで表示 ).
 	void InfoAsync( const std::string& Text, const std::string& Caption );
+
+	// 表示中のメッセージボックスを全て閉じ、以降の表示を止める.
+	//	アプリ終了時、スレッドの終了を待つ前に呼ぶこと.
+	//	( メッセージボックスは閉じられるまで戻らないため、閉じずに待つと終了できなくなる ).
+	void Release();
 }

@@ -17,6 +17,7 @@ enum class enLocalPosition : unsigned char
 	Center,		// 8:中央.
 
 	Max,
+	Default = 0xFF,	// 未設定(スプライト情報の値を使用).
 	None = 0
 } typedef ELocalPosition;
 
@@ -278,6 +279,7 @@ struct stSpriteRenderState
 	ID3D11ShaderResourceView*	MaskTexture;	// マスクテクスチャ.
 	ID3D11ShaderResourceView*	RuleTexture;	// ルールテクスチャ.
 	ESamplerState				SmaplerNo;		// サンプラ番号.
+	ELocalPosition				LocalPosNo;		// ローカル座標の番号(Default:スプライト情報の値を使用).
 	D3DXCOLOR4					Color;			// 色.
 	D3DXVECTOR4					RenderArea;		// 描画するエリア( 左上x, 左上y, 幅, 高さ ).
 	bool						IsDisp;			// 表示するか.
@@ -292,6 +294,7 @@ struct stSpriteRenderState
 		, MaskTexture	( nullptr )
 		, RuleTexture	( nullptr )
 		, SmaplerNo		( ESamplerState::Wrap )
+		, LocalPosNo	( ELocalPosition::Default )
 		, Color			( Color4::White )
 		, RenderArea	( 0.0f, 0.0f, -1.0f, -1.0f )
 		, IsDisp		( true )

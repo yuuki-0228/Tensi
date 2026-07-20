@@ -9,6 +9,7 @@
 
 #include "..\..\Common.h"
 #include "Parser\SkinMeshParser.h"
+#include "..\FbxLoader\FbxLoader.h"
 
 #ifdef ENABLE_FOG
 class CFog;
@@ -138,7 +139,7 @@ public:
 	CSkinMesh();
 	~CSkinMesh();
 
-	HRESULT Init( LPCTSTR fileName );
+	HRESULT Init( LPCTSTR fileName, const EMeshType Type = EMeshType::Auto );
 
 	// 解放関数.
 	HRESULT Release();
@@ -222,6 +223,8 @@ public:
 private:
 	// Xファイルからスキンメッシュを作成する.
 	HRESULT LoadXMesh( LPCTSTR lpFileName );
+	// FBXファイルからスキンメッシュを作成する.
+	HRESULT LoadFbxMesh( LPCTSTR lpFileName );
 
 	// シェーダを作成する.
 	HRESULT CreateShader();

@@ -64,7 +64,12 @@
     <ClCompile Include="SourceCode\Object\GameObject\Actor\BackGroundManager\ActorBackGround\WaterFall\WaterFallTile\WaterFallTile.cpp" />
     <ClCompile Include="SourceCode\Object\GameObject\Actor\BackGroundManager\ActorBackGround\WeedManager\Weed\Weed.cpp" />
     <ClCompile Include="SourceCode\Object\GameObject\Actor\WindowObjectManager\WindowObject\WateringCan\WateringCan.cpp" />
-    <ClCompile Include="SourceCode\Utility\WindowsMessageBox\WindowsMessageBox.cpp" />     <ClCompile Include="SourceCode\Object\GameObject\Actor\ActorEffect\IconSmokeEffectManager\IconSmokeEffectManager.cpp" />     <ClCompile Include="SourceCode\Object\GameObject\Actor\ActorEffect\IconSmokeEffectManager\IconSmokeEffect\IconSmokeEffect.cpp" />     <ClCompile Include="SourceCode\Object\GameObject\Actor\WindowObjectManager\WindowObject\Player\ExploreManager\ExploreManager.cpp" />
+    <ClCompile Include="SourceCode\Object\GameObject\Widget\SceneWidget\UIEditWidget\UIEditWidget.cpp" />
+    <ClCompile Include="SourceCode\Scene\UIEdit\UIEdit.cpp" />
+    <ClCompile Include="SourceCode\Utility\WindowsMessageBox\WindowsMessageBox.cpp" />
+    <ClCompile Include="SourceCode\Object\GameObject\Actor\ActorEffect\IconSmokeEffectManager\IconSmokeEffectManager.cpp" />
+    <ClCompile Include="SourceCode\Object\GameObject\Actor\ActorEffect\IconSmokeEffectManager\IconSmokeEffect\IconSmokeEffect.cpp" />
+    <ClCompile Include="SourceCode\Object\GameObject\Actor\WindowObjectManager\WindowObject\Player\ExploreManager\ExploreManager.cpp" />
     <ClCompile Include="SourceCode\Object\GameObject\Actor\WindowObjectManager\WindowObject\WaterManager\WaterManager.cpp" />
     <ClCompile Include="SourceCode\Object\GameObject\Actor\WindowObjectManager\WindowObject\WaterManager\Water\Water.cpp" />
     <ClCompile Include="SourceCode\Object\GameObject\Actor\Window\Window.cpp" />
@@ -77,6 +82,7 @@
     <ClCompile Include="SourceCode\Utility\SaveDataManager\FlowerSaveData\FlowerSaveData.cpp" />
     <ClCompile Include="SourceCode\Utility\SaveDataManager\WeedSaveData\WeedSaveData.cpp" />
     <ClCompile Include="SourceCode\Utility\TimeManager\TimeManager.cpp" />
+    <ClCompile Include="SourceCode\Utility\ThreadManager\ThreadManager.cpp" />
     <ClCompile Include="SourceCode\Object\GameObject\Actor\BackGroundManager\ActorBackGround\Tree\Tree.cpp" />
     <ClCompile Include="SourceCode\Object\GameObject\Actor\BackGroundManager\ActorBackGround\WeedManager\WeedManager.cpp" />
     <ClCompile Include="SourceCode\Object\GameObject\Actor\WindowObjectManager\WindowObjectManager.cpp" />
@@ -172,6 +178,8 @@
     <ClCompile Include="SourceCode\Common\Mesh\RayMesh\RayMesh.cpp" />
     <ClCompile Include="SourceCode\Common\Mesh\SkinMesh\SkinMesh.cpp" />
     <ClCompile Include="SourceCode\Common\Mesh\SkinMesh\Parser\SkinMeshParser.cpp" />
+    <ClCompile Include="SourceCode\Common\Mesh\FbxLoader\FbxLoader.cpp" />
+    <ClCompile Include="Library\ufbx\ufbx.c" />
     <ClCompile Include="SourceCode\Common\Sprite\Sprite.cpp" />
     <ClCompile Include="SourceCode\Common\Mesh\StaticMesh\StaticMesh.cpp" />
     <ClCompile Include="SourceCode\Main\WinMain.cpp" />
@@ -180,13 +188,19 @@
     <ClCompile Include="SourceCode\Utility\ImGuiManager\DebugWindow\DebugWindow.cpp" />
     <ClCompile Include="SourceCode\Utility\ImGuiManager\ImGuiManager.cpp" />
     <ClCompile Include="SourceCode\Utility\Math\Math.cpp" />
+    <ClCompile Include="SourceCode\Utility\Physics\Physics.cpp" />
     <ClCompile Include="SourceCode\Utility\ImGuiManager\MessageWindow\MessageWindow.cpp" />
     <ClCompile Include="SourceCode\Utility\Random\Random.cpp" />
     <ClCompile Include="SourceCode\Utility\Transform\Transform.cpp" />
-    <ClCompile Include="SourceCode\Utility\Animation\SpringScale\SpringScale.cpp" />
-    <ClCompile Include="SourceCode\Utility\Animation\ValueAnimation\ValueAnimation.cpp" />
-    <ClCompile Include="SourceCode\Utility\Animation\Vector2Animation\Vector2Animation.cpp" />
+    <ClCompile Include="SourceCode\Utility\Animation\SpringAnimation\SpringAnimation.cpp" />
     <ClCompile Include="SourceCode\Utility\Animation\ShakeAnimation\ShakeAnimation.cpp" />
+    <ClCompile Include="SourceCode\Utility\Animation\ButtonAnimation\ButtonAnimation.cpp" />
+    <ClCompile Include="SourceCode\Utility\Animation\PopupAnimation\PopupAnimation.cpp" />
+    <ClCompile Include="SourceCode\Utility\Animation\FadeAnimation\FadeAnimation.cpp" />
+    <ClCompile Include="SourceCode\Utility\Animation\FloatingAnimation\FloatingAnimation.cpp" />
+    <ClCompile Include="SourceCode\Utility\Animation\BlinkAnimation\BlinkAnimation.cpp" />
+    <ClCompile Include="SourceCode\Utility\Animation\SlideAnimation\SlideAnimation.cpp" />
+    <ClCompile Include="SourceCode\Utility\Animation\PulseAnimation\PulseAnimation.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Library\encrypt\file.h" />
@@ -238,7 +252,12 @@
     <ClInclude Include="SourceCode\Object\GameObject\Actor\BackGroundManager\ActorBackGround\WeedManager\Weed\Weed.h" />
     <ClInclude Include="SourceCode\Object\GameObject\Actor\BackGroundManager\ActorBackGround\WeedManager\Weed\WeedSaveData.h" />
     <ClInclude Include="SourceCode\Object\GameObject\Actor\WindowObjectManager\WindowObject\WateringCan\WateringCan.h" />
-    <ClInclude Include="SourceCode\Utility\WindowsMessageBox\WindowsMessageBox.h" />     <ClInclude Include="SourceCode\Utility\SaveDataManager\ExploreSaveData.h" />     <ClInclude Include="SourceCode\Object\GameObject\Actor\ActorEffect\IconSmokeEffectManager\IconSmokeEffectManager.h" />     <ClInclude Include="SourceCode\Object\GameObject\Actor\ActorEffect\IconSmokeEffectManager\IconSmokeEffect\IconSmokeEffect.h" />     <ClInclude Include="SourceCode\Object\GameObject\Actor\WindowObjectManager\WindowObject\Player\ExploreManager\ExploreManager.h" />
+    <ClInclude Include="SourceCode\Object\GameObject\Widget\SceneWidget\UIEditWidget\UIEditWidget.h" />
+    <ClInclude Include="SourceCode\Scene\UIEdit\UIEdit.h" />
+    <ClInclude Include="SourceCode\Utility\WindowsMessageBox\WindowsMessageBox.h" />
+    <ClInclude Include="SourceCode\Object\GameObject\Actor\ActorEffect\IconSmokeEffectManager\IconSmokeEffectManager.h" />
+    <ClInclude Include="SourceCode\Object\GameObject\Actor\ActorEffect\IconSmokeEffectManager\IconSmokeEffect\IconSmokeEffect.h" />
+    <ClInclude Include="SourceCode\Object\GameObject\Actor\WindowObjectManager\WindowObject\Player\ExploreManager\ExploreManager.h" />
     <ClInclude Include="SourceCode\Object\GameObject\Actor\WindowObjectManager\WindowObject\WaterManager\WaterData.h" />
     <ClInclude Include="SourceCode\Object\GameObject\Actor\WindowObjectManager\WindowObject\WaterManager\WaterManager.h" />
     <ClInclude Include="SourceCode\Object\GameObject\Actor\WindowObjectManager\WindowObject\WaterManager\Water\Water.h" />
@@ -251,11 +270,12 @@
     <ClInclude Include="SourceCode\Utility\EventSubject\Subject\Subject.h" />
     <ClInclude Include="SourceCode\Utility\MasterData\MasterDataAccesser.h" />
     <ClInclude Include="SourceCode\Utility\MasterData\MasterDatas.h" />
-    <ClInclude Include="SourceCode\Utility\SaveDataManager\SaveData.h" />
+    <ClInclude Include="SourceCode\Utility\SaveDataManager\SaveDatas.h" />
     <ClInclude Include="SourceCode\Utility\SaveDataManager\CommonSaveData\CommonSaveData.h" />
     <ClInclude Include="SourceCode\Utility\SaveDataManager\FlowerSaveData\FlowerSaveData.h" />
     <ClInclude Include="SourceCode\Utility\SaveDataManager\WeedSaveData\WeedSaveData.h" />
     <ClInclude Include="SourceCode\Utility\TimeManager\TimeManager.h" />
+    <ClInclude Include="SourceCode\Utility\ThreadManager\ThreadManager.h" />
     <ClInclude Include="SourceCode\Object\GameObject\Actor\BackGroundManager\ActorBackGround\Tree\Tree.h" />
     <ClInclude Include="SourceCode\Object\GameObject\Actor\BackGroundManager\ActorBackGround\WeedManager\WeedManager.h" />
     <ClInclude Include="SourceCode\Object\GameObject\Actor\WindowObjectManager\WindowObjectManager.h" />
@@ -309,6 +329,7 @@
     <ClInclude Include="SourceCode\Scene\FadeManager\FadeBase\UFOFade\UFOFade.h" />
     <ClInclude Include="SourceCode\Scene\GameMain\GameMain.h" />
     <ClInclude Include="SourceCode\Scene\SceneManager\SceneManager.h" />
+    <ClInclude Include="SourceCode\Scene\Scenes.h" />
     <ClInclude Include="SourceCode\System\BugReport\BugReport.h" />
     <ClInclude Include="SourceCode\Utility\FrameRate\FrameRate.h" />
     <ClInclude Include="SourceCode\Utility\Input\InputList.h" />
@@ -326,10 +347,15 @@
     <ClInclude Include="SourceCode\Utility\Message\Message.h" />
     <ClInclude Include="SourceCode\Utility\StringConversion\StringConversion.h" />
     <ClInclude Include="SourceCode\Utility\Transform\Transform.h" />
-    <ClInclude Include="SourceCode\Utility\Animation\SpringScale\SpringScale.h" />
-    <ClInclude Include="SourceCode\Utility\Animation\ValueAnimation\ValueAnimation.h" />
-    <ClInclude Include="SourceCode\Utility\Animation\Vector2Animation\Vector2Animation.h" />
+    <ClInclude Include="SourceCode\Utility\Animation\SpringAnimation\SpringAnimation.h" />
     <ClInclude Include="SourceCode\Utility\Animation\ShakeAnimation\ShakeAnimation.h" />
+    <ClInclude Include="SourceCode\Utility\Animation\ButtonAnimation\ButtonAnimation.h" />
+    <ClInclude Include="SourceCode\Utility\Animation\PopupAnimation\PopupAnimation.h" />
+    <ClInclude Include="SourceCode\Utility\Animation\FadeAnimation\FadeAnimation.h" />
+    <ClInclude Include="SourceCode\Utility\Animation\FloatingAnimation\FloatingAnimation.h" />
+    <ClInclude Include="SourceCode\Utility\Animation\BlinkAnimation\BlinkAnimation.h" />
+    <ClInclude Include="SourceCode\Utility\Animation\SlideAnimation\SlideAnimation.h" />
+    <ClInclude Include="SourceCode\Utility\Animation\PulseAnimation\PulseAnimation.h" />
     <ClInclude Include="SourceCode\Common\WindowTextRenderer\WindowTextRenderer.h" />
     <ClInclude Include="SourceCode\Utility\FileManager\FileManager.h" />
     <ClInclude Include="SourceCode\Utility\FileManager\Json\Json.h" />
@@ -355,6 +381,8 @@
     <ClInclude Include="SourceCode\Common\Mesh\RayMesh\RayMesh.h" />
     <ClInclude Include="SourceCode\Common\Mesh\SkinMesh\SkinMesh.h" />
     <ClInclude Include="SourceCode\Common\Mesh\SkinMesh\Parser\SkinMeshParser.h" />
+    <ClInclude Include="SourceCode\Common\Mesh\FbxLoader\FbxLoader.h" />
+    <ClInclude Include="Library\ufbx\ufbx.h" />
     <ClInclude Include="SourceCode\Common\Sprite\Sprite.h" />
     <ClInclude Include="SourceCode\Common\Mesh\StaticMesh\StaticMesh.h" />
     <ClInclude Include="SourceCode\Global.h" />
@@ -364,6 +392,8 @@
     <ClInclude Include="SourceCode\Utility\ImGuiManager\DebugWindow\DebugWindow.h" />
     <ClInclude Include="SourceCode\Utility\ImGuiManager\ImGuiManager.h" />
     <ClInclude Include="SourceCode\Utility\Math\Math.h" />
+    <ClInclude Include="SourceCode\Utility\Physics\Physics.h" />
+    <ClInclude Include="SourceCode\Utility\Physics\PhysicsBody\PhysicsBody.h" />
     <ClInclude Include="SourceCode\Utility\ImGuiManager\MessageWindow\MessageWindow.h" />
     <ClInclude Include="SourceCode\Utility\Random\Random.h" />
   </ItemGroup>
