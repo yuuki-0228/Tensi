@@ -1,7 +1,7 @@
 #include "Tree.h"
 #include "..\..\..\..\..\..\Resource\SpriteResource\SpriteResource.h"
 #include "..\..\..\..\..\..\Utility\Random\Random.h"
-#include "..\..\..\..\..\..\Utility\WindowManager\WindowManager.h"
+#include "..\..\..\..\..\..\Utility\WindowsWindowManager\WindowsWindowManager.h"
 #include "..\..\..\..\..\..\Utility\Input\Input.h"
 
 namespace {
@@ -115,7 +115,7 @@ void CTree::Fill( const D3DXPOSITION3& Pos )
 	m_IsDisp = true;
 
 	// タスクバーのサイズを取得.
-	const RECT& Rect = WindowManager::GetTaskBarRect();
+	const RECT& Rect = WindowsWindowManager::GetTaskBarRect();
 
 	// 苗木の位置の設定.
 	m_Transform.Position	 = Pos;

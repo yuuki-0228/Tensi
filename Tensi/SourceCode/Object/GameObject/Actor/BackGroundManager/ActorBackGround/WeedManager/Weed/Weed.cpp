@@ -2,7 +2,7 @@
 #include "..\..\..\..\WindowObjectManager\WindowObjectManager.h"
 #include "..\..\..\..\..\..\..\Resource\SpriteResource\SpriteResource.h"
 #include "..\..\..\..\..\..\..\Utility\Input\Input.h"
-#include "..\..\..\..\..\..\..\Utility\WindowManager\WindowManager.h"
+#include "..\..\..\..\..\..\..\Utility\WindowsWindowManager\WindowsWindowManager.h"
 #include "..\..\..\..\..\..\..\Utility\Const\Const.h"
 
 namespace {
@@ -120,7 +120,7 @@ void CWeed::SetWeedData( const SWeedData& t )
 	m_WeedState.Transform	= t.Transform;
 
 	// X座標が属するモニターの地面Y座標へ補正する
-	const float GroundY = WindowManager::GetGroundY( m_Transform.Position.x ) + 10.0f;
+	const float GroundY = WindowsWindowManager::GetGroundY( m_Transform.Position.x ) + 10.0f;
 	m_Transform.Position.y			= GroundY;
 	m_WeedState.Transform.Position.y = GroundY;
 	m_WeedState.RenderArea.w		= GroundY;
@@ -134,7 +134,7 @@ void CWeed::Fill( const D3DXPOSITION3& Pos )
 	if ( m_IsDisp ) return;
 
 	// X座標が属するモニターの地面Y座標(ゲーム座標系)を取得.
-	const float GroundY = WindowManager::GetGroundY( Pos.x );
+	const float GroundY = WindowsWindowManager::GetGroundY( Pos.x );
 
 	// 雑草の位置の設定.
 	m_IsDisp				= true;
@@ -218,7 +218,7 @@ void CWeed::GrabUptate()
 	{
 		if ( GetIsTouchMouse() &&
 			 Input::GetIsLeftClickDown() &&
-			 WindowManager::GetIsMouseOverTheWindow() == false &&
+			 WindowsWindowManager::GetIsMouseOverTheWindow() == false &&
 			 WindowObjectManager::GetIsMouseOverTheObject () == false )
 		{
 			m_IsGrab = true;

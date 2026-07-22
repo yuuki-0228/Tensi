@@ -468,6 +468,6 @@ void CWateringCan::WateringWaterPlay()
 	D3DXVec3Normalize( &m_WateringWaterData.MoveVec, &wv );
 
 	// …‚Ì•\Ž¦
-	const auto hWnd = WindowManager::GetPointOverTheWindow( wwp );
+	const auto hWnd = WindowsWindowManager::GetPointOverTheWindow( wwp );
 	m_pWaterEffect->Spill( m_WateringWaterData, hWnd );
 }

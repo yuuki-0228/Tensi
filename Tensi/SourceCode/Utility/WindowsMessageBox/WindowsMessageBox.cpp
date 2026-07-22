@@ -7,7 +7,7 @@
 #include <thread>
 #include <vector>
 #include "..\StringConversion\StringConversion.h"
-#include "..\WindowManager\WindowManager.h"
+#include "..\WindowsWindowManager\WindowsWindowManager.h"
 #include "..\ThreadManager\ThreadManager.h"
 
 namespace {
@@ -29,7 +29,7 @@ namespace {
 	HWND GetOwnerWnd()
 	{
 #ifdef ENABLE_WINDOWS_WINDOW
-		return WindowManager::GetWnd();
+		return WindowsWindowManager::GetWnd();
 #else
 		return NULL;
 #endif

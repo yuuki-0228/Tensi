@@ -86,7 +86,7 @@ bool CPlayer::Init()
 	m_pNoteEffect->Init();
 
 	// タスクバーの情報を取得.
-	const RECT& TaskBar = WindowManager::GetTaskBarRect();
+	const RECT& TaskBar = WindowsWindowManager::GetTaskBarRect();
 
 	// 画像の設定.
 	m_SpriteState.Transform.Position.x		= 256.0f;

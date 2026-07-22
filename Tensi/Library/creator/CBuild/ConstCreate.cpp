@@ -130,7 +130,7 @@ void ConstCreate::h( const std::vector<std::pair<std::pair<std::string, std::str
 
 	Text +=
 		"#pragma once\n"
-		"#include \"..\\..\\SystemSetting.h\"\n"
+		"#include \"..\\..\\SystemSettings.h\"\n"
 		"#ifdef ENABLE_CONST\n"
 		"#include \"..\\..\\Global.h\"\n"
 		"#include <vector>\n"

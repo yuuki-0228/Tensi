@@ -84,7 +84,7 @@ void CWindowObject::WindowObjectInit()
 	UpdateMonitorWorkAreas();
 
 	// ウィンドウの情報の補正値の取得.
-	m_AddWndRect = WindowManager::GetAddWindowRect();
+	m_AddWndRect = WindowsWindowManager::GetAddWindowRect();
 
 	// ウィンドウオブジェクトマネージャーに登録.
 	WindowObjectManager::PushObject( this, &m_SpriteState.Transform );
@@ -215,7 +215,7 @@ void CWindowObject::Separate()
 //---------------------------.
 void CWindowObject::InWindowCheck()
 {
-	const HWND& hWnd = WindowManager::GetMouseOverTheWindow();
+	const HWND& hWnd = WindowsWindowManager::GetMouseOverTheWindow();
 
 	if ( hWnd != NULL ){
 		// ウィンドウの情報を保存.
@@ -231,7 +231,7 @@ void CWindowObject::TeleportTrashCanCheck()
 	if ( m_IsTrashCan == false ) return;
 
 	// ごみ箱のウィンドウハンドルを取得.
-	const HWND& hWnd = WindowManager::GetTrashCanWindow();
+	const HWND& hWnd = WindowsWindowManager::GetTrashCanWindow();
 
 	// ごみ箱が見つかったか.
 	if ( hWnd == NULL ) return;
@@ -338,10 +338,10 @@ void CWindowObject::WindowCollision()
 	D3DXPOSITION3* pPos = &m_SpriteState.Transform.Position;
 
 	// 他ウィンドウの情報を取得.
-	const WindowManager::WndList& WindList = WindowManager::GetWindowList();
+	const WindowsWindowManager::WndList& WindList = WindowsWindowManager::GetWindowList();
 
 	// ウィンドウに当たっているか調べる.
-	const int			 InWndZOrder = WindowManager::GetWindowZOrder( m_InWndHandle );
+	const int			 InWndZOrder = WindowsWindowManager::GetWindowZOrder( m_InWndHandle );
 	const D3DXPOSITION3& CPos		 = *pPos + m_AddCenterPosition;
 	for ( auto& [w, hWnd] : WindList ) {
 		// ボックス通しが当たっているか調べる.
@@ -353,7 +353,7 @@ void CWindowObject::WindowCollision()
 
 			// 中に入っているウィンドウより下のウィンドウか.
 			if ( m_InWndHandle != NULL ) {
-				if ( InWndZOrder < WindowManager::GetWindowZOrder( hWnd ) ) continue;
+				if ( InWndZOrder < WindowsWindowManager::GetWindowZOrder( hWnd ) ) continue;
 			}
 
 			// 押されて中にめり込んだか.
@@ -417,7 +417,7 @@ void CWindowObject::DesktopDragSelectCollision()
 	if ( m_SpriteState.IsDisp == false	) return;
 	if ( m_IsGrab						) return;
 
-	const RECT w = WindowManager::GetDesktopDragSelectRect();
+	const RECT w = WindowsWindowManager::GetDesktopDragSelectRect();
 	if ( w.right - w.left <= 0 && w.bottom - w.top <= 0 ) return;
 
 	// ボックス通しが当たっているか調べる.
@@ -604,7 +604,7 @@ void CWindowObject::UpdateMonitorWorkAreas()
 	constexpr LONG CEILING_MARGIN = 640;
 
 	// モニターの詳細情報を取得.
-	const WindowManager::MonitorAreaList MonitorAreas = WindowManager::GetMonitorAreas();
+	const WindowsWindowManager::MonitorAreaList MonitorAreas = WindowsWindowManager::GetMonitorAreas();
 	m_MonitorWorkAreas.clear();
 	m_MonitorWorkAreas.reserve( MonitorAreas.size() );
 
@@ -794,7 +794,7 @@ void CWindowObject::ApplyGrabDownSpeed()
 
 	// スクリーン座標に変換してから下方向へ動かす.
 	POINT Point = { static_cast<LONG>( Pos.x ), static_cast<LONG>( Pos.y + m_GrabDownSpeed ) };
-	ClientToScreen( WindowManager::GetWnd(), &Point );
+	ClientToScreen( WindowsWindowManager::GetWnd(), &Point );
 	SetCursorPos( Point.x, Point.y );
 }
 
@@ -808,7 +808,7 @@ void CWindowObject::PushWindow( const HWND& hWnd, const EDirection Dire )
 	if ( hWnd == NULL	) return;
 
 	// 全画面表示( 最大化・フルスクリーン )のウィンドウは動かさない.
-	if ( WindowManager::IsFullScreenWindow( hWnd ) ) return;
+	if ( WindowsWindowManager::IsFullScreenWindow( hWnd ) ) return;
 
 	// ぶつかった方向の衝突速度を取得する.
 	float Speed = 0.0f;
@@ -826,10 +826,10 @@ void CWindowObject::PushWindow( const HWND& hWnd, const EDirection Dire )
 
 	// ぶつかった方向へウィンドウを動かす( 画面外には出さない ).
 	switch ( Dire ) {
-	case EDirection::Up:	WindowManager::MoveWindowInScreen( hWnd, 0, -Move );	break;
-	case EDirection::Down:	WindowManager::MoveWindowInScreen( hWnd, 0,  Move );	break;
-	case EDirection::Left:	WindowManager::MoveWindowInScreen( hWnd, -Move, 0 );	break;
-	case EDirection::Right:	WindowManager::MoveWindowInScreen( hWnd,  Move, 0 );	break;
+	case EDirection::Up:	WindowsWindowManager::MoveWindowInScreen( hWnd, 0, -Move );	break;
+	case EDirection::Down:	WindowsWindowManager::MoveWindowInScreen( hWnd, 0,  Move );	break;
+	case EDirection::Left:	WindowsWindowManager::MoveWindowInScreen( hWnd, -Move, 0 );	break;
+	case EDirection::Right:	WindowsWindowManager::MoveWindowInScreen( hWnd,  Move, 0 );	break;
 	default:														break;
 	}
 }

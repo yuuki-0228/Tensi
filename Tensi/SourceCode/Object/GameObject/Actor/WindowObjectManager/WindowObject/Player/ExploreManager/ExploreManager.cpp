@@ -4,7 +4,7 @@
 #include "..\..\..\..\..\..\..\Common\Font\Font.h"
 #include "..\..\..\..\..\..\..\Resource\SpriteResource\SpriteResource.h"
 #include "..\..\..\..\..\..\..\Resource\FontResource\FontResource.h"
-#include "..\..\..\..\..\..\..\Utility\WindowManager\WindowManager.h"
+#include "..\..\..\..\..\..\..\Utility\WindowsWindowManager\WindowsWindowManager.h"
 #include "..\..\..\..\..\..\..\Utility\WindowsMessageBox\WindowsMessageBox.h"
 #include "..\..\..\..\..\..\..\Utility\SaveDataManager\SaveDataManager.h"
 #include "..\..\..\..\..\..\..\Utility\Const\Const.h"
@@ -42,13 +42,13 @@ namespace {
 	}
 
 	// デスクトップアイコンの矩形をゲーム座標系に変換する.
-	//	WindowManager が返すアイコン矩形はデスクトップ( SysListView32 )の
+	//	WindowsWindowManager が返すアイコン矩形はデスクトップ( SysListView32 )の
 	//	ウィンドウ原点が画面(0,0)である前提で補正されているため、
 	//	マルチモニタ等で原点がずれている場合はデスクトップ原点分だけ補正する.
 	RECT ToGameRect( const RECT& Rect )
 	{
 		RECT Desk = {};
-		GetWindowRect( WindowManager::GetDesktop(), &Desk );
+		GetWindowRect( WindowsWindowManager::GetDesktop(), &Desk );
 
 		RECT Out = Rect;
 		Out.left	+= Desk.left;
@@ -192,9 +192,9 @@ bool CExploreManager::TryStart( const D3DXPOSITION3& SlimeCenter )
 	if ( m_State != enState::None ) return false;
 
 	// フォルダのアイコンの上で離したか調べる.
-	const WindowManager::IconList List = WindowManager::GetDesktopIconList();
+	const WindowsWindowManager::IconList List = WindowsWindowManager::GetDesktopIconList();
 	for ( const auto& Icon : List ) {
-		if ( Icon.Type != WindowManager::enDesktopIconType::Folder ) continue;
+		if ( Icon.Type != WindowsWindowManager::enDesktopIconType::Folder ) continue;
 
 		// アイコン矩形をゲーム座標系に変換して判定する.
 		const RECT ClickRect = ToGameRect( Icon.ClickRect );
@@ -204,7 +204,7 @@ bool CExploreManager::TryStart( const D3DXPOSITION3& SlimeCenter )
 		m_IconIndex		= Icon.Index;
 		m_IconClickRect	= ClickRect;
 		m_IconDrawRect	= ToGameRect( Icon.DrawRect );
-		m_FolderPath	= WindowManager::GetDesktopIconPath( Icon.Index );
+		m_FolderPath	= WindowsWindowManager::GetDesktopIconPath( Icon.Index );
 		UpdateTarget();
 
 		// 縮小の開始情報を保存.
@@ -462,11 +462,11 @@ void CExploreManager::StartExplore()
 
 	// フォルダの容量をワーカースレッドで計算し、完了時間を確定する.
 	if ( LocateTargetIcon() ) {
-		const std::string SizePath = WindowManager::GetDesktopIconFilePath( m_IconIndex );
+		const std::string SizePath = WindowsWindowManager::GetDesktopIconFilePath( m_IconIndex );
 		if ( SizePath.empty() == false ) {
 			const std::string FolderPath = m_FolderPath;
 			ThreadManager::StartResult(
-				[SizePath]() { return WindowManager::GetPathTotalSize( SizePath ); },
+				[SizePath]() { return WindowsWindowManager::GetPathTotalSize( SizePath ); },
 				[this, FolderPath]( const ULONGLONG& Bytes ) {
 					// 計算中に探索が中断・別フォルダに変更された場合は反映しない.
 					if ( m_SaveData.IsExploring == false )	return;
@@ -554,10 +554,10 @@ void CExploreManager::OnLoaded()
 //---------------------------.
 bool CExploreManager::LocateTargetIcon()
 {
-	const WindowManager::IconList List = WindowManager::GetDesktopIconList();
+	const WindowsWindowManager::IconList List = WindowsWindowManager::GetDesktopIconList();
 	for ( const auto& Icon : List ) {
-		if ( Icon.Type != WindowManager::enDesktopIconType::Folder ) continue;
-		if ( WindowManager::GetDesktopIconPath( Icon.Index ) != m_FolderPath ) continue;
+		if ( Icon.Type != WindowsWindowManager::enDesktopIconType::Folder ) continue;
+		if ( WindowsWindowManager::GetDesktopIconPath( Icon.Index ) != m_FolderPath ) continue;
 
 		m_IconIndex		= Icon.Index;
 		m_IconClickRect	= ToGameRect( Icon.ClickRect );

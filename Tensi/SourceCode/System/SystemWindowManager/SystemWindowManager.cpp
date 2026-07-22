@@ -44,9 +44,6 @@ void SystemWindowManager::Update( const float& DeltaTime )
 
 	// バグボタンの表示.
 	pI->m_pButton->SetIsAllDisp( !pI->m_pBugReport->GetBugListEmpty() );
-
-	// バグボタンが押された場合.
-	if ( Message::Check( "BugButtonDown" ) ) pI->m_pBugReport->Open();
 #endif
 }
 

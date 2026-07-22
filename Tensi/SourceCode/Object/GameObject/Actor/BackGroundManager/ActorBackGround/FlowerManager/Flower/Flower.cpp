@@ -4,7 +4,7 @@
 #include "..\..\..\..\WindowObjectManager\WindowObjectManager.h"
 #include "..\..\..\..\..\..\..\Resource\SpriteResource\SpriteResource.h"
 #include "..\..\..\..\..\..\..\Utility\Input\Input.h"
-#include "..\..\..\..\..\..\..\Utility\WindowManager\WindowManager.h"
+#include "..\..\..\..\..\..\..\Utility\WindowsWindowManager\WindowsWindowManager.h"
 #include "..\..\..\..\..\..\..\Utility\TimeManager\TimeManager.h"
 #include "..\..\..\..\..\..\..\Utility\Random\Random.h"
 #include "..\..\..\..\..\..\..\Utility\Const\Const.h"
@@ -139,7 +139,7 @@ void CFlower::SetFlowerData( const SFlowerData& Data )
 	m_LeafState.AnimState.PatternNo.y	= Data.FlowerType;
 
 	// X座標が属するモニターの地面Y座標へ補正する
-	const float GroundY = WindowManager::GetGroundY( m_Transform.Position.x ) + 5.0f;
+	const float GroundY = WindowsWindowManager::GetGroundY( m_Transform.Position.x ) + 5.0f;
 	m_Transform.Position.y			= GroundY;
 	m_FlowerState.Transform.Position.y = GroundY;
 	m_LeafState.Transform.Position.y	= GroundY;
@@ -175,7 +175,7 @@ void CFlower::Fill( const int Type, const D3DXCOLOR3& Color, const D3DXPOSITION3
 	if ( m_IsDisp ) return;
 
 	// X座標が属するモニターの地面Y座標(ゲーム座標系)を取得.
-	const float GroundY = WindowManager::GetGroundY( Pos.x );
+	const float GroundY = WindowsWindowManager::GetGroundY( Pos.x );
 
 	// 日時を保存
 	m_FlowerSaveData.FillDay		= TimeManager::GetTime();

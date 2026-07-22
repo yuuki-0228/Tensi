@@ -265,7 +265,7 @@
     <ClCompile Include="SourceCode\Object\Collision\2D\Sphere2D\Sphere2D.cpp" />
     <ClCompile Include="SourceCode\Utility\Transform\PositionRenderer\PositionRenderer.cpp" />
     <ClCompile Include="SourceCode\Scene\FadeManager\FadeBase\MaskFade\MaskFade.cpp" />
-    <ClCompile Include="SourceCode\Utility\WindowManager\WindowManager.cpp" />
+    <ClCompile Include="SourceCode\Utility\WindowsWindowManager\WindowsWindowManager.cpp" />
     <ClCompile Include="SourceCode\Utility\WindowsShortCutManager\WindowsShortCutManager.cpp" />
     <ClCompile Include="SourceCode\Object\GameObject\Actor\ActorEffect\SleepEffectManager\SleepEffect\SleepEffect.cpp" />
     <ClCompile Include="SourceCode\Object\GameObject\Actor\ActorEffect\SleepEffectManager\SleepEffectManager.cpp" />
@@ -279,6 +279,9 @@
     <ClCompile Include="SourceCode\Object\GameObject\Actor\WindowObjectManager\WindowObject\Ball\SuperBall\SuperBall.cpp" />
     <ClCompile Include="SourceCode\Utility\TimeManager\TimeManager.cpp" />
     <ClCompile Include="SourceCode\Utility\ThreadManager\ThreadManager.cpp" />
+    <ClCompile Include="SourceCode\Utility\Network\NetworkManager.cpp" />
+    <ClCompile Include="SourceCode\Utility\Network\RoomCode\RoomCode.cpp" />
+    <ClCompile Include="SourceCode\Utility\Network\UPnP\UPnPPortMapper.cpp" />
     <ClCompile Include="SourceCode\Object\GameObject\Actor\ActorEffect\NoteEffectManager\NoteEffect\NoteEffect.cpp" />
     <ClCompile Include="SourceCode\Object\GameObject\Actor\ActorEffect\NoteEffectManager\NoteEffectManager.cpp" />
     <ClCompile Include="SourceCode\Object\GameObject\Actor\BackGroundManager\ActorBackGround\Tree\Tree.cpp" />
@@ -498,7 +501,7 @@
     <ClInclude Include="SourceCode\Object\Collision\2D\Sphere2D\Sphere2D.h" />
     <ClInclude Include="SourceCode\Utility\Transform\PositionRenderer\PositionRenderer.h" />
     <ClInclude Include="SourceCode\Scene\FadeManager\FadeBase\MaskFade\MaskFade.h" />
-    <ClInclude Include="SourceCode\Utility\WindowManager\WindowManager.h" />
+    <ClInclude Include="SourceCode\Utility\WindowsWindowManager\WindowsWindowManager.h" />
     <ClInclude Include="SourceCode\Utility\WindowsShortCutManager\WindowsShortCutManager.h" />
     <ClInclude Include="SourceCode\Object\GameObject\Actor\ActorEffect\SleepEffectManager\SleepEffect\SleepEffect.h" />
     <ClInclude Include="SourceCode\Object\GameObject\Actor\ActorEffect\SleepEffectManager\SleepEffectManager.h" />
@@ -512,6 +515,10 @@
     <ClInclude Include="SourceCode\Object\GameObject\Actor\WindowObjectManager\WindowObject\Ball\SuperBall\SuperBall.h" />
     <ClInclude Include="SourceCode\Utility\TimeManager\TimeManager.h" />
     <ClInclude Include="SourceCode\Utility\ThreadManager\ThreadManager.h" />
+    <ClInclude Include="SourceCode\Utility\Network\NetworkManager.h" />
+    <ClInclude Include="SourceCode\Utility\Network\NetworkStruct.h" />
+    <ClInclude Include="SourceCode\Utility\Network\RoomCode\RoomCode.h" />
+    <ClInclude Include="SourceCode\Utility\Network\UPnP\UPnPPortMapper.h" />
     <ClInclude Include="SourceCode\Object\GameObject\Actor\ActorEffect\NoteEffectManager\NoteEffectManager.h" />
     <ClInclude Include="SourceCode\Object\GameObject\Actor\ActorEffect\NoteEffectManager\NoteEffect\NoteEffect.h" />
     <ClInclude Include="SourceCode\Object\GameObject\Actor\BackGroundManager\ActorBackGround\Tree\Tree.h" />

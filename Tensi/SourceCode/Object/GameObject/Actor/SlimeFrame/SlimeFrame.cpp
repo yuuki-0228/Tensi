@@ -1,6 +1,6 @@
 #include "SlimeFrame.h"
 #include "..\..\..\..\Resource\SpriteResource\SpriteResource.h"
-#include "..\..\..\..\Utility\WindowManager\WindowManager.h"
+#include "..\..\..\..\Utility\WindowsWindowManager\WindowsWindowManager.h"
 #include "..\..\..\..\Utility\Input\Input.h"
 #include <dwmapi.h>
 
@@ -92,7 +92,7 @@ void CSlimeFrame::SelectWindow()
 	if ( KeyInput::IsKeyDown(  VK_LBUTTON ) == false ) return;
 
 	// ウィンドウに当たっているか調べる.
-	m_hWnd = WindowManager::GetMouseDownWindow();
+	m_hWnd = WindowsWindowManager::GetMouseDownWindow();
 	if ( m_hWnd == NULL ) return;
 	SetWindowPos( m_hWnd, HWND_TOPMOST, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE | SWP_SHOWWINDOW );
 	return;

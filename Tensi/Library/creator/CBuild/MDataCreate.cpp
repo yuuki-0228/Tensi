@@ -124,7 +124,7 @@ void MDataCreate::h( const std::vector<std::pair<std::string, json>>& Container 
 
 	Text +=
 		"#pragma once\n"
-		"#include \"..\\..\\SystemSetting.h\"\n"
+		"#include \"..\\..\\SystemSettings.h\"\n"
 		"#ifdef ENABLE_MASTER_DATA\n"
 		"#include \"..\\..\\Global.h\"\n"
 		"#include \"..\\FileManager\\FileManager.h\"\n"

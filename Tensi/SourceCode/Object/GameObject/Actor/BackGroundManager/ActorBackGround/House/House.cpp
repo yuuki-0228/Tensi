@@ -1,5 +1,5 @@
 #include "House.h"
-#include "..\..\..\..\..\..\Utility\WindowManager\WindowManager.h"
+#include "..\..\..\..\..\..\Utility\WindowsWindowManager\WindowsWindowManager.h"
 #include "..\..\..\..\..\..\Resource\SpriteResource\SpriteResource.h"
 #include "..\..\..\..\..\..\Utility\Random\Random.h"
 #include "..\..\..\..\..\..\Utility\Input\Input.h"
@@ -73,7 +73,7 @@ void CHouse::Setting( const D3DXPOSITION3& Pos )
 	m_IsDisp = true;
 
 	// タスクバーのサイズを取得.
-	const RECT& Rect = WindowManager::GetTaskBarRect();
+	const RECT& Rect = WindowsWindowManager::GetTaskBarRect();
 
 	// テントの位置の設定.
 	m_TentState.Transform.Position		= Pos;

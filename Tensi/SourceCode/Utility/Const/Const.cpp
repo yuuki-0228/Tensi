@@ -135,6 +135,28 @@ void Const::stConstFreeCamera::Load()
 }
 
 //----------------------------.
+// Network.
+//----------------------------.
+void Const::stConstNetwork::Load()
+{
+	Json j = FileManager::JsonLoad( "Data\\Parameter\\Const\\Network.json" );
+
+	// èâä˙âª
+	DEFAULT_CONNECTION_TIMEOUT_SEC = j["DEFAULT_CONNECTION_TIMEOUT_SEC"][_DATA].Get<float>();
+	DEFAULT_CONNECT_TIMEOUT_SEC = j["DEFAULT_CONNECT_TIMEOUT_SEC"][_DATA].Get<float>();
+	DEFAULT_MAX_PLAYER = j["DEFAULT_MAX_PLAYER"][_DATA].Get<int>();
+	DEFAULT_SYNC_FPS = j["DEFAULT_SYNC_FPS"][_DATA].Get<float>();
+	DEFAULT_TCP_PORT = j["DEFAULT_TCP_PORT"][_DATA].Get<int>();
+	DEFAULT_UDP_PORT = j["DEFAULT_UDP_PORT"][_DATA].Get<int>();
+	DISCOVERY_PORT = j["DISCOVERY_PORT"][_DATA].Get<int>();
+	MAX_MESSAGE_SIZE = j["MAX_MESSAGE_SIZE"][_DATA].Get<int>();
+	MAX_PLAYER_LIMIT = j["MAX_PLAYER_LIMIT"][_DATA].Get<int>();
+	MAX_SYNC_DATA_SIZE = j["MAX_SYNC_DATA_SIZE"][_DATA].Get<int>();
+
+	Log::PushLogInfo( "Data\\Parameter\\Const\\Network.json ì«Ç›çûÇ› : ê¨å˜" );
+}
+
+//----------------------------.
 // System.
 //----------------------------.
 void Const::stConstSystem::Load()
@@ -213,6 +235,7 @@ void Const::Load()
 	pI->ExploreData.Load();
 	pI->FlowerData.Load();
 	pI->FreeCameraData.Load();
+	pI->NetworkData.Load();
 	pI->SystemData.Load();
 	pI->WaterFallData.Load();
 	pI->WateringCanData.Load();

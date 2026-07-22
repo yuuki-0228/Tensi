@@ -1,7 +1,7 @@
 #include "WaterFall.h"
 #include "WaterFallTile/WaterFallTile.h"
 #include "..\..\..\..\..\..\Resource\SpriteResource\SpriteResource.h"
-#include "..\..\..\..\..\..\Utility\WindowManager\WindowManager.h"
+#include "..\..\..\..\..\..\Utility\WindowsWindowManager\WindowsWindowManager.h"
 #include "..\..\..\..\..\..\Utility\Random\Random.h"
 #include "..\..\..\..\..\..\Utility\SaveDataManager\SaveDataManager.h"
 #include "..\..\..\..\..\..\Utility\Const\Const.h"
@@ -28,7 +28,7 @@ bool CWaterFall::Init()
 	SaveDataManager::SetSaveData()->WaterFallTransform = &m_Transform;
 	SaveDataManager::PushLoadFunction( [this]() {
 		// X座標が属するモニターの地面Y座標へ補正する
-		m_Transform.Position.y = WindowManager::GetGroundY( m_Transform.Position.x ) + 3.0f;
+		m_Transform.Position.y = WindowsWindowManager::GetGroundY( m_Transform.Position.x ) + 3.0f;
 		CreateWaterFall();
 	} );
 	return true;
@@ -56,13 +56,13 @@ void CWaterFall::SubRender()
 void CWaterFall::Setting()
 {
 	// 表示する位置の設定.
-	const RECT& Size		= WindowManager::GetMyWndSize();
+	const RECT& Size		= WindowsWindowManager::GetMyWndSize();
 	const float Wnd_W		= static_cast< float >( Size.right - Size.left );
 	m_Transform.Position.x  = Random::GetRand( 0.0f , Wnd_W - m_ImageSize * Const::WaterFall().WATER_FALL_W);
 	m_Transform.Position.x += m_ImageSize / 2.0f;
 
 	// X座標が属するモニターの地面Y座標(ゲーム座標系)を設置場所にする.
-	m_Transform.Position.y = WindowManager::GetGroundY( m_Transform.Position.x ) + 3.0f;
+	m_Transform.Position.y = WindowsWindowManager::GetGroundY( m_Transform.Position.x ) + 3.0f;
 
 	// 滝を作る.
 	CreateWaterFall();

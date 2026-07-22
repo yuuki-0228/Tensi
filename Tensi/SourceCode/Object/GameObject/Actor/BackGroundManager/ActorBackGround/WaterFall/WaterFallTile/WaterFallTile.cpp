@@ -1,6 +1,6 @@
 #include "WaterFallTile.h"
 #include "..\..\..\..\..\..\..\Resource\SpriteResource\SpriteResource.h"
-#include "..\..\..\..\..\..\..\Utility\WindowManager\WindowManager.h"
+#include "..\..\..\..\..\..\..\Utility\WindowsWindowManager\WindowsWindowManager.h"
 
 namespace {
 	constexpr int WATERFALL_PATTERN_NO	= 0;	// 滝のパターンNo
@@ -83,7 +83,7 @@ void CWaterFallTile::Setting( const D3DXPOSITION3& Pos, const bool IsWater )
 	m_SplashState.IsDisp				= IsWater;
 
 	// 地面より下を描画しないようにする( モニター毎の地面Y座標に合わせる ).
-	const float GroundY = WindowManager::GetGroundY( Pos.x );
+	const float GroundY = WindowsWindowManager::GetGroundY( Pos.x );
 	m_WaterFallState.RenderArea.w	= GroundY;
 	m_SplashState.RenderArea.w		= GroundY;
 }

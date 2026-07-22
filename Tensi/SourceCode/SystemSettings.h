@@ -32,14 +32,14 @@
 #define ENABLE_OBSERVER
 // スレッドに関する機能の有効/無効
 #define ENABLE_THREAD
+// ネットワーク通信(ローカル/オンライン)に関する機能の有効/無効
+#define ENABLE_NETWORK
 // 定数に関する機能の有効/無効
 #define ENABLE_CONST
 // マスターデータに関する機能の有効/無効
 #define ENABLE_MASTER_DATA
 // キャッシュデータに関する機能の有効/無効
 #define ENABLE_CASH
-// メッセージ機能の有効/無効
-#define ENABLE_MESSAGE
 // 時間に関する機能の有効/無効
 #define ENABLE_TIME
 // Windowsのウィンドウに関する機能の有効/無効

@@ -1,0 +1,42 @@
+{
+  "DEFAULT_TCP_PORT": [
+    "既定のTCPポート番号(接続・重要メッセージ用)",
+    52400
+  ],
+  "DEFAULT_UDP_PORT": [
+    "既定のUDPポート番号(状態同期用)",
+    52401
+  ],
+  "DISCOVERY_PORT": [
+    "同一ネットワーク内の部屋検索に使うUDPポート番号",
+    52402
+  ],
+  "DEFAULT_MAX_PLAYER": [
+    "既定の最大参加人数(ホストを含む)",
+    4
+  ],
+  "MAX_PLAYER_LIMIT": [
+    "最大参加人数の上限",
+    16
+  ],
+  "MAX_SYNC_DATA_SIZE": [
+    "1プレイヤーあたりの同期データの最大サイズ(byte)",
+    1024
+  ],
+  "MAX_MESSAGE_SIZE": [
+    "任意メッセージの最大サイズ(byte)",
+    32768
+  ],
+  "DEFAULT_SYNC_FPS": [
+    "既定の状態同期の送信頻度(回/秒)",
+    20.0
+  ],
+  "DEFAULT_CONNECT_TIMEOUT_SEC": [
+    "既定の接続タイムアウト(秒)",
+    5.0
+  ],
+  "DEFAULT_CONNECTION_TIMEOUT_SEC": [
+    "既定の応答無し切断時間(秒)",
+    8.0
+  ]
+}

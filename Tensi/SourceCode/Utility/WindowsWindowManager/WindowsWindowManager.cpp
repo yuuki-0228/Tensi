@@ -1,4 +1,4 @@
-#include "WindowManager.h"
+#include "WindowsWindowManager.h"
 #ifdef ENABLE_WINDOWS_WINDOW
 #include "..\Input\Input.h"
 #include <dwmapi.h>
@@ -9,7 +9,7 @@
 namespace {
 	// モニター列挙コールバック用データ.
 	struct SMonitorEnumData {
-		std::vector<WindowManager::SMonitorArea>	Areas;
+		std::vector<WindowsWindowManager::SMonitorArea>	Areas;
 		RECT										AddRect;
 	};
 
@@ -22,7 +22,7 @@ namespace {
 		mi.cbSize = sizeof( MONITORINFO );
 		if ( GetMonitorInfo( hMonitor, &mi ) == FALSE ) return TRUE;
 
-		WindowManager::SMonitorArea area;
+		WindowsWindowManager::SMonitorArea area;
 
 		// 物理範囲をゲーム座標系に変換.
 		area.Monitor		= mi.rcMonitor;
@@ -61,15 +61,15 @@ namespace {
 	}
 
 	// フォルダかどうかと拡張子からアイコンの種類を判定する.
-	WindowManager::enDesktopIconType ToDesktopIconType( const bool IsDirectory, const std::string& Ext )
+	WindowsWindowManager::enDesktopIconType ToDesktopIconType( const bool IsDirectory, const std::string& Ext )
 	{
-		if ( IsDirectory		) return WindowManager::enDesktopIconType::Folder;
-		if ( Ext == ".exe"		) return WindowManager::enDesktopIconType::Exe;
-		if ( Ext == ".lnk"		) return WindowManager::enDesktopIconType::Shortcut;
-		if ( Ext == ".txt"		) return WindowManager::enDesktopIconType::TextFile;
+		if ( IsDirectory		) return WindowsWindowManager::enDesktopIconType::Folder;
+		if ( Ext == ".exe"		) return WindowsWindowManager::enDesktopIconType::Exe;
+		if ( Ext == ".lnk"		) return WindowsWindowManager::enDesktopIconType::Shortcut;
+		if ( Ext == ".txt"		) return WindowsWindowManager::enDesktopIconType::TextFile;
 		if ( Ext == ".png" || Ext == ".jpg" || Ext == ".jpeg" ||
-			 Ext == ".bmp" || Ext == ".gif" ) return WindowManager::enDesktopIconType::Image;
-		return WindowManager::enDesktopIconType::Other;
+			 Ext == ".bmp" || Ext == ".gif" ) return WindowsWindowManager::enDesktopIconType::Image;
+		return WindowsWindowManager::enDesktopIconType::Other;
 	}
 
 	// 指定フォルダ内を走査してファイル情報を集める.
@@ -151,7 +151,7 @@ namespace {
 
 }
 
-WindowManager::WindowManager()
+WindowsWindowManager::WindowsWindowManager()
 	: m_hDesktop				( NULL )
 	, m_hMyWindow				( NULL )
 	, m_hMySubWindow			( NULL )
@@ -183,7 +183,7 @@ WindowManager::WindowManager()
 {
 }
 
-WindowManager::~WindowManager()
+WindowsWindowManager::~WindowsWindowManager()
 {
 	// 後処理.
 	VirtualFreeEx( m_DProcessHandle, m_DProcessMemory, 0, MEM_RELEASE );
@@ -193,18 +193,18 @@ WindowManager::~WindowManager()
 //----------------------------.
 // インスタンスの取得.
 //----------------------------.
-WindowManager* WindowManager::GetInstance()
+WindowsWindowManager* WindowsWindowManager::GetInstance()
 {
-	static std::unique_ptr<WindowManager> pInstance = std::make_unique<WindowManager>();
+	static std::unique_ptr<WindowsWindowManager> pInstance = std::make_unique<WindowsWindowManager>();
 	return pInstance.get();
 }
 
 //---------------------------.
 // 初期化.
 //---------------------------.
-HRESULT WindowManager::Init()
+HRESULT WindowsWindowManager::Init()
 {
-	WindowManager* pI = GetInstance();
+	WindowsWindowManager* pI = GetInstance();
 
 	// ウィンドウの情報に追加する補正値の作成.
 	GetWindowRect( pI->m_hMyWindow, &pI->m_MyWindowRect );
@@ -258,9 +258,9 @@ HRESULT WindowManager::Init()
 //---------------------------.
 // 更新.
 //---------------------------.
-void WindowManager::Update()
+void WindowsWindowManager::Update()
 {
-	WindowManager* pI = GetInstance();
+	WindowsWindowManager* pI = GetInstance();
 
 	// フラグの初期化.
 	pI->m_IsWindowUpdate		= false;
@@ -274,9 +274,9 @@ void WindowManager::Update()
 //---------------------------.
 // タスクバーの情報を取得.
 //---------------------------.
-RECT WindowManager::GetTaskBarRect()
+RECT WindowsWindowManager::GetTaskBarRect()
 {
-	WindowManager* pI = GetInstance();
+	WindowsWindowManager* pI = GetInstance();
 
 	// タスクバーを更新していない場合更新する.
 	if ( pI->m_IsTaskBarUpdate == false ) TaskBarUpdate();
@@ -287,9 +287,9 @@ RECT WindowManager::GetTaskBarRect()
 //---------------------------.
 // タスクバーのウィンドウハンドルの取得.
 //---------------------------.
-HWND WindowManager::GetTaskBarWnd()
+HWND WindowsWindowManager::GetTaskBarWnd()
 {
-	WindowManager* pI = GetInstance();
+	WindowsWindowManager* pI = GetInstance();
 
 	// タスクバーを更新していない場合更新する.
 	if ( pI->m_IsTaskBarUpdate == false ) TaskBarUpdate();
@@ -300,7 +300,7 @@ HWND WindowManager::GetTaskBarWnd()
 //---------------------------.
 // マウスが他のウィンドウの上にある場合そのウィンドウのハンドルを取得(上にない場合:NULL).
 //---------------------------.
-HWND WindowManager::GetMouseOverTheWindow()
+HWND WindowsWindowManager::GetMouseOverTheWindow()
 {
 	const D3DXPOSITION3& MousePos = Input::GetMousePosition3();
 	return GetPointOverTheWindow( MousePos );
@@ -309,7 +309,7 @@ HWND WindowManager::GetMouseOverTheWindow()
 //---------------------------.
 // マウスが他のウィンドウの上にあるか取得.
 //---------------------------.
-bool WindowManager::GetIsMouseOverTheWindow()
+bool WindowsWindowManager::GetIsMouseOverTheWindow()
 {
 	const D3DXPOSITION3& MousePos = Input::GetMousePosition3();
 	return GetIsPointOverTheWindow( MousePos );
@@ -318,9 +318,9 @@ bool WindowManager::GetIsMouseOverTheWindow()
 //---------------------------.
 // 指定した座標が他のウィンドウの上にある場合そのウィンドウのハンドルを取得(上にない場合:NULL).
 //---------------------------.
-HWND WindowManager::GetPointOverTheWindow( const D3DXPOSITION3& Pos )
+HWND WindowsWindowManager::GetPointOverTheWindow( const D3DXPOSITION3& Pos )
 {
-	WindowManager* pI = GetInstance();
+	WindowsWindowManager* pI = GetInstance();
 
 	// ウィンドウリストを更新していない場合更新する.
 	if ( pI->m_IsWindowUpdate == false ) WindowListUpdate();
@@ -336,7 +336,7 @@ HWND WindowManager::GetPointOverTheWindow( const D3DXPOSITION3& Pos )
 	}
 	return NULL;
 }
-HWND WindowManager::GetPointOverTheWindow( const D3DXPOSITION2& Pos )
+HWND WindowsWindowManager::GetPointOverTheWindow( const D3DXPOSITION2& Pos )
 {
 	return GetPointOverTheWindow( { Pos.x, Pos.y, INIT_FLOAT } );
 }
@@ -344,11 +344,11 @@ HWND WindowManager::GetPointOverTheWindow( const D3DXPOSITION2& Pos )
 //---------------------------.
 // 指定した座標が他のウィンドウの上にあるか取得.
 //---------------------------.
-bool WindowManager::GetIsPointOverTheWindow( const D3DXPOSITION3& Pos )
+bool WindowsWindowManager::GetIsPointOverTheWindow( const D3DXPOSITION3& Pos )
 {
 	return GetPointOverTheWindow( Pos ) != NULL;
 }
-bool WindowManager::GetIsPointOverTheWindow( const D3DXPOSITION2& Pos )
+bool WindowsWindowManager::GetIsPointOverTheWindow( const D3DXPOSITION2& Pos )
 {
 	return GetIsPointOverTheWindow( { Pos.x, Pos.y, INIT_FLOAT } );
 }
@@ -356,9 +356,9 @@ bool WindowManager::GetIsPointOverTheWindow( const D3DXPOSITION2& Pos )
 //---------------------------.
 // ウィンドウの名前からハンドルを取得.
 //---------------------------.
-HWND WindowManager::GetFindWindow( const std::string& Name )
+HWND WindowsWindowManager::GetFindWindow( const std::string& Name )
 {
-	WindowManager* pI = GetInstance();
+	WindowsWindowManager* pI = GetInstance();
 
 	// ウィンドウリストを更新していない場合更新する.
 	if ( pI->m_IsWindowUpdate == false ) WindowListUpdate();
@@ -368,9 +368,9 @@ HWND WindowManager::GetFindWindow( const std::string& Name )
 //---------------------------.
 // ゴミがこのウインドウハンドルを取得
 //---------------------------.
-HWND WindowManager::GetTrashCanWindow()
+HWND WindowsWindowManager::GetTrashCanWindow()
 {
-	WindowManager* pI = GetInstance();
+	WindowsWindowManager* pI = GetInstance();
 
 	static const std::string ShellName = []() -> std::string {
 		LPITEMIDLIST pIDL = nullptr;
@@ -404,9 +404,9 @@ HWND WindowManager::GetTrashCanWindow()
 //---------------------------.
 // デスクトップのアイコン名からアイコンインデックスを取得.
 //---------------------------.
-ICOINDEX WindowManager::GetFindDesktopIcon( const std::string& Name )
+ICOINDEX WindowsWindowManager::GetFindDesktopIcon( const std::string& Name )
 {
-	WindowManager* pI = GetInstance();
+	WindowsWindowManager* pI = GetInstance();
 
 	// アイコンリストを更新していない場合更新する.
 	if ( pI->m_IsDesktopIconUpdate == false ) DesktopIconUpdate();
@@ -416,9 +416,9 @@ ICOINDEX WindowManager::GetFindDesktopIcon( const std::string& Name )
 //---------------------------.
 // ウィンドウの情報を取得.
 //---------------------------.
-WindowManager::WndList WindowManager::GetWindowList()
+WindowsWindowManager::WndList WindowsWindowManager::GetWindowList()
 {
-	WindowManager* pI = GetInstance();
+	WindowsWindowManager* pI = GetInstance();
 
 	// ウィンドウクラスを更新していない場合更新する.
 	if ( pI->m_IsWindowUpdate == false ) WindowListUpdate();
@@ -428,9 +428,9 @@ WindowManager::WndList WindowManager::GetWindowList()
 //---------------------------.
 // デスクトップのアイコンの詳細情報リストの取得.
 //---------------------------.
-WindowManager::IconList WindowManager::GetDesktopIconList()
+WindowsWindowManager::IconList WindowsWindowManager::GetDesktopIconList()
 {
-	WindowManager* pI = GetInstance();
+	WindowsWindowManager* pI = GetInstance();
 
 	// アイコンリストを更新していない場合更新する.
 	if ( pI->m_IsDesktopIconUpdate == false ) DesktopIconUpdate();
@@ -440,9 +440,9 @@ WindowManager::IconList WindowManager::GetDesktopIconList()
 //---------------------------.
 // ウィンドウの情報の取得.
 //---------------------------.
-RECT WindowManager::GetWindowSize( const HWND& hWnd )
+RECT WindowsWindowManager::GetWindowSize( const HWND& hWnd )
 {
-	WindowManager* pI = GetInstance();
+	WindowsWindowManager* pI = GetInstance();
 
 	// ウィンドウクラスを更新していない場合更新する.
 	if ( pI->m_IsWindowUpdate == false ) WindowListUpdate();
@@ -452,9 +452,9 @@ RECT WindowManager::GetWindowSize( const HWND& hWnd )
 //---------------------------.
 // ドロップシャドウを除いたウィンドウの情報の取得.
 //---------------------------.
-RECT WindowManager::GetWindowNoShadowSize( const HWND& hWnd )
+RECT WindowsWindowManager::GetWindowNoShadowSize( const HWND& hWnd )
 {
-	WindowManager* pI = GetInstance();
+	WindowsWindowManager* pI = GetInstance();
 
 	// ウィンドウクラスを更新していない場合更新する.
 	if ( pI->m_IsWindowUpdate == false ) WindowListUpdate();
@@ -464,9 +464,9 @@ RECT WindowManager::GetWindowNoShadowSize( const HWND& hWnd )
 //---------------------------.
 // ウィンドウ名の取得.
 //---------------------------.
-std::string WindowManager::GetWindowName( const HWND& hWnd )
+std::string WindowsWindowManager::GetWindowName( const HWND& hWnd )
 {
-	WindowManager* pI = GetInstance();
+	WindowsWindowManager* pI = GetInstance();
 
 	// ウィンドウクラスを更新していない場合更新する.
 	if ( pI->m_IsWindowUpdate == false ) WindowListUpdate();
@@ -476,9 +476,9 @@ std::string WindowManager::GetWindowName( const HWND& hWnd )
 //---------------------------.
 // ウィンドウクラス名の取得.
 //---------------------------.
-std::string WindowManager::GetWindowClassName( const HWND& hWnd )
+std::string WindowsWindowManager::GetWindowClassName( const HWND& hWnd )
 {
-	WindowManager* pI = GetInstance();
+	WindowsWindowManager* pI = GetInstance();
 
 	// ウィンドウクラスを更新していない場合更新する.
 	if ( pI->m_IsWindowUpdate == false ) WindowListUpdate();
@@ -488,9 +488,9 @@ std::string WindowManager::GetWindowClassName( const HWND& hWnd )
 //---------------------------.
 // Zオーダーの取得( 数字が小さい程上側 ).
 //---------------------------.
-int WindowManager::GetWindowZOrder( const HWND& hWnd )
+int WindowsWindowManager::GetWindowZOrder( const HWND& hWnd )
 {
-	WindowManager* pI = GetInstance();
+	WindowsWindowManager* pI = GetInstance();
 
 	// ウィンドウクラスを更新していない場合更新する.
 	if ( pI->m_IsWindowUpdate == false ) WindowListUpdate();
@@ -500,9 +500,9 @@ int WindowManager::GetWindowZOrder( const HWND& hWnd )
 //---------------------------.
 // アイコンの位置を取得.
 //---------------------------.
-D3DXPOSITION2 WindowManager::GetDesktopIconPosition( const ICOINDEX Index )
+D3DXPOSITION2 WindowsWindowManager::GetDesktopIconPosition( const ICOINDEX Index )
 {
-	WindowManager* pI = GetInstance();
+	WindowsWindowManager* pI = GetInstance();
 
 	// アイコンリストを更新していない場合更新する.
 	if ( pI->m_IsDesktopIconUpdate == false ) DesktopIconUpdate();
@@ -512,9 +512,9 @@ D3DXPOSITION2 WindowManager::GetDesktopIconPosition( const ICOINDEX Index )
 //---------------------------.
 // アイコンの名前を取得.
 //---------------------------.
-std::string WindowManager::GetDesktopIconName( const ICOINDEX Index )
+std::string WindowsWindowManager::GetDesktopIconName( const ICOINDEX Index )
 {
-	WindowManager* pI = GetInstance();
+	WindowsWindowManager* pI = GetInstance();
 
 	// アイコンリストを更新していない場合更新する.
 	if ( pI->m_IsDesktopIconUpdate == false ) DesktopIconUpdate();
@@ -524,9 +524,9 @@ std::string WindowManager::GetDesktopIconName( const ICOINDEX Index )
 //---------------------------.
 // デスクトップのアイコンのファイルパスを取得.
 //---------------------------.
-std::string WindowManager::GetDesktopIconPath( const ICOINDEX Index )
+std::string WindowsWindowManager::GetDesktopIconPath( const ICOINDEX Index )
 {
-	WindowManager* pI = GetInstance();
+	WindowsWindowManager* pI = GetInstance();
 
 	// アイコンリストを更新していない場合更新する.
 	if ( pI->m_IsDesktopIconUpdate == false ) DesktopIconUpdate();
@@ -536,7 +536,7 @@ std::string WindowManager::GetDesktopIconPath( const ICOINDEX Index )
 //---------------------------.
 // デスクトップのアイコンのファイル容量（バイト）を取得.
 //---------------------------.
-ULONGLONG WindowManager::GetDesktopIconFileSize( const ICOINDEX Index )
+ULONGLONG WindowsWindowManager::GetDesktopIconFileSize( const ICOINDEX Index )
 {
 	// 実ファイルパスを解決してから容量を求める.
 	const std::string Path = GetDesktopIconFilePath( Index );
@@ -547,9 +547,9 @@ ULONGLONG WindowManager::GetDesktopIconFileSize( const ICOINDEX Index )
 //---------------------------.
 // デスクトップのアイコンの実ファイルパスを取得.
 //---------------------------.
-std::string WindowManager::GetDesktopIconFilePath( const ICOINDEX Index )
+std::string WindowsWindowManager::GetDesktopIconFilePath( const ICOINDEX Index )
 {
-	WindowManager* pI = GetInstance();
+	WindowsWindowManager* pI = GetInstance();
 
 	// アイコンリストを更新していない場合更新する.
 	if ( pI->m_IsDesktopIconUpdate == false ) DesktopIconUpdate();
@@ -592,7 +592,7 @@ std::string WindowManager::GetDesktopIconFilePath( const ICOINDEX Index )
 //---------------------------.
 // パスの容量（バイト）を取得.
 //---------------------------.
-ULONGLONG WindowManager::GetPathTotalSize( const std::string& Path )
+ULONGLONG WindowsWindowManager::GetPathTotalSize( const std::string& Path )
 {
 	// 無名名前空間側の実装を呼ぶ( インスタンスの状態には触れない ).
 	return ::GetPathTotalSize( StringConversion::to_wString( Path ) );
@@ -601,9 +601,9 @@ ULONGLONG WindowManager::GetPathTotalSize( const std::string& Path )
 //---------------------------.
 // デスクトップのアイコンの位置を設定.
 //---------------------------.
-void WindowManager::SetDesktopIconPosition( const ICOINDEX Index, const int x, const int y )
+void WindowsWindowManager::SetDesktopIconPosition( const ICOINDEX Index, const int x, const int y )
 {
-	WindowManager* pI = GetInstance();
+	WindowsWindowManager* pI = GetInstance();
 
 	// 設定する位置を調整する.
 	const int PosX = x - pI->m_AddWindowRect.left;
@@ -616,11 +616,11 @@ void WindowManager::SetDesktopIconPosition( const ICOINDEX Index, const int x, c
 		MAKELPARAM( x, y )
 	);
 }
-void WindowManager::SetDesktopIconPosition( const ICOINDEX Index, const D3DXPOSITION2& Pos )
+void WindowsWindowManager::SetDesktopIconPosition( const ICOINDEX Index, const D3DXPOSITION2& Pos )
 {
 	SetDesktopIconPosition( Index, static_cast<int>( Pos.x ), static_cast<int>( Pos.y ) );
 }
-void WindowManager::SetDesktopIconPosition( const ICOINDEX Index, const D3DXPOSITION3& Pos )
+void WindowsWindowManager::SetDesktopIconPosition( const ICOINDEX Index, const D3DXPOSITION3& Pos )
 {
 	SetDesktopIconPosition( Index, static_cast<int>( Pos.x ), static_cast<int>( Pos.y ) );
 }
@@ -628,17 +628,17 @@ void WindowManager::SetDesktopIconPosition( const ICOINDEX Index, const D3DXPOSI
 //---------------------------.
 // デスクトップのアイコンの位置を追加.
 //---------------------------.
-void WindowManager::AddDesktopIconPosition( const ICOINDEX Index, const int x, const int y )
+void WindowsWindowManager::AddDesktopIconPosition( const ICOINDEX Index, const int x, const int y )
 {
-	WindowManager* pI = GetInstance();
+	WindowsWindowManager* pI = GetInstance();
 
 	SetDesktopIconPosition( Index, static_cast<int>( pI->m_IconPosMap[Index].x + x ), static_cast<int>( pI->m_IconPosMap[Index].y + y ) );
 }
-void WindowManager::AddDesktopIconPosition( const ICOINDEX Index, const D3DXPOSITION2& Pos )
+void WindowsWindowManager::AddDesktopIconPosition( const ICOINDEX Index, const D3DXPOSITION2& Pos )
 {
 	AddDesktopIconPosition( Index, static_cast<int>( Pos.x ), static_cast<int>( Pos.y ) );
 }
-void WindowManager::AddDesktopIconPosition( const ICOINDEX Index, const D3DXPOSITION3& Pos )
+void WindowsWindowManager::AddDesktopIconPosition( const ICOINDEX Index, const D3DXPOSITION3& Pos )
 {
 	AddDesktopIconPosition( Index, static_cast<int>( Pos.x ), static_cast<int>( Pos.y ) );
 }
@@ -646,15 +646,15 @@ void WindowManager::AddDesktopIconPosition( const ICOINDEX Index, const D3DXPOSI
 //---------------------------.
 // ウィンドウの位置を設定.
 //---------------------------.
-void WindowManager::SetWindowPosition( const HWND& hWnd, const int x, const int y )
+void WindowsWindowManager::SetWindowPosition( const HWND& hWnd, const int x, const int y )
 {
 	SetWindowPos( hWnd, NULL, x, y, 0, 0, SWP_NOSIZE | SWP_NOZORDER );
 }
-void WindowManager::SetWindowPosition( const HWND& hWnd, const D3DXPOSITION2& Pos )
+void WindowsWindowManager::SetWindowPosition( const HWND& hWnd, const D3DXPOSITION2& Pos )
 {
 	SetWindowPosition( hWnd, static_cast<int>( Pos.x ), static_cast<int>( Pos.y ) );
 }
-void WindowManager::SetWindowPosition( const HWND& hWnd, const D3DXPOSITION3& Pos )
+void WindowsWindowManager::SetWindowPosition( const HWND& hWnd, const D3DXPOSITION3& Pos )
 {
 	SetWindowPosition( hWnd, static_cast<int>( Pos.x ), static_cast<int>( Pos.y ) );
 }
@@ -662,17 +662,17 @@ void WindowManager::SetWindowPosition( const HWND& hWnd, const D3DXPOSITION3& Po
 //---------------------------.
 // ウィンドウの位置を追加.
 //---------------------------.
-void WindowManager::AddWindowPosition( const HWND& hWnd, const int x, const int y )
+void WindowsWindowManager::AddWindowPosition( const HWND& hWnd, const int x, const int y )
 {
-	WindowManager* pI = GetInstance();
+	WindowsWindowManager* pI = GetInstance();
 
 	SetWindowPosition( hWnd, pI->m_WindowRectMap[hWnd].left + x, pI->m_WindowRectMap[hWnd].top  + y );
 }
-void WindowManager::AddWindowPosition( const HWND& hWnd, const D3DXPOSITION2& Pos )
+void WindowsWindowManager::AddWindowPosition( const HWND& hWnd, const D3DXPOSITION2& Pos )
 {
 	AddWindowPosition( hWnd, static_cast<int>( Pos.x ), static_cast<int>( Pos.y ) );
 }
-void WindowManager::AddWindowPosition( const HWND& hWnd, const D3DXPOSITION3& Pos )
+void WindowsWindowManager::AddWindowPosition( const HWND& hWnd, const D3DXPOSITION3& Pos )
 {
 	AddWindowPosition( hWnd, static_cast<int>( Pos.x ), static_cast<int>( Pos.y ) );
 }
@@ -680,15 +680,15 @@ void WindowManager::AddWindowPosition( const HWND& hWnd, const D3DXPOSITION3& Po
 //---------------------------.
 // ウィンドウのサイズを設定.
 //---------------------------.
-void WindowManager::SetWindowSize( const HWND& hWnd, const int x, const int y )
+void WindowsWindowManager::SetWindowSize( const HWND& hWnd, const int x, const int y )
 {
 	SetWindowPos( hWnd, NULL, 0, 0, x, y, SWP_NOMOVE | SWP_NOZORDER );
 }
-void WindowManager::SetWindowSize( const HWND& hWnd, const D3DXSCALE2& Size )
+void WindowsWindowManager::SetWindowSize( const HWND& hWnd, const D3DXSCALE2& Size )
 {
 	SetWindowSize( hWnd, static_cast<int>( Size.x ), static_cast<int>( Size.y ) );
 }
-void WindowManager::SetWindowSize( const HWND& hWnd, const D3DXSCALE3& Size )
+void WindowsWindowManager::SetWindowSize( const HWND& hWnd, const D3DXSCALE3& Size )
 {
 	SetWindowSize( hWnd, static_cast<int>( Size.x ), static_cast<int>( Size.y ) );
 }
@@ -696,17 +696,17 @@ void WindowManager::SetWindowSize( const HWND& hWnd, const D3DXSCALE3& Size )
 //---------------------------.
 // ウィンドウのサイズを追加.
 //---------------------------.
-void WindowManager::AddWindowSize( const HWND& hWnd, const int x, const int y )
+void WindowsWindowManager::AddWindowSize( const HWND& hWnd, const int x, const int y )
 {
-	WindowManager* pI = GetInstance();
+	WindowsWindowManager* pI = GetInstance();
 
 	SetWindowSize( hWnd, pI->m_WindowRectMap[hWnd].right - pI->m_WindowRectMap[hWnd].left + x, pI->m_WindowRectMap[hWnd].bottom - pI->m_WindowRectMap[hWnd].top + y );
 }
-void WindowManager::AddWindowSize( const HWND& hWnd, const D3DXSCALE2& Size )
+void WindowsWindowManager::AddWindowSize( const HWND& hWnd, const D3DXSCALE2& Size )
 {
 	AddWindowSize( hWnd, static_cast<int>( Size.x ), static_cast< int >( Size.y ) );
 }
-void WindowManager::AddWindowSize( const HWND& hWnd, const D3DXSCALE3& Size )
+void WindowsWindowManager::AddWindowSize( const HWND& hWnd, const D3DXSCALE3& Size )
 {
 	AddWindowSize( hWnd, static_cast<int>( Size.x ), static_cast< int >( Size.y ) );
 }
@@ -714,7 +714,7 @@ void WindowManager::AddWindowSize( const HWND& hWnd, const D3DXSCALE3& Size )
 //---------------------------.
 // ウィンドウを最前面に移動.
 //---------------------------.
-void WindowManager::SetWindowTop( const HWND& hWnd, const bool IsLock )
+void WindowsWindowManager::SetWindowTop( const HWND& hWnd, const bool IsLock )
 {
 	SetWindowPos( hWnd, IsLock ? HWND_TOPMOST : HWND_NOTOPMOST, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE | SWP_SHOWWINDOW );
 	if ( IsLock ) return;
@@ -724,7 +724,7 @@ void WindowManager::SetWindowTop( const HWND& hWnd, const bool IsLock )
 //---------------------------.
 // ウィンドウを最背面に移動.
 //---------------------------.
-void WindowManager::SetWindowBottom( const HWND& hWnd )
+void WindowsWindowManager::SetWindowBottom( const HWND& hWnd )
 {
 	SetWindowPos( hWnd, HWND_BOTTOM, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE | SWP_SHOWWINDOW );
 }
@@ -732,7 +732,7 @@ void WindowManager::SetWindowBottom( const HWND& hWnd )
 //---------------------------.
 // ウィンドウを指定したウィンドウの下に移動.
 //---------------------------.
-void WindowManager::SetWindowSelectDown( const HWND& hWnd, const HWND& hSelectWnd )
+void WindowsWindowManager::SetWindowSelectDown( const HWND& hWnd, const HWND& hSelectWnd )
 {
 	SetWindowPos( hWnd, hSelectWnd, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE | SWP_SHOWWINDOW );
 }
@@ -740,7 +740,7 @@ void WindowManager::SetWindowSelectDown( const HWND& hWnd, const HWND& hSelectWn
 //---------------------------.
 // ウィンドウを指定したウィンドウの上に移動.
 //---------------------------.
-void WindowManager::SetWindowSelectUp( const HWND& hWnd, const HWND& hSelectWnd )
+void WindowsWindowManager::SetWindowSelectUp( const HWND& hWnd, const HWND& hSelectWnd )
 {
 	SetWindowPos( hWnd, GetWindow( hSelectWnd, GW_HWNDPREV ), 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE | SWP_SHOWWINDOW );
 }
@@ -748,7 +748,7 @@ void WindowManager::SetWindowSelectUp( const HWND& hWnd, const HWND& hSelectWnd 
 //---------------------------.
 // ウィンドウの破棄.
 //---------------------------.
-void WindowManager::WindowDelete( const HWND& hWnd )
+void WindowsWindowManager::WindowDelete( const HWND& hWnd )
 {
 	// ウィンドウの破棄.
 	if ( hWnd == NULL ) PostMessage( GetInstance()->m_hMyWindow, WM_CLOSE, 0, 0 );
@@ -758,7 +758,7 @@ void WindowManager::WindowDelete( const HWND& hWnd )
 //---------------------------.
 // ウィンドウを強調する.
 //---------------------------.
-void WindowManager::WindowFlash( const HWND& hWnd )
+void WindowsWindowManager::WindowFlash( const HWND& hWnd )
 {
 	FLASHWINFO fInfo {
 		sizeof( FLASHWINFO ),
@@ -771,9 +771,9 @@ void WindowManager::WindowFlash( const HWND& hWnd )
 //---------------------------.
 // ウィンドウの更新.
 //---------------------------.
-void WindowManager::WindowListUpdate()
+void WindowsWindowManager::WindowListUpdate()
 {
-	WindowManager* pI = GetInstance();
+	WindowsWindowManager* pI = GetInstance();
 
 	// リストの初期化.
 	pI->m_WindowList.clear();
@@ -880,9 +880,9 @@ void WindowManager::WindowListUpdate()
 //	・このゲームのクリック可能な部分( スライム等 )の上.
 //	・デスクトップのアイコンの上( 範囲選択ではなくアイコンのドラッグになるため ).
 //---------------------------.
-bool WindowManager::GetIsMouseOnEmptyDesktop()
+bool WindowsWindowManager::GetIsMouseOnEmptyDesktop()
 {
-	WindowManager* pI = GetInstance();
+	WindowsWindowManager* pI = GetInstance();
 	if ( pI->m_hDesktop == NULL ) return false;
 
 	// カーソル直下の( クリックが実際に届く )ウィンドウを取得.
@@ -913,9 +913,9 @@ bool WindowManager::GetIsMouseOnEmptyDesktop()
 //---------------------------.
 // デスクトップのドラッグ選択矩形の更新.
 //---------------------------.
-void WindowManager::DesktopDragSelectUpdate()
+void WindowsWindowManager::DesktopDragSelectUpdate()
 {
-	WindowManager* pI = GetInstance();
+	WindowsWindowManager* pI = GetInstance();
 
 	const D3DXPOSITION2& MousePos = Input::GetMousePosition();
 
@@ -960,9 +960,9 @@ void WindowManager::DesktopDragSelectUpdate()
 //---------------------------.
 // デスクトップのアイコンの位置の更新.
 //---------------------------.
-void WindowManager::DesktopIconUpdate()
+void WindowsWindowManager::DesktopIconUpdate()
 {
-	WindowManager* pI = GetInstance();
+	WindowsWindowManager* pI = GetInstance();
 
 	// アイテム数取得.
 	int nCount;
@@ -1067,9 +1067,9 @@ void WindowManager::DesktopIconUpdate()
 //---------------------------.
 // タスクバーの更新.
 //---------------------------.
-void WindowManager::TaskBarUpdate()
+void WindowsWindowManager::TaskBarUpdate()
 {
-	WindowManager* pI = GetInstance();
+	WindowsWindowManager* pI = GetInstance();
 
 	if ( pI->m_IsTaskBarUpdate ) return;
 
@@ -1084,9 +1084,9 @@ void WindowManager::TaskBarUpdate()
 //---------------------------.
 // モニターの物理範囲とワークエリアの両方を取得（ゲーム座標系）.
 //---------------------------.
-WindowManager::MonitorAreaList WindowManager::GetMonitorAreas()
+WindowsWindowManager::MonitorAreaList WindowsWindowManager::GetMonitorAreas()
 {
-	WindowManager* pI = GetInstance();
+	WindowsWindowManager* pI = GetInstance();
 
 	SMonitorEnumData Data;
 	Data.AddRect = pI->m_AddWindowRect;
@@ -1097,7 +1097,7 @@ WindowManager::MonitorAreaList WindowManager::GetMonitorAreas()
 //---------------------------.
 // モニターのワークエリアリストを取得（ゲーム座標系）.
 //---------------------------.
-WindowManager::MonitorList WindowManager::GetMonitorWorkAreas()
+WindowsWindowManager::MonitorList WindowsWindowManager::GetMonitorWorkAreas()
 {
 	const MonitorAreaList Areas = GetMonitorAreas();
 	MonitorList Result;
@@ -1109,7 +1109,7 @@ WindowManager::MonitorList WindowManager::GetMonitorWorkAreas()
 //---------------------------.
 // 指定したX座標が属するモニターの地面Y座標(ワークエリア下端)を取得(ゲーム座標系).
 //---------------------------.
-float WindowManager::GetGroundY( const float X )
+float WindowsWindowManager::GetGroundY( const float X )
 {
 	const MonitorAreaList Areas = GetMonitorAreas();
 	if ( Areas.empty() ) return 0.0f;
@@ -1138,7 +1138,7 @@ float WindowManager::GetGroundY( const float X )
 //---------------------------.
 // ウィンドウを画面外へ完全に出さないように移動量を制限して動かす.
 //---------------------------.
-void WindowManager::MoveWindowInScreen( const HWND& hWnd, const int dx, const int dy )
+void WindowsWindowManager::MoveWindowInScreen( const HWND& hWnd, const int dx, const int dy )
 {
 	if ( hWnd == NULL			) return;
 	if ( dx == 0 && dy == 0		) return;
@@ -1177,7 +1177,7 @@ void WindowManager::MoveWindowInScreen( const HWND& hWnd, const int dx, const in
 //---------------------------.
 // ウィンドウが全画面表示( 最大化 or モニター全体を覆う )かを取得.
 //---------------------------.
-bool WindowManager::IsFullScreenWindow( const HWND& hWnd )
+bool WindowsWindowManager::IsFullScreenWindow( const HWND& hWnd )
 {
 	if ( hWnd == NULL ) return false;
 

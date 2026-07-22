@@ -1,7 +1,7 @@
 #include "FlowerManager.h"
 #include "Flower/Flower.h"
 #include "..\..\..\..\..\..\Resource\SpriteResource\SpriteResource.h"
-#include "..\..\..\..\..\..\Utility\WindowManager\WindowManager.h"
+#include "..\..\..\..\..\..\Utility\WindowsWindowManager\WindowsWindowManager.h"
 #include "..\..\..\..\..\..\Utility\Random\Random.h"
 #include "..\..\..\..\..\..\Utility\SaveDataManager\SaveDataManager.h"
 
@@ -76,7 +76,7 @@ void CFlowerManager::SubRender()
 //---------------------------.
 void CFlowerManager::Fill( const int Num )
 {
-	const RECT& Size  = WindowManager::GetMyWndSize();
+	const RECT& Size  = WindowsWindowManager::GetMyWndSize();
 	const float Wnd_W = static_cast< float >( Size.right - Size.left );
 
 	for ( int i = 0; i < Num; ++i ) {

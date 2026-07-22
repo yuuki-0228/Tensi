@@ -77,7 +77,23 @@ private:
 
 		void Load();
 		stConstFreeCamera() { Load(); }
-	} FreeCameraData; 
+	} FreeCameraData;
+
+	struct stConstNetwork {
+		float		DEFAULT_CONNECTION_TIMEOUT_SEC;	// 既定の応答無し切断時間(秒)
+		float		DEFAULT_CONNECT_TIMEOUT_SEC;	// 既定の接続タイムアウト(秒)
+		int			DEFAULT_MAX_PLAYER;	// 既定の最大参加人数(ホストを含む)
+		float		DEFAULT_SYNC_FPS;	// 既定の状態同期の送信頻度(回/秒)
+		int			DEFAULT_TCP_PORT;	// 既定のTCPポート番号(接続・重要メッセージ用)
+		int			DEFAULT_UDP_PORT;	// 既定のUDPポート番号(状態同期用)
+		int			DISCOVERY_PORT;	// 同一ネットワーク内の部屋検索に使うUDPポート番号
+		int			MAX_MESSAGE_SIZE;	// 任意メッセージの最大サイズ(byte)
+		int			MAX_PLAYER_LIMIT;	// 最大参加人数の上限
+		int			MAX_SYNC_DATA_SIZE;	// 1プレイヤーあたりの同期データの最大サイズ(byte)
+
+		void Load();
+		stConstNetwork() { Load(); }
+	} NetworkData;
 
 	struct stConstSystem {
 		float		AUTO_SAVE_TIME;	// オートセーブを行う間隔(秒)
@@ -136,6 +152,7 @@ public:
 	static inline stConstExplore Explore() { return GetInstance()->ExploreData; }
 	static inline stConstFlower Flower() { return GetInstance()->FlowerData; }
 	static inline stConstFreeCamera FreeCamera() { return GetInstance()->FreeCameraData; }
+	static inline stConstNetwork Network() { return GetInstance()->NetworkData; }
 	static inline stConstSystem System() { return GetInstance()->SystemData; }
 	static inline stConstWaterFall WaterFall() { return GetInstance()->WaterFallData; }
 	static inline stConstWateringCan WateringCan() { return GetInstance()->WateringCanData; }

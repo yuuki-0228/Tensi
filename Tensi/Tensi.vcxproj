@@ -82,6 +82,9 @@
     <ClCompile Include="SourceCode\Utility\SaveDataManager\WeedSaveData\WeedSaveData.cpp" />
     <ClCompile Include="SourceCode\Utility\TimeManager\TimeManager.cpp" />
     <ClCompile Include="SourceCode\Utility\ThreadManager\ThreadManager.cpp" />
+    <ClCompile Include="SourceCode\Utility\Network\NetworkManager.cpp" />
+    <ClCompile Include="SourceCode\Utility\Network\RoomCode\RoomCode.cpp" />
+    <ClCompile Include="SourceCode\Utility\Network\UPnP\UPnPPortMapper.cpp" />
     <ClCompile Include="SourceCode\Object\GameObject\Actor\BackGroundManager\ActorBackGround\Tree\Tree.cpp" />
     <ClCompile Include="SourceCode\Object\GameObject\Actor\BackGroundManager\ActorBackGround\WeedManager\WeedManager.cpp" />
     <ClCompile Include="SourceCode\Object\GameObject\Actor\WindowObjectManager\WindowObjectManager.cpp" />
@@ -91,7 +94,7 @@
     <ClCompile Include="SourceCode\Object\GameObject\Actor\WindowObjectManager\WindowObject\Player\Player.cpp" />
     <ClCompile Include="SourceCode\Object\GameObject\Actor\WindowObjectManager\WindowObject\WindowObject.cpp" />
     <ClCompile Include="SourceCode\Utility\WindowsMenuManager\WindowsMenuManager.cpp" />
-    <ClCompile Include="SourceCode\Utility\WindowManager\WindowManager.cpp" />
+    <ClCompile Include="SourceCode\Utility\WindowsWindowManager\WindowsWindowManager.cpp" />
     <ClCompile Include="SourceCode\Utility\WindowsShortCutManager\WindowsShortCutManager.cpp" />
     <ClCompile Include="SourceCode\Scene\FadeManager\FadeBase\MaskFade\MaskFade.cpp" />
     <ClCompile Include="SourceCode\Utility\SaveDataManager\SaveDataManager.cpp" />
@@ -146,7 +149,6 @@
     <ClCompile Include="SourceCode\Utility\FileManager\ImagSize\ImageSize.cpp" />
     <ClCompile Include="SourceCode\Utility\FrameRate\FrameRate.cpp" />
     <ClCompile Include="SourceCode\Utility\Input\Controller\DirectInput\DirectInput.cpp" />
-    <ClCompile Include="SourceCode\Utility\Message\Message.cpp" />
     <ClCompile Include="SourceCode\Utility\StringConversion\StringConversion.cpp" />
     <ClCompile Include="SourceCode\Common\WindowTextRenderer\WindowTextRenderer.cpp" />
     <ClCompile Include="SourceCode\Utility\FileManager\FileManager.cpp" />
@@ -274,6 +276,10 @@
     <ClInclude Include="SourceCode\Utility\SaveDataManager\WeedSaveData\WeedSaveData.h" />
     <ClInclude Include="SourceCode\Utility\TimeManager\TimeManager.h" />
     <ClInclude Include="SourceCode\Utility\ThreadManager\ThreadManager.h" />
+    <ClInclude Include="SourceCode\Utility\Network\NetworkManager.h" />
+    <ClInclude Include="SourceCode\Utility\Network\NetworkStruct.h" />
+    <ClInclude Include="SourceCode\Utility\Network\RoomCode\RoomCode.h" />
+    <ClInclude Include="SourceCode\Utility\Network\UPnP\UPnPPortMapper.h" />
     <ClInclude Include="SourceCode\Object\GameObject\Actor\BackGroundManager\ActorBackGround\Tree\Tree.h" />
     <ClInclude Include="SourceCode\Object\GameObject\Actor\BackGroundManager\ActorBackGround\WeedManager\WeedManager.h" />
     <ClInclude Include="SourceCode\Object\GameObject\Actor\WindowObjectManager\WindowObjectManager.h" />
@@ -283,7 +289,7 @@
     <ClInclude Include="SourceCode\Object\GameObject\Actor\WindowObjectManager\WindowObject\Player\Player.h" />
     <ClInclude Include="SourceCode\Object\GameObject\Actor\WindowObjectManager\WindowObject\WindowObject.h" />
     <ClInclude Include="SourceCode\Utility\WindowsMenuManager\WindowsMenuManager.h" />
-    <ClInclude Include="SourceCode\Utility\WindowManager\WindowManager.h" />
+    <ClInclude Include="SourceCode\Utility\WindowsWindowManager\WindowsWindowManager.h" />
     <ClInclude Include="SourceCode\Utility\WindowsShortCutManager\WindowsShortCutManager.h" />
     <ClInclude Include="SourceCode\Scene\FadeManager\FadeBase\MaskFade\MaskFade.h" />
     <ClInclude Include="SourceCode\Utility\SaveDataManager\SaveDataManager.h" />
@@ -342,7 +348,6 @@
     <ClInclude Include="SourceCode\Utility\Easing\Easing.h" />
     <ClInclude Include="SourceCode\Utility\FileManager\ImagSize\ImageSize.h" />
     <ClInclude Include="SourceCode\Utility\Input\Controller\DirectInput\DirectInput.h" />
-    <ClInclude Include="SourceCode\Utility\Message\Message.h" />
     <ClInclude Include="SourceCode\Utility\StringConversion\StringConversion.h" />
     <ClInclude Include="SourceCode\Utility\Transform\Transform.h" />
     <ClInclude Include="SourceCode\Utility\Animation\SpringAnimation\SpringAnimation.h" />

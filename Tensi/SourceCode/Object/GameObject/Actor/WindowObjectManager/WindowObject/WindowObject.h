@@ -3,7 +3,7 @@
 #include "..\..\..\Actor\WindowObjectManager\WindowObjectManager.h"
 #include "..\..\..\..\..\Common\Sprite\Sprite.h"
 #include "..\..\..\..\..\Resource\SpriteResource\SpriteResource.h"
-#include "..\..\..\..\..\Utility\WindowManager\WindowManager.h"
+#include "..\..\..\..\..\Utility\WindowsWindowManager\WindowsWindowManager.h"
 #include "..\..\..\..\..\Utility\Animation\SpringAnimation\SpringAnimation.h"
 
 /************************************************
@@ -152,7 +152,7 @@ protected:
 	bool						m_IsInWndSmall;		// 中に入ってるウィンドウが最小化されているか.
 	bool						m_IsTrashCan;		// ごみ箱に移動させるか.
 	bool						m_IsDisp;			// 表示されるか.
-	WindowManager::MonitorList	m_MonitorWorkAreas;	// モニターごとのワークエリア.
+	WindowsWindowManager::MonitorList	m_MonitorWorkAreas;	// モニターごとのワークエリア.
 
 private:
 	bool						m_IsWeightMouseSpeed;// 重さでマウス速度を変更中か.

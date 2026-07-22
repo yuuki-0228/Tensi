@@ -18,7 +18,7 @@ namespace {
 /************************************************
 *	ウィンドウの情報マネージャークラス.
 **/
-class WindowManager
+class WindowsWindowManager
 {
 public:
 	using IconFindMap	= std::unordered_map<std::string, ICOINDEX>;
@@ -61,8 +61,8 @@ public:
 	using IconList = std::vector<SDesktopIcon>;
 
 public:
-	WindowManager();
-	~WindowManager();
+	WindowsWindowManager();
+	~WindowsWindowManager();
 
 	// 初期化.
 	static HRESULT Init();
@@ -217,7 +217,7 @@ public:
 
 private:
 	// インスタンスの取得.
-	static WindowManager* GetInstance();
+	static WindowsWindowManager* GetInstance();
 
 	// ウィンドウの更新.
 	static void WindowListUpdate();

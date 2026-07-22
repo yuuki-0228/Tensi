@@ -16,11 +16,12 @@
 #include "..\Utility\FileManager\DragAndDrop\DragAndDrop.h"
 #include "..\Utility\FileManager\DragAndDrop\DragAndDrop.h"
 #include "..\Utility\Message\Message.h"
-#include "..\Utility\WindowManager\WindowManager.h"
+#include "..\Utility\WindowsWindowManager\WindowsWindowManager.h"
 #include "..\Utility\WindowsShortCutManager\WindowsShortCutManager.h"
 #include "..\Utility\WindowsMenuManager\WindowsMenuManager.h"
 #include "..\Utility\WindowsMessageBox\WindowsMessageBox.h"
 #include "..\Utility\ThreadManager\ThreadManager.h"
+#include "..\Utility\Network\NetworkManager.h"
 #include "..\System\SystemWindowManager\SystemWindowManager.h"
 #include <dwmapi.h>
 #include "../Utility/Const/Const.h"
@@ -119,11 +120,10 @@ void CMain::Update( const float& DeltaTime )
 	DirectX11::CheckActiveWindow();
 	ImGuiManager::SetingNewFrame();
 	Input::Update();
-	WindowManager::Update();
+	WindowsWindowManager::Update();
 	SceneManager::Update( DeltaTime );
 	CameraManager::Update( DeltaTime );
 	Light::Update();
-	Message::Update( DeltaTime );
 	SystemWindowManager::Update( DeltaTime );
 
 	// バックバッファをクリアにする.
@@ -185,7 +185,7 @@ HRESULT CMain::Create()
 	if ( FAILED( ImGuiManager::Init( m_hWnd ) ) ) return E_FAIL;
 #ifdef ENABLE_WINDOWS_WINDOW
 	// ウィンドウマネージャーの初期化.
-	if ( FAILED( WindowManager::Init() ) ) return E_FAIL;
+	if ( FAILED( WindowsWindowManager::Init() ) ) return E_FAIL;
 #endif
 #ifdef ENABLE_WINDOWS_MENU
 	// メニューの初期化.
@@ -280,6 +280,11 @@ void CMain::Loop()
 			ThreadManager::Update();
 #endif // ENABLE_THREAD
 
+#ifdef ENABLE_NETWORK
+			// ネットワークマネージャーの更新( 受信コールバックの実行など ).
+			NetworkManager::Update();
+#endif // ENABLE_NETWORK
+
 			// ロード中の更新処理.
 			m_IsGameLoad = m_pLoadManager->ThreadRelease();
 			//更新処理.
@@ -293,6 +298,11 @@ void CMain::Loop()
 	// 表示中のメッセージボックスを閉じる.
 	//	( 閉じられるまで戻らないため、スレッドの終了を待つ前に閉じる ).
 	WindowsMessageBox::Release();
+
+#ifdef ENABLE_NETWORK
+	// ネットワークの終了処理( 切断と全通信スレッドの終了待ち ).
+	NetworkManager::Release();
+#endif // ENABLE_NETWORK
 
 #ifdef ENABLE_THREAD
 	// 全スレッドの終了を待つ.
@@ -386,7 +396,7 @@ HRESULT CMain::InitWindow( HINSTANCE hInstance )
 		ErrorMessage( "ウィンドウ作成失敗" );
 		return E_FAIL;
 	}
-	WindowManager::SetWnd( m_hWnd );
+	WindowsWindowManager::SetWnd( m_hWnd );
 
 #ifdef ENABLE_SUB_WINDOW
 	// デスクトップ壁紙の上・デスクトップアイコンの下のレイヤーに描画するための
@@ -432,7 +442,7 @@ HRESULT CMain::InitWindow( HINSTANCE hInstance )
 			SetWindowPos( m_hSubWnd, HWND_TOP, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE | SWP_NOACTIVATE );
 		}
 	}
-	WindowManager::SetSubWnd( m_hSubWnd );
+	WindowsWindowManager::SetSubWnd( m_hSubWnd );
 #endif // ENABLE_SUB_WINDOW
 
 	// DCの取得.
