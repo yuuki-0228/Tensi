@@ -1,5 +1,5 @@
 #pragma once
-#include "..\..\..\SystemSetting.h"
+#include "..\..\..\SystemSettings.h"
 #include "..\..\..\Global.h"
 #ifdef ENABLE_MESH
 #include "..\Sphere\Sphere.h"

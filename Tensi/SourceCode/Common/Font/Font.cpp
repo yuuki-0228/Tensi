@@ -1,10 +1,10 @@
 #include "Font.h"
 #ifdef ENABLE_FONT
 #include "..\DirectX\DirectX11.h"
-#include "..\Sprite\Sprite.h"
 #include "..\..\Resource\FontResource\FontResource.h"
 #include "..\..\Object\Camera\CameraManager\CameraManager.h"
 #include "..\..\Utility\FileManager\FileManager.h"
+#include <cmath>
 
 namespace {
 	// シェーダファイル名(ディレクトリも含む).
@@ -12,6 +12,22 @@ namespace {
 
 	// フォントデータファイルパス.
 	constexpr char FONT_DATA_FILE_PATH[] = "Data\\Sprite\\Font\\FontData.json";
+
+	// 3D描画時の行間.
+	constexpr float LINE_SPACING_3D	= 12.0f;
+	// 下線の位置(セルの高さに対する割合).
+	constexpr float UNDERLINE_POS	= 0.88f;
+	// 取り消し線の位置(セルの高さに対する割合).
+	constexpr float STRIKEOUT_POS	= 0.52f;
+	// 下線・取り消し線の太さ(セルの高さに対する割合).
+	constexpr float LINE_SIZE		= 0.05f;
+
+	// アウトライン幅の最大値(SDF距離値).
+	constexpr float OUTLINE_DIST_MAX	= 0.4f;
+	// 太字の膨張量の最大値(SDF距離値).
+	constexpr float BOLD_DIST_MAX		= 0.2f;
+	// グロー幅の最大値(SDF距離値).
+	constexpr float GLOW_DIST_MAX		= 0.45f;
 }
 
 CFont::CFont()
@@ -26,6 +42,7 @@ CFont::CFont()
 	, m_Vertices				()
 	, m_FontState				()
 	, m_FontRenderState			()
+	, m_Size3D					()
 	, m_pSampleLinears			()
 	, m_FileName				( "" )
 	, m_DitherFlag				( false )
@@ -72,101 +89,13 @@ void CFont::RenderUI( SFontRenderState* pRenderState )
 {
 	SFontRenderState* RenderState = pRenderState == nullptr ? &m_FontRenderState : pRenderState;
 
-	RenderUI( RenderState->Text, RenderState );
+	RenderText( RenderState->Text, RenderState, false, false );
 }
 void CFont::RenderUI( const std::string& Text, SFontRenderState* pRenderState )
 {
 	SFontRenderState* RenderState = pRenderState == nullptr ? &m_FontRenderState : pRenderState;
 
-	// 非表示の場合は処理を行わない.
-	if ( RenderState->IsDisp	== false	) return;
-	if ( RenderState->Color.w	== 0.0f		) return;
-
-	// 文字の大きさ取得.
-	const float			TextSizeW = m_FontState.Disp.w * RenderState->Transform.GetWorldScale().x;
-	const float			TextSizeH = m_FontState.Disp.h * RenderState->Transform.GetWorldScale().x;
-
-	// 文字数の取得.
-	const std::wstring	wText	= StringConversion::to_wString( Text.substr( 0, Text.find( "\n" ) ) );
-	const int			TextNum = static_cast<int>( wText.size() );
-
-	// テキストの表示形式に対応した開始位置の変更.
-	const D3DXPOSITION3 Pos		= RenderState->Transform.Position;
-	bool				IsMove	= false;
-	if ( RenderState->TextAlign == ETextAlign::Right ) {
-		RenderState->Transform.Position.x -= TextSizeW * TextNum;
-		IsMove = true;
-	}
-	else if ( RenderState->TextAlign == ETextAlign::Center ) {
-		RenderState->Transform.Position.x -= TextSizeW * ( TextNum / 2.0f );
-		IsMove = true;
-	}
-
-	// 中心座標によて位置を調整する.
-	if ( IsMove ){
-		if ( m_FontState.LocalPosNo == ELocalPosition::Up ||
-			 m_FontState.LocalPosNo == ELocalPosition::Center ||
-			 m_FontState.LocalPosNo == ELocalPosition::Up )
-		{
-			RenderState->Transform.Position.x += TextSizeW / 2.0f;
-		}
-		if ( m_FontState.LocalPosNo == ELocalPosition::RightUp ||
-			 m_FontState.LocalPosNo == ELocalPosition::Right ||
-			 m_FontState.LocalPosNo == ELocalPosition::RightDown )
-		{
-			RenderState->Transform.Position.x += TextSizeW;
-		}
-	}
-
-	// 文字数分ループ.
-	for ( int i = 0; i < static_cast<int>( Text.length() ); ++i ){
-		// 表示する文字の取得.
-		std::string f = Text.substr( i, 1 );
-		if( IsDBCSLeadByte( Text[i] ) == TRUE ){
-			f = Text.substr( i++, 2 );	// 全角文字.
-		} else {
-			f = Text.substr( i, 1 );	// 半角文字.
-		}
-
-		// 改行.
-		if ( f == "\n" ) {
-			// 文字数の取得.
-			const int			NextNo	= i + 1;
-			const std::wstring	wText	= StringConversion::to_wString( Text.substr( NextNo, Text.find( "\n", NextNo ) - NextNo ) );
-			const int			TextNum = static_cast<int>( wText.size() );
-
-			// テキストの表示形式に対応した開始位置の変更.
-			RenderState->Transform.Position.x = Pos.x;
-			if ( RenderState->TextAlign == ETextAlign::Right ) {
-				RenderState->Transform.Position.x -= TextSizeW * TextNum;
-			}
-			else if ( RenderState->TextAlign == ETextAlign::Center ) {
-				RenderState->Transform.Position.x -= TextSizeW * static_cast< float >( TextNum ) / 2.0f;
-			}
-			RenderState->Transform.Position.y += TextSizeH + RenderState->TextInterval.h;
-			continue;
-		}
-
-		// アウトラインの描画( 4方向にずらしたフォントを描画する ).
-		if ( RenderState->IsOutLine || RenderState->IsBold ) {
-			for ( int i = 0; i < 4; ++i ) {
-				SFontRenderState OutLineState = *RenderState;
-
-				// アウトラインの場合アウトラインの色を反映させる.
-				if ( OutLineState.IsOutLine ) OutLineState.Color = OutLineState.OutLineColor;
-
-				// アウトラインの描画.
-				OutLineState.Transform.Position.x += -( OutLineState.OutLineSize / 2 ) + OutLineState.OutLineSize * ( i / 2 );
-				OutLineState.Transform.Position.y += -( OutLineState.OutLineSize / 2 ) + OutLineState.OutLineSize * ( i % 2 );
-				RenderFontUI( f.c_str(), &OutLineState );
-			}
-		}
-
-		// 表示する文字の描画.
-		RenderFontUI( f.c_str(), RenderState );
-		RenderState->Transform.Position.x += TextSizeW + +RenderState->TextInterval.w;
-	}
-	RenderState->Transform.Position = Pos;
+	RenderText( Text, RenderState, false, false );
 }
 
 //---------------------------------.
@@ -176,54 +105,460 @@ void CFont::Render3D( SFontRenderState* pRenderState, const bool& IsBillBoard )
 {
 	SFontRenderState* RenderState = pRenderState == nullptr ? &m_FontRenderState : pRenderState;
 
-	Render3D( RenderState->Text, RenderState );
+	RenderText( RenderState->Text, RenderState, true, IsBillBoard );
 }
 void CFont::Render3D( const std::string& Text, SFontRenderState* pRenderState, const bool& IsBillBoard )
 {
 	SFontRenderState* RenderState = pRenderState == nullptr ? &m_FontRenderState : pRenderState;
 
+	RenderText( Text, RenderState, true, IsBillBoard );
+}
+
+//---------------------------------.
+// テキストの描画(UI/3D共通).
+//---------------------------------.
+void CFont::RenderText( const std::string& Text, SFontRenderState* pRenderState, const bool Is3D, const bool IsBillBoard )
+{
+	SFontRenderState* State = pRenderState == nullptr ? &m_FontRenderState : pRenderState;
+
 	// 非表示の場合は処理を行わない.
-	if ( RenderState->IsDisp	== false	) return;
-	if ( RenderState->Color.w	== 0.0f		) return;
+	if ( State->IsDisp	== false	) return;
+	if ( State->Color.w	== 0.0f		) return;
+	if ( Text.empty()				) return;
 
-	// 文字数分ループ.
-	const D3DXPOSITION3 Pos = RenderState->Transform.Position;
-	for( int i = 0; i < static_cast<int>( Text.length() ); ++i ){
-		// 表示する文字の取得.
-		std::string f = Text.substr( i, 1 );
-		if( IsDBCSLeadByte( Text[i] ) == TRUE ){
-			f = Text.substr( i++, 2 );	// 全角文字.
-		} else {
-			f = Text.substr( i, 1 );	// 半角文字.
+	// 文字送り・行送りの基準値.
+	const D3DXSCALE3	WScale		= State->Transform.GetWorldScale();
+	const float			ScaleX		= Is3D ? State->Transform.Scale.x : WScale.x;
+	const float			ScaleY		= Is3D ? State->Transform.Scale.y : WScale.y;
+	const float			BaseAdvW	= m_FontState.Disp.w * ScaleX;	// 1文字の送り幅.
+	const float			BaseCharH	= m_FontState.Disp.h * ScaleY;	// 1文字の高さ.
+	const float			IntervalW	= Is3D ? 0.0f : State->TextInterval.w;
+	const float			LineSpace	= Is3D ? LINE_SPACING_3D : State->TextInterval.h;
+	const float			YSign		= Is3D ? -1.0f : 1.0f;			// 下方向の符号(UI:正, 3D:負).
+
+	// タグの解析(無効時は文字のみのリストが作成される).
+	const SFontDrawItemList Items	= CFontTagParser::Parse( Text, *State, m_FontState.Disp.h );
+	const int				ItemNum	= static_cast<int>( Items.size() );
+
+	// 行ごとの情報を計測する.
+	struct SLineInfo
+	{
+		int			Begin;		// 開始アイテム番号.
+		int			End;		// 終了アイテム番号(この番号は含まない).
+		float		Width;		// 行の幅.
+		float		Height;		// 行の高さ.
+		ETextAlign	Align;		// 行揃え.
+		bool		HasChar;	// 文字があるか.
+	};
+	std::vector<SLineInfo> Lines;
+	{
+		SLineInfo	Line		= { 0, 0, 0.0f, BaseCharH, State->TextAlign, false };
+		float		LastTrail	= 0.0f;	// 行末の余分な間隔(字間など).
+		for ( int i = 0; i < ItemNum; ++i ) {
+			const SFontDrawItem& Item = Items[i];
+			if ( Item.IsNewLine ) {
+				Line.End	= i;
+				Line.Width	-= LastTrail;	// 行末の字間は幅に含めない.
+				Lines.emplace_back( Line );
+				Line		= { i + 1, i + 1, 0.0f, BaseCharH, State->TextAlign, false };
+				LastTrail	= 0.0f;
+				continue;
+			}
+			if ( Item.Char.empty() ) {
+				// 送りのみのアイテム.
+				Line.Width += Item.Space * ScaleX;
+				LastTrail	= 0.0f;
+				continue;
+			}
+			// 行揃えは行の最初の文字のスタイルを使用する.
+			if ( Line.HasChar == false ) Line.Align = Item.Style.Align;
+			Line.HasChar = true;
+
+			const float CharH = BaseCharH * Item.Style.SizeScale;
+			if ( CharH > Line.Height ) Line.Height = CharH;
+
+			const float Trail = IntervalW + Item.Style.CharSpace * ScaleX;
+			Line.Width	+= BaseAdvW * Item.Style.SizeScale + Trail;
+			LastTrail	 = Trail;
+		}
+		Line.End	= ItemNum;
+		Line.Width	-= LastTrail;
+		Lines.emplace_back( Line );
+	}
+
+	// 中心座標による行揃えの補正量.
+	const ELocalPosition LocalPos = GetLocalPosition( State );
+	float AlignAnchorOffset = 0.0f;
+	if ( LocalPos == ELocalPosition::Up ||
+		 LocalPos == ELocalPosition::Center ||
+		 LocalPos == ELocalPosition::Down )
+	{
+		AlignAnchorOffset = BaseAdvW / 2.0f;
+	}
+	if ( LocalPos == ELocalPosition::RightUp ||
+		 LocalPos == ELocalPosition::Right ||
+		 LocalPos == ELocalPosition::RightDown )
+	{
+		AlignAnchorOffset = BaseAdvW;
+	}
+
+	// 1行ずつ描画する.
+	const D3DXPOSITION3 BasePos	= State->Transform.Position;
+	float				PenY	= BasePos.y;
+	for ( const auto& Line : Lines ) {
+		// 行揃えに対応した開始位置.
+		float PenX = BasePos.x;
+		if ( Line.Align == ETextAlign::Right ) {
+			PenX -= Line.Width - AlignAnchorOffset;
+		}
+		else if ( Line.Align == ETextAlign::Center ) {
+			PenX -= Line.Width / 2.0f - AlignAnchorOffset;
 		}
 
-		// 改行.
-		if ( f == "\n" ) {
-			RenderState->Transform.Position.x = Pos.x;
-			RenderState->Transform.Position.y += m_FontState.Disp.h * RenderState->Transform.Scale.y + 12.0f;
-			continue;
-		}
-
-		// アウトラインの描画.
-		if ( RenderState->IsOutLine || RenderState->IsBold ) {
-			const D3DXPOSITION3& FontPos = RenderState->Transform.Position;
-
-			// 4方向にずらしたフォントを描画する.
-			for ( int i = 0; i < 4; ++i ) {
-				RenderState->Transform.Position.x += -(RenderState->OutLineSize / 2) + RenderState->OutLineSize * (i / 2);
-				RenderState->Transform.Position.y += -(RenderState->OutLineSize / 2) + RenderState->OutLineSize * (i % 2);
-				RenderFontUI( f.c_str(), RenderState );
+		for ( int i = Line.Begin; i < Line.End; ++i ) {
+			const SFontDrawItem& Item = Items[i];
+			if ( Item.IsNewLine ) continue;
+			if ( Item.Char.empty() ) {
+				// 送りのみのアイテム.
+				PenX += Item.Space * ScaleX;
+				continue;
 			}
 
-			// フォントの位置を元に戻す.
-			RenderState->Transform.Position = FontPos;
+			const SFontCharStyle&	Style	= Item.Style;
+			const float				CharH	= BaseCharH * Style.SizeScale;
+			const float				AdvW	= BaseAdvW * Style.SizeScale;
+			const float				Trail	= IntervalW + Style.CharSpace * ScaleX;
+
+			// 透明の場合は送りのみ進める.
+			if ( Style.Color.w <= 0.0f && Style.IsMark == false ) {
+				PenX += AdvW + Trail;
+				continue;
+			}
+
+			// 行の下端に揃え、縦オフセットを反映する.
+			const float OffsetY = ( Line.Height - CharH ) - Style.VOffset * ScaleY;
+
+			// 1文字分のトランスフォームを作成する.
+			STransform Trans	= State->Transform;
+			Trans.Position		= D3DXPOSITION3( PenX, PenY + YSign * OffsetY, BasePos.z );
+			Trans.Scale.x	   *= Style.SizeScale;
+			Trans.Scale.y	   *= Style.SizeScale;
+
+			// 矩形の幅の倍率(送り幅と字間を覆うようにする).
+			const float QuadW		= Is3D ? m_Size3D.w : m_FontState.Disp.w;
+			const float RectBase	= QuadW * ScaleX * Style.SizeScale;
+			const float WidthScale	= RectBase > 0.0f ? ( AdvW + Trail ) / RectBase : 1.0f;
+
+			// マーカー(背景).
+			if ( Style.IsMark ) {
+				RenderLineRect( Style.MarkColor, WidthScale, 0.0f, 1.0f, Trans, State, Is3D, IsBillBoard );
+			}
+			// 文字本体.
+			RenderGlyph( Item.Char, Style, Trans, State, Is3D, IsBillBoard );
+			// 下線.
+			if ( Style.IsUnderline ) {
+				RenderLineRect( Style.Color, WidthScale, UNDERLINE_POS, LINE_SIZE, Trans, State, Is3D, IsBillBoard );
+			}
+			// 取り消し線.
+			if ( Style.IsStrikeout ) {
+				RenderLineRect( Style.Color, WidthScale, STRIKEOUT_POS, LINE_SIZE, Trans, State, Is3D, IsBillBoard );
+			}
+
+			PenX += AdvW + Trail;
 		}
 
-		// 表示する文字の描画.
-		RenderFont3D( f.c_str(), RenderState, IsBillBoard );
-		RenderState->Transform.Position.x += m_FontState.Disp.w * RenderState->Transform.Scale.x;
+		// 次の行へ.
+		PenY += YSign * ( Line.Height + LineSpace );
 	}
-	RenderState->Transform.Position = Pos;
+}
+
+//---------------------------------.
+// 1文字の描画.
+//---------------------------------.
+void CFont::RenderGlyph( const std::string& Char, const SFontCharStyle& Style, const STransform& Transform, SFontRenderState* pState, const bool Is3D, const bool IsBillBoard )
+{
+	// グリフ(SDFテクスチャ)の取得.
+	const SFontGlyph Glyph = FontResource::GetFontGlyph( m_FileName, Char );
+	if ( Glyph.pTexture	== nullptr ) return;
+	if ( Glyph.CellW	<= 0.0f	   ) return;
+	if ( Glyph.CellH	<= 0.0f	   ) return;
+
+	// ワールド行列を取得.
+	STransform Trans	= Transform;
+	D3DXMATRIX mWorld	= Trans.GetWorldMatrix();
+
+	// ビルボード用.
+	if ( Is3D && IsBillBoard ) {
+		D3DXMATRIX CancelRotation = CameraManager::GetViewMatrix();	// ビュー行列.
+		CancelRotation._41
+			= CancelRotation._42 = CancelRotation._43 = 0.0f;		// xyzを0にする.
+		// CancelRotationの逆行列を求めます.
+		D3DXMatrixInverse( &CancelRotation, nullptr, &CancelRotation );
+		mWorld = CancelRotation * mWorld;
+	}
+
+	// クアッドのローカル情報.
+	float x0, y0, w, h, YSign;
+	GetQuadTopLeft( GetLocalPosition( pState ), Is3D, &x0, &y0, &w, &h, &YSign );
+
+	// 中心座標に合わせてクアッドを移動する行列.
+	D3DXMATRIX mLocal;
+	D3DXMatrixTranslation( &mLocal, x0, y0, 0.0f );
+
+	// SDFの余白分クアッドを拡張する行列(セル中心基準).
+	const float sx = ( Glyph.CellW + Glyph.Pad * 2.0f ) / Glyph.CellW;
+	const float sy = ( Glyph.CellH + Glyph.Pad * 2.0f ) / Glyph.CellH;
+	const float cx = x0 + w / 2.0f;
+	const float cy = y0 + YSign * h / 2.0f;
+	D3DXMATRIX mPad;
+	D3DXMatrixIdentity( &mPad );
+	mPad._11 = sx;
+	mPad._22 = sy;
+	mPad._41 = cx * ( 1.0f - sx );
+	mPad._42 = cy * ( 1.0f - sy );
+	mLocal *= mPad;
+
+	// イタリック(せん断)行列(文字の下端を基準に上側を傾ける).
+	if ( Style.IsItalic ) {
+		const float Slant	= tanf( Math::ToRadian( pState->ItalicSlant ) );
+		const float Bottom	= y0 + YSign * h;
+		D3DXMATRIX mItalic;
+		D3DXMatrixIdentity( &mItalic );
+		mItalic._21 = -Slant * YSign;
+		mItalic._41 = Slant * YSign * Bottom;
+		mLocal *= mItalic;
+	}
+	mWorld = mLocal * mWorld;
+
+	// 画面上の文字の高さから「画面px→SDF距離値」の変換係数を求める.
+	const float QuadH		= Is3D ? m_Size3D.h : m_FontState.Disp.h;
+	const float ScreenH		= QuadH * ( Is3D ? Trans.Scale.y : Trans.GetWorldScale().y );
+	const float PxPerGlyph	= Glyph.CellH > 0.0f ? ScreenH / Glyph.CellH : 0.0f;
+	const float ToDist		= PxPerGlyph > 0.0f ? 1.0f / ( PxPerGlyph * Glyph.Spread * 2.0f ) : 0.0f;
+
+	// アウトライン幅(従来の見た目に合わせて半分にする).
+	float OutLineW = 0.0f;
+	if ( Style.IsOutLine ) {
+		OutLineW = Style.OutLineSize * 0.5f * ToDist;
+		if ( OutLineW > OUTLINE_DIST_MAX ) OutLineW = OUTLINE_DIST_MAX;
+	}
+	// 太字の膨張量.
+	float Bold = 0.0f;
+	if ( Style.IsBold ) {
+		Bold = pState->BoldWeight * ToDist;
+		if ( Bold > BOLD_DIST_MAX ) Bold = BOLD_DIST_MAX;
+	}
+	// 縁のぼかし量(0の場合はシェーダ側で自動計算).
+	const float Soft = pState->Softness * ToDist;
+	// グロー幅.
+	float GlowW = 0.0f;
+	if ( Style.IsGlow ) {
+		GlowW = Style.GlowSize * ToDist;
+		if ( GlowW > GLOW_DIST_MAX ) GlowW = GLOW_DIST_MAX;
+	}
+
+	// 描画.
+	SFontDrawParam Param;
+	Param.mWorld		= mWorld;
+	Param.pTexture		= Glyph.pTexture;
+	Param.Color			= Style.Color;
+	Param.OutLineColor	= Style.OutLineColor;
+	Param.GlowColor		= Style.GlowColor;
+	Param.SDFParam		= D3DXVECTOR4( OutLineW, Bold, Soft, Style.IsOutLine ? 1.0f : 0.0f );
+	Param.GlowParam		= D3DXVECTOR4( GlowW, Style.GlowPower, Style.IsGlow ? 1.0f : 0.0f, 0.0f );
+	Param.SmaplerNo		= pState->SmaplerNo;
+	Param.Is3D			= Is3D;
+	DrawQuad( Param, pState );
+}
+
+//---------------------------------.
+// 矩形の描画(下線・取り消し線・マーカー用).
+//---------------------------------.
+void CFont::RenderLineRect( const D3DXCOLOR4& Color, const float WidthScale, const float PosRateY, const float SizeRateY, const STransform& Transform, SFontRenderState* pState, const bool Is3D, const bool IsBillBoard )
+{
+	if ( Color.w <= 0.0f ) return;
+
+	// ワールド行列を取得.
+	STransform Trans	= Transform;
+	D3DXMATRIX mWorld	= Trans.GetWorldMatrix();
+
+	// ビルボード用.
+	if ( Is3D && IsBillBoard ) {
+		D3DXMATRIX CancelRotation = CameraManager::GetViewMatrix();	// ビュー行列.
+		CancelRotation._41
+			= CancelRotation._42 = CancelRotation._43 = 0.0f;		// xyzを0にする.
+		D3DXMatrixInverse( &CancelRotation, nullptr, &CancelRotation );
+		mWorld = CancelRotation * mWorld;
+	}
+
+	// クアッドのローカル情報.
+	float x0, y0, w, h, YSign;
+	GetQuadTopLeft( GetLocalPosition( pState ), Is3D, &x0, &y0, &w, &h, &YSign );
+
+	// 中心座標に合わせてクアッドを移動する行列.
+	D3DXMATRIX mLocal;
+	D3DXMatrixTranslation( &mLocal, x0, y0, 0.0f );
+
+	// クアッドを指定位置の帯(矩形)に変形する行列.
+	D3DXMATRIX mBand;
+	D3DXMatrixIdentity( &mBand );
+	mBand._11 = WidthScale;
+	mBand._41 = x0 * ( 1.0f - WidthScale );
+	mBand._22 = SizeRateY;
+	mBand._42 = y0 * ( 1.0f - SizeRateY ) + YSign * h * PosRateY;
+	mLocal *= mBand;
+	mWorld = mLocal * mWorld;
+
+	// 描画.
+	SFontDrawParam Param;
+	Param.mWorld		= mWorld;
+	Param.pTexture		= nullptr;
+	Param.Color			= Color;
+	Param.OutLineColor	= Color;
+	Param.GlowColor		= Color;
+	Param.SDFParam		= D3DXVECTOR4( 0.0f, 0.0f, 0.0f, 0.0f );
+	Param.GlowParam		= D3DXVECTOR4( 0.0f, 0.0f, 0.0f, 0.0f );
+	Param.SmaplerNo		= pState->SmaplerNo;
+	Param.Is3D			= Is3D;
+	DrawQuad( Param, pState );
+}
+
+//---------------------------------.
+// クアッドの描画.
+//---------------------------------.
+void CFont::DrawQuad( const SFontDrawParam& Param, SFontRenderState* pState )
+{
+	// 使用するシェーダの登録.
+	m_pContext->VSSetShader( m_pVertexShader,	nullptr, 0 );
+	m_pContext->PSSetShader( m_pPixelShader,	nullptr, 0 );
+
+	// シェーダのコンスタントバッファに各種データを渡す.
+	D3D11_MAPPED_SUBRESOURCE	pData;
+	SFontShaderConstantBuffer	cb;	// コンスタントバッファ.
+	// バッファ内のデータの書き換え開始時にmap.
+	if ( SUCCEEDED(
+		m_pContext->Map( m_pConstantBuffer,
+			0, D3D11_MAP_WRITE_DISCARD, 0, &pData ) ) )
+	{
+		// ワールド行列を渡す(3Dの場合はビュー,プロジェクションも合成する).
+		D3DXMATRIX m = Param.mWorld;
+		if ( Param.Is3D ) m = Param.mWorld * CameraManager::GetViewProjMatrix();
+		D3DXMatrixTranspose( &m, &m );// 行列を転置する.
+		cb.mWVP = m;
+
+		// カラー.
+		cb.vColor			= Param.Color;
+		cb.vOutLineColor	= Param.OutLineColor;
+		cb.vGlowColor		= Param.GlowColor;
+
+		// テクスチャ座標(UV座標).
+		cb.vUV = D3DXVECTOR4( 0.0f, 0.0f, 0.0f, 0.0f );
+
+		// 描画するエリア.
+		D3DXVECTOR4 RenderArea = pState->RenderArea;
+		const float WndScalseW = DirectX11::GetWndWidth()  / Const::GameWindow().SIZE.x;
+		const float WndScalseH = DirectX11::GetWndHeight() / Const::GameWindow().SIZE.y;
+		RenderArea.x	*= WndScalseW;
+		RenderArea.z	*= WndScalseW;
+		RenderArea.y	*= WndScalseH;
+		RenderArea.w	*= WndScalseH;
+		cb.vRenderArea	 = RenderArea;
+
+		// ビューポートの幅、高さを渡す(3Dでは使用しない).
+		cb.vViewPort = Param.Is3D
+			? D3DXVECTOR4( 0.0f, 0.0f, 0.0f, 0.0f )
+			: D3DXVECTOR4( DirectX11::GetWndWidth(), DirectX11::GetWndHeight(), 0.0f, 0.0f );
+
+		// 各種フラグ.
+		cb.vFlag = D3DXVECTOR4(
+			m_DitherFlag				? 1.0f : 0.0f,		// ディザ抜きを使用するか.
+			m_AlphaBlockFlag			? 1.0f : 0.0f,		// アルファブロックを使用するか.
+			Param.pTexture == nullptr	? 1.0f : 0.0f,		// 矩形描画か.
+			0.0f );
+
+		// SDF・グローのパラメータ.
+		cb.vSDFParam	= Param.SDFParam;
+		cb.vGlowParam	= Param.GlowParam;
+
+		memcpy_s( pData.pData, pData.RowPitch,
+			(void*) ( &cb ), sizeof( cb ) );
+
+		m_pContext->Unmap( m_pConstantBuffer, 0 );
+	}
+
+	// このコンスタントバッファをどのシェーダで使うか？.
+	m_pContext->VSSetConstantBuffers( 0, 1, &m_pConstantBuffer );
+	m_pContext->PSSetConstantBuffers( 0, 1, &m_pConstantBuffer );
+
+	// 頂点バッファをセット.
+	UINT stride = sizeof( SVertex );// データの間隔.
+	UINT offset = 0;
+	ID3D11Buffer* pVertexBuffer = Param.Is3D ? m_pVertexBuffer3D : m_pVertexBufferUI;
+	m_pContext->IASetVertexBuffers( 0, 1,
+		&pVertexBuffer, &stride, &offset );
+
+	// 頂点インプットレイアウトをセット.
+	m_pContext->IASetInputLayout( m_pVertexLayout );
+	// プリミティブ・トポロジーをセット.
+	m_pContext->IASetPrimitiveTopology(
+		D3D11_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP );
+
+	// テクスチャをシェーダに渡す.
+	m_pContext->PSSetSamplers( 0, 1, &m_pSampleLinears[static_cast<Sampler>( Param.SmaplerNo )] );
+	ID3D11ShaderResourceView* pTexture = Param.pTexture;
+	m_pContext->PSSetShaderResources( 0, 1, &pTexture );
+
+	// アルファブレンド有効にする.
+	if ( !m_DitherFlag ) DirectX11::SetAlphaBlend( true );
+
+	// プリミティブをレンダリング.
+	m_pContext->Draw( 4, 0 );// 板ポリ(頂点4つ分).
+
+	// アルファブレンド無効にする.
+	if ( !m_DitherFlag ) DirectX11::SetAlphaBlend( false );
+}
+
+//---------------------------------.
+// 使用するローカル座標の番号を取得.
+//---------------------------------.
+ELocalPosition CFont::GetLocalPosition( const SFontRenderState* pState ) const
+{
+	// 未設定の場合はフォント情報の値を使用する.
+	if ( pState == nullptr							) return m_FontState.LocalPosNo;
+	if ( pState->LocalPosNo == ELocalPosition::Default	) return m_FontState.LocalPosNo;
+	return pState->LocalPosNo;
+}
+
+//---------------------------------.
+// クアッドのローカル左上座標などの取得.
+//---------------------------------.
+void CFont::GetQuadTopLeft( const ELocalPosition LocalPos, const bool Is3D, float* pX, float* pY, float* pW, float* pH, float* pYSign )
+{
+	const float w		= Is3D ? m_Size3D.w : m_FontState.Disp.w;
+	const float h		= Is3D ? m_Size3D.h : m_FontState.Disp.h;
+	const float YSign	= Is3D ? -1.0f : 1.0f;
+
+	// UI(y正方向が下)基準の左上座標.
+	float x0 = 0.0f;
+	float y0 = 0.0f;
+	switch ( LocalPos ) {
+	case ELocalPosition::LeftUp:	x0 = 0.0f;		y0 = 0.0f;		break;
+	case ELocalPosition::Left:		x0 = 0.0f;		y0 = -h / 2.0f;	break;
+	case ELocalPosition::LeftDown:	x0 = 0.0f;		y0 = -h;		break;
+	case ELocalPosition::Down:		x0 = -w / 2.0f;	y0 = -h;		break;
+	case ELocalPosition::RightDown:	x0 = -w;		y0 = -h;		break;
+	case ELocalPosition::Right:		x0 = -w;		y0 = -h / 2.0f;	break;
+	case ELocalPosition::RightUp:	x0 = -w;		y0 = 0.0f;		break;
+	case ELocalPosition::Up:		x0 = -w / 2.0f;	y0 = 0.0f;		break;
+	case ELocalPosition::Center:
+	default:						x0 = -w / 2.0f;	y0 = -h / 2.0f;	break;
+	}
+
+	if ( pX		!= nullptr ) *pX		= x0;
+	if ( pY		!= nullptr ) *pY		= YSign * y0;	// 3Dはy正方向が上のため反転する.
+	if ( pW		!= nullptr ) *pW		= w;
+	if ( pH		!= nullptr ) *pH		= h;
+	if ( pYSign	!= nullptr ) *pYSign	= YSign;
 }
 
 //----------------------------.
@@ -449,6 +784,9 @@ HRESULT CFont::CreateModel3D()
 	float	w = ( m_FontState.Disp.w / as ) * m_FontState.Disp.w * 0.1f;
 	float	h = ( m_FontState.Disp.h / as ) * m_FontState.Disp.h * 0.1f;
 
+	// 3D用モデルの幅高さを保存する.
+	m_Size3D = { w, h };
+
 	// 板ポリ(四角形)の頂点を作成.
 	//	頂点座標(x,y,z), UV座標(u,v).
 	CreateVertex( w, -h, 1.0f, 1.0f );
@@ -490,6 +828,8 @@ HRESULT CFont::CreateSampler()
 	samDesc.AddressU	= D3D11_TEXTURE_ADDRESS_WRAP;
 	samDesc.AddressV	= D3D11_TEXTURE_ADDRESS_WRAP;
 	samDesc.AddressW	= D3D11_TEXTURE_ADDRESS_WRAP;
+	// 縮小時にミップマップを使用できるようにする( 0 のままだと常に最大解像度が使われてちらつく ).
+	samDesc.MaxLOD		= D3D11_FLOAT32_MAX;
 
 	// サンプラ作成.
 	for( int i = 0; i < static_cast<int>( ESamplerState::Max ); i++ ){
@@ -512,257 +852,11 @@ HRESULT CFont::CreateVertex( const float w, const float h, const float u, const 
 {
 	// 板ポリ(四角形)の頂点を作成.
 	//	頂点座標(x,y,z), UV座標(u,v).
-	switch ( m_FontState.LocalPosNo ) {
-	case ELocalPosition::LeftUp:
-		m_Vertices[0] = { D3DXPOSITION3( 0.0f,    h, 0.0f ),	D3DXVECTOR2( 0.0f,    v ) };	// 頂点１(左下).
-		m_Vertices[1] = { D3DXPOSITION3( 0.0f, 0.0f, 0.0f ),	D3DXVECTOR2( 0.0f, 0.0f ) };	// 頂点１(左下).
-		m_Vertices[2] = { D3DXPOSITION3(    w,    h, 0.0f ),	D3DXVECTOR2(    u,    v ) };	// 頂点１(左下).
-		m_Vertices[3] = { D3DXPOSITION3(    w, 0.0f, 0.0f ),	D3DXVECTOR2(    u, 0.0f ) };	// 頂点１(左下).
-		break;
-	case ELocalPosition::Left:
-		m_Vertices[0] = { D3DXPOSITION3( 0.0f,  h / 2, 0.0f ),	D3DXVECTOR2( 0.0f,    v ) };	// 頂点１(左下).
-		m_Vertices[1] = { D3DXPOSITION3( 0.0f, -h / 2, 0.0f ),	D3DXVECTOR2( 0.0f, 0.0f ) };	// 頂点１(左下).
-		m_Vertices[2] = { D3DXPOSITION3(    w,  h / 2, 0.0f ),	D3DXVECTOR2(    u,    v ) };	// 頂点１(左下).
-		m_Vertices[3] = { D3DXPOSITION3(    w, -h / 2, 0.0f ),	D3DXVECTOR2(    u, 0.0f ) };	// 頂点１(左下).
-		break;
-	case ELocalPosition::LeftDown:
-		m_Vertices[0] = { D3DXPOSITION3( 0.0f, 0.0f, 0.0f ),	D3DXVECTOR2( 0.0f,    v ) };	// 頂点１(左下).
-		m_Vertices[1] = { D3DXPOSITION3( 0.0f,   -h, 0.0f ),	D3DXVECTOR2( 0.0f, 0.0f ) };	// 頂点１(左下).
-		m_Vertices[2] = { D3DXPOSITION3(    w, 0.0f, 0.0f ),	D3DXVECTOR2(    u,    v ) };	// 頂点１(左下).
-		m_Vertices[3] = { D3DXPOSITION3(    w,   -h, 0.0f ),	D3DXVECTOR2(    u, 0.0f ) };	// 頂点１(左下).
-		break;
-	case ELocalPosition::Down:
-		m_Vertices[0] = { D3DXPOSITION3( -w / 2, 0.0f, 0.0f ),	D3DXVECTOR2( 0.0f,    v ) };	// 頂点１(左下).
-		m_Vertices[1] = { D3DXPOSITION3( -w / 2,   -h, 0.0f ),	D3DXVECTOR2( 0.0f, 0.0f ) };	// 頂点１(左下).
-		m_Vertices[2] = { D3DXPOSITION3(  w / 2, 0.0f, 0.0f ),	D3DXVECTOR2(    u,    v ) };	// 頂点１(左下).
-		m_Vertices[3] = { D3DXPOSITION3(  w / 2,   -h, 0.0f ),	D3DXVECTOR2(    u, 0.0f ) };	// 頂点１(左下).
-		break;
-	case ELocalPosition::RightDown:
-		m_Vertices[0] = { D3DXPOSITION3(   -w, 0.0f, 0.0f ),	D3DXVECTOR2( 0.0f,    v ) };	// 頂点１(左下).
-		m_Vertices[1] = { D3DXPOSITION3(   -w,   -h, 0.0f ),	D3DXVECTOR2( 0.0f, 0.0f ) };	// 頂点１(左下).
-		m_Vertices[2] = { D3DXPOSITION3( 0.0f, 0.0f, 0.0f ),	D3DXVECTOR2(    u,    v ) };	// 頂点１(左下).
-		m_Vertices[3] = { D3DXPOSITION3( 0.0f,   -h, 0.0f ),	D3DXVECTOR2(    u, 0.0f ) };	// 頂点１(左下).
-		break;
-	case ELocalPosition::Right:
-		m_Vertices[0] = { D3DXPOSITION3(   -w,  h / 2, 0.0f ),	D3DXVECTOR2( 0.0f,    v ) };	// 頂点１(左下).
-		m_Vertices[1] = { D3DXPOSITION3(   -w, -h / 2, 0.0f ),	D3DXVECTOR2( 0.0f, 0.0f ) };	// 頂点１(左下).
-		m_Vertices[2] = { D3DXPOSITION3( 0.0f,  h / 2, 0.0f ),	D3DXVECTOR2(    u,    v ) };	// 頂点１(左下).
-		m_Vertices[3] = { D3DXPOSITION3( 0.0f, -h / 2, 0.0f ),	D3DXVECTOR2(    u, 0.0f ) };	// 頂点１(左下).
-		break;
-	case ELocalPosition::RightUp:
-		m_Vertices[0] = { D3DXPOSITION3(   -w,    h, 0.0f ),	D3DXVECTOR2( 0.0f,    v ) };	// 頂点１(左下).
-		m_Vertices[1] = { D3DXPOSITION3(   -w, 0.0f, 0.0f ),	D3DXVECTOR2( 0.0f, 0.0f ) };	// 頂点１(左下).
-		m_Vertices[2] = { D3DXPOSITION3( 0.0f,    h, 0.0f ),	D3DXVECTOR2(    u,    v ) };	// 頂点１(左下).
-		m_Vertices[3] = { D3DXPOSITION3( 0.0f, 0.0f, 0.0f ),	D3DXVECTOR2(    u, 0.0f ) };	// 頂点１(左下).
-		break;
-	case ELocalPosition::Up:
-		m_Vertices[0] = { D3DXPOSITION3( -w / 2,    h, 0.0f ),	D3DXVECTOR2( 0.0f,    v ) };	// 頂点１(左下).
-		m_Vertices[1] = { D3DXPOSITION3( -w / 2, 0.0f, 0.0f ),	D3DXVECTOR2( 0.0f, 0.0f ) };	// 頂点１(左下).
-		m_Vertices[2] = { D3DXPOSITION3(  w / 2,    h, 0.0f ),	D3DXVECTOR2(    u,    v ) };	// 頂点１(左下).
-		m_Vertices[3] = { D3DXPOSITION3(  w / 2, 0.0f, 0.0f ),	D3DXVECTOR2(    u, 0.0f ) };	// 頂点１(左下).
-		break;
-	case ELocalPosition::Center:
-	default: 
-		m_Vertices[0] = { D3DXVECTOR3( -w / 2,  h / 2, 0.0f ),	D3DXVECTOR2( 0.0f,    v ) };	// 頂点１(左下).
-		m_Vertices[1] = { D3DXVECTOR3( -w / 2, -h / 2, 0.0f ),	D3DXVECTOR2( 0.0f, 0.0f ) };	// 頂点１(左下).
-		m_Vertices[2] = { D3DXVECTOR3(  w / 2,  h / 2, 0.0f ),	D3DXVECTOR2(    u,    v ) };	// 頂点１(左下).
-		m_Vertices[3] = { D3DXVECTOR3(  w / 2, -h / 2, 0.0f ),	D3DXVECTOR2(    u, 0.0f ) };	// 頂点１(左下).
-		break;
-	}
+	//	常に左上基準で作成し、中心座標は描画時の行列で反映する.
+	m_Vertices[0] = { D3DXPOSITION3( 0.0f,    h, 0.0f ),	D3DXVECTOR2( 0.0f,    v ) };	// 頂点１(左下).
+	m_Vertices[1] = { D3DXPOSITION3( 0.0f, 0.0f, 0.0f ),	D3DXVECTOR2( 0.0f, 0.0f ) };	// 頂点２(左上).
+	m_Vertices[2] = { D3DXPOSITION3(    w,    h, 0.0f ),	D3DXVECTOR2(    u,    v ) };	// 頂点３(右下).
+	m_Vertices[3] = { D3DXPOSITION3(    w, 0.0f, 0.0f ),	D3DXVECTOR2(    u, 0.0f ) };	// 頂点４(右上).
 	return S_OK;
-}
-
-
-//---------------------------------.
-// テクスチャの描画.
-//---------------------------------.
-void CFont::RenderFontUI( const char* c, SFontRenderState* pRenderState )
-{
-	// テクスチャの取得.
-	ID3D11ShaderResourceView* pTexture = FontResource::GetFontTexture( m_FileName, c );
-
-	// ワールド行列を取得.
-	D3DXMATRIX mWorld = pRenderState->Transform.GetWorldMatrix();
-
-	// 使用するシェーダの登録.
-	m_pContext->VSSetShader( m_pVertexShader, nullptr, 0 );
-	m_pContext->PSSetShader( m_pPixelShader,  nullptr, 0 );
-
-	// シェーダのコンスタントバッファに各種データを渡す.
-	D3D11_MAPPED_SUBRESOURCE	pData;
-	SFontShaderConstantBuffer	cb;	// コンスタントバッファ.
-	// バッファ内のデータの書き換え開始時にmap.
-	if ( SUCCEEDED(
-		m_pContext->Map( m_pConstantBuffer,
-			0, D3D11_MAP_WRITE_DISCARD, 0, &pData ) ) )
-	{
-		// ワールド行列を渡す(ビュー,プロジェクションは使わない).
-		D3DXMATRIX m = mWorld;
-		D3DXMatrixTranspose( &m, &m );// 行列を転置する.
-		cb.mWVP = m;
-
-		// カラー.
-		cb.vColor = pRenderState->Color;
-
-		// テクスチャ座標(UV座標).
-		// 1マス当たりの割合にパターン番号(マス目)をかけて座標を設定する.
-		cb.vUV.x = 0.0f;
-		cb.vUV.y = 0.0f;
-
-		// 描画するエリア.
-		D3DXVECTOR4 RenderArea = pRenderState->RenderArea;
-		const float WndScalseW = DirectX11::GetWndWidth()  / Const::GameWindow().SIZE.x;
-		const float WndScalseH = DirectX11::GetWndHeight() / Const::GameWindow().SIZE.y;
-		RenderArea.x	*= WndScalseW;
-		RenderArea.z	*= WndScalseW;
-		RenderArea.y	*= WndScalseH;
-		RenderArea.w	*= WndScalseH;
-		cb.vRenderArea	 = RenderArea;
-
-		// ビューポートの幅、高さを渡す.
-		cb.fViewPortWidth	= DirectX11::GetWndWidth();
-		cb.fViewPortHeight	= DirectX11::GetWndHeight();
-
-		// ディザ抜きを使用するか.
-		cb.vDitherFlag.x = m_DitherFlag == true ? 1.0f : 0.0f;
-
-		// アルファブロックを使用するかを渡す.
-		cb.vAlphaBlockFlag.x = m_AlphaBlockFlag == true ? 1.0f : 0.0f;
-
-		memcpy_s( pData.pData, pData.RowPitch,
-			(void*) ( &cb ), sizeof( cb ) );
-
-		m_pContext->Unmap( m_pConstantBuffer, 0 );
-	}
-
-	// このコンスタントバッファをどのシェーダで使うか？.
-	m_pContext->VSSetConstantBuffers( 0, 1, &m_pConstantBuffer );
-	m_pContext->PSSetConstantBuffers( 0, 1, &m_pConstantBuffer );
-
-	// 頂点バッファをセット.
-	UINT stride = sizeof( SVertex );// データの間隔.
-	UINT offset = 0;
-	m_pContext->IASetVertexBuffers( 0, 1,
-		&m_pVertexBufferUI, &stride, &offset );
-
-	// 頂点インプットレイアウトをセット.
-	m_pContext->IASetInputLayout( m_pVertexLayout );
-	// プリミティブ・トポロジーをセット.
-	m_pContext->IASetPrimitiveTopology(
-		D3D11_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP );
-
-	// テクスチャをシェーダに渡す.
-	m_pContext->PSSetSamplers( 0, 1, &m_pSampleLinears[static_cast<Sampler>( pRenderState->SmaplerNo )] );
-	m_pContext->PSSetShaderResources( 0, 1, &pTexture );
-
-	// アルファブレンド有効にする.
-	if ( !m_DitherFlag ) DirectX11::SetAlphaBlend( true );
-
-	// プリミティブをレンダリング.
-	m_pContext->Draw( 4, 0 );// 板ポリ(頂点4つ分).
-
-	// アルファブレンド無効にする.
-	if ( !m_DitherFlag ) DirectX11::SetAlphaBlend( false );
-}
-
-//---------------------------------.
-// テクスチャの描画.
-//---------------------------------.
-void CFont::RenderFont3D( const char* c, SFontRenderState* pRenderState, const bool& IsBillBoard  )
-{
-	// テクスチャの取得.
-	ID3D11ShaderResourceView* pTexture = FontResource::GetFontTexture( m_FileName, c );
-
-	// ワールド行列を取得.
-	D3DXMATRIX mWorld = pRenderState->Transform.GetWorldMatrix();
-
-	// ビルボード用.
-	if ( IsBillBoard == true ) {
-		D3DXMATRIX CancelRotation = CameraManager::GetViewMatrix();	// ビュー行列.
-		CancelRotation._41
-			= CancelRotation._42 = CancelRotation._43 = 0.0f;			// xyzを0にする.
-		// CancelRotationの逆行列を求めます.
-		D3DXMatrixInverse( &CancelRotation, nullptr, &CancelRotation );
-		mWorld = CancelRotation * mWorld;
-	}
-
-	// 使用するシェーダの登録.
-	m_pContext->VSSetShader( m_pVertexShader,	nullptr, 0 );
-	m_pContext->PSSetShader( m_pPixelShader,	nullptr, 0 );
-
-	// シェーダのコンスタントバッファに各種データを渡す.
-	D3D11_MAPPED_SUBRESOURCE	pData;
-	SFontShaderConstantBuffer	cb;	// コンスタントバッファ.
-	// バッファ内のデータの書き換え開始時にmap.
-	if ( SUCCEEDED(
-		m_pContext->Map( m_pConstantBuffer,
-			0, D3D11_MAP_WRITE_DISCARD, 0, &pData ) ) )
-	{
-		// ワールド,ビュー,プロジェクション行列を渡す.
-		D3DXMATRIX m = mWorld * CameraManager::GetViewProjMatrix();
-		D3DXMatrixTranspose( &m, &m );// 行列を転置する.
-		cb.mWVP = m;
-
-		// カラー.
-		cb.vColor = pRenderState->Color;
-
-		// テクスチャ座標(UV座標).
-		cb.vUV.x = 0.0f;
-		cb.vUV.y = 0.0f;
-
-		// 描画するエリア.
-		D3DXVECTOR4 RenderArea = pRenderState->RenderArea;
-		const float WndScalseW = DirectX11::GetWndWidth()  / Const::GameWindow().SIZE.x;
-		const float WndScalseH = DirectX11::GetWndHeight() / Const::GameWindow().SIZE.y;
-		RenderArea.x	*= WndScalseW;
-		RenderArea.z	*= WndScalseW;
-		RenderArea.y	*= WndScalseH;
-		RenderArea.w	*= WndScalseH;
-		cb.vRenderArea	 = RenderArea;
-
-		// ビューポートの幅、高さは使用しないため初期化.
-		cb.fViewPortWidth	= 0.0f;
-		cb.fViewPortHeight	= 0.0f;
-
-		// ディザ抜きを使用するか.
-		cb.vDitherFlag.x = m_DitherFlag == true ? 1.0f : 0.0f;
-
-		// アルファブロックを使用するかを渡す.
-		cb.vAlphaBlockFlag.x = m_AlphaBlockFlag == true ? 1.0f : 0.0f;
-
-		memcpy_s( pData.pData, pData.RowPitch,
-			(void*) ( &cb ), sizeof( cb ) );
-
-		m_pContext->Unmap( m_pConstantBuffer, 0 );
-	}
-
-	// このコンスタントバッファをどのシェーダで使うか？.
-	m_pContext->VSSetConstantBuffers( 0, 1, &m_pConstantBuffer );
-	m_pContext->PSSetConstantBuffers( 0, 1, &m_pConstantBuffer );
-
-	// 頂点バッファをセット.
-	UINT stride = sizeof( SVertex );// データの間隔.
-	UINT offset = 0;
-	m_pContext->IASetVertexBuffers( 0, 1,
-		&m_pVertexBuffer3D, &stride, &offset );
-
-	// 頂点インプットレイアウトをセット.
-	m_pContext->IASetInputLayout( m_pVertexLayout );
-	// プリミティブ・トポロジーをセット.
-	m_pContext->IASetPrimitiveTopology(
-		D3D11_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP );
-
-	// テクスチャをシェーダに渡す.
-	m_pContext->PSSetSamplers( 0, 1, &m_pSampleLinears[static_cast<Sampler>( pRenderState->SmaplerNo )] );
-	m_pContext->PSSetShaderResources( 0, 1, &pTexture );
-
-	// アルファブレンド有効にする.
-	if ( !m_DitherFlag ) DirectX11::SetAlphaBlend( true );
-
-	// プリミティブをレンダリング.
-	m_pContext->Draw( 4, 0 );// 板ポリ(頂点4つ分).
-
-	// アルファブレンド無効にする.
-	if ( !m_DitherFlag ) DirectX11::SetAlphaBlend( false );
 }
 #endif // ENABLE_FONT

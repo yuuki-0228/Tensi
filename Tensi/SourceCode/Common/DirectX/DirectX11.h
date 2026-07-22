@@ -33,7 +33,9 @@ public:
 
 	// クリック透過判定用: カーソル位置のバックバッファの色をコピー/取得.
 	//	GDI の GetPixel は DWM との同期待ちが発生して重いため、
-	//	Present 前に 1x1 だけステージングテクスチャへコピーし、次フレームに読み取る.
+	//	1x1 だけステージングテクスチャへコピーし、次フレームに読み取る.
+	//	( CopyCursorPixel は座標の記録のみ行い、実際のコピーは Present 内で
+	//	  MSAA の解決後に行う ).
 	static void		CopyCursorPixel( const int x, const int y );
 	static COLORREF	GetCursorPixel();
 
@@ -126,6 +128,13 @@ private:
 	// バックバッファ作成：カラー用レンダーターゲットビュー作成.
 	HRESULT CreateColorBackBufferRTV();
 
+	// MSAA 用オフスクリーンレンダーターゲット作成.
+	//	MSAA が有効な場合、描画は一旦こちらへ行い Present 時にバックバッファへ解決する.
+	HRESULT CreateSceneRenderTargets();
+
+	// クリック透過判定用: 記録しておいたカーソル位置の 1x1 をコピーする( Present 内で呼ぶ ).
+	void DoCopyCursorPixel( ID3D11Texture2D* pBackBuffer );
+
 	// バックバッファ作成：デプスステンシル用レンダーターゲットビュー作成.
 	HRESULT CreateDepthStencilBackBufferRTV();
 
@@ -154,6 +163,10 @@ private:
 	std::vector<ID3D11Texture2D*>			m_pBackBuffer_DSTex;		// デプスステンシル用テクスチャ.
 	std::vector<ID3D11DepthStencilView*>	m_pBackBuffer_DSTexDSV;		// デプスステンシルビュー.
 
+	// MSAA 用オフスクリーンシーンターゲット( サンプル数が 1 の場合は未使用 ).
+	std::vector<ID3D11Texture2D*>			m_pSceneTex;				// MSAA カラーテクスチャ.
+	std::vector<ID3D11RenderTargetView*>	m_pSceneRTV;				// MSAA カラー RTV.
+
 	// DirectComposition( サブウィンドウの透過合成用 ).
 	//	dcomp.h の具象型を DirectX11.h に持ち込むと旧DirectX SDKのd2d1.hと衝突するため、
 	//	IUnknown* として保持する( 生成/SetRoot等は DCompHelper.cpp 側で完結させる ).
@@ -163,6 +176,9 @@ private:
 
 	// クリック透過判定用のカーソル位置の色コピー先( 1x1 ステージングテクスチャ ).
 	ID3D11Texture2D*						m_pCursorPixelTex;
+	// クリック透過判定用に記録したカーソル位置( 画面外の場合は負値 ).
+	int										m_CursorPixelX;
+	int										m_CursorPixelY;
 	// 深度(Z)テスト設定.
 	ID3D11DepthStencilState*				m_pDepthStencilStateOn;		// 有効設定.
 	ID3D11DepthStencilState*				m_pDepthStencilStateOff;	// 無効設定.
@@ -180,8 +196,14 @@ private:
 	ID3D11RasterizerState*					m_pCullFront;				// 正面を描画しない.
 	ID3D11RasterizerState*					m_pWireFrame;				// ワイヤーフレーム描画.
 
+	// 現在セットされているステートのキャッシュ( 冗長なステート切り替えを省く.所有権は持たない ).
+	ID3D11BlendState*						m_pCurrentBlendState;		// 現在のブレンドステート.
+	ID3D11DepthStencilState*				m_pCurrentDepthState;		// 現在の深度ステート.
+	ID3D11RasterizerState*					m_pCurrentRasterState;		// 現在のラスタライザステート.
+
 	UINT									m_WndWidth;					// ウィンドウ幅.
 	UINT									m_WndHeight;				// ウィンドウ高さ.
+	UINT									m_MsaaSampleCount;			// MSAAのサンプル数( 1で無効 ).
 
 	D3DXCOLOR4								m_BackColor;				// 背景色.
 	D3DXCOLOR4								m_InitBackColor;			// 初期の背景の色.

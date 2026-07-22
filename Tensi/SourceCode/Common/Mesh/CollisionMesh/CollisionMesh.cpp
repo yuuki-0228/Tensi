@@ -354,6 +354,8 @@ HRESULT CCollisionMesh::CreateSampler()
 		= D3D11_TEXTURE_ADDRESS_WRAP;// ラッピングモード(WRAP:繰り返し).
 	samDesc.AddressV = D3D11_TEXTURE_ADDRESS_WRAP;
 	samDesc.AddressW = D3D11_TEXTURE_ADDRESS_WRAP;
+	// 縮小時にミップマップを使用できるようにする( 0 のままだと常に最大解像度が使われてちらつく ).
+	samDesc.MaxLOD	 = D3D11_FLOAT32_MAX;
 	// MIRROR: 反転繰り返し.
 	// CLAMP : 端の模様を引き伸ばす.
 	// BORDER: 別途境界色を決める.

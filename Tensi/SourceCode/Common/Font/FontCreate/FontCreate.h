@@ -1,11 +1,13 @@
 #pragma once
-#include "..\..\..\SystemSetting.h"
+#include "..\..\..\SystemSettings.h"
 #ifdef ENABLE_FONT
 #include "..\..\..\Global.h"
+#include "..\FontStruct.h"
 #include <Shlwapi.h>
 
 /***********************************
 *	フォントスプライト作成クラス.
+*	  GDIでラスタライズした文字をSDF(符号付き距離場)テクスチャに変換する.
 **/
 class CFontCreate final
 {
@@ -13,8 +15,8 @@ public:
 	CFontCreate( const std::string& FilePath, const std::string& FileName );
 	~CFontCreate();
 
-	// フォント画像の作成.
-	HRESULT CreateFontTexture2D( const char* c, ID3D11ShaderResourceView** textur2D );
+	// フォントSDF画像の作成.
+	HRESULT CreateFontTexture2D( const char* c, SFontGlyph* pGlyph );
 
 private:
 	// フォントを利用可能にする.

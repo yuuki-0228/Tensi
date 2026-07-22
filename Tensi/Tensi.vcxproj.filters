@@ -259,6 +259,7 @@
     <ClCompile Include="SourceCode\Scene\FadeManager\FadeBase\NormalFade\NormalFade.cpp" />
     <ClCompile Include="SourceCode\Common\Font\Font.cpp" />
     <ClCompile Include="SourceCode\Common\Font\FontCreate\FontCreate.cpp" />
+    <ClCompile Include="SourceCode\Common\Font\FontTagParser\FontTagParser.cpp" />
     <ClCompile Include="SourceCode\Resource\FontResource\FontResource.cpp" />
     <ClCompile Include="SourceCode\Object\Collision\2D\Box2D\Box2D.cpp" />
     <ClCompile Include="SourceCode\Object\Collision\2D\Sphere2D\Sphere2D.cpp" />
@@ -293,7 +294,10 @@
     <ClCompile Include="SourceCode\Object\GameObject\Actor\BackGroundManager\ActorBackGround\WaterFall\WaterFallTile\WaterFallTile.cpp" />
     <ClCompile Include="SourceCode\Utility\Const\Const.cpp" />
     <ClCompile Include="SourceCode\Object\GameObject\Actor\WindowObjectManager\WindowObject\WateringCan\WateringCan.cpp" />
-    <ClCompile Include="SourceCode\Utility\WindowsMessageBox\WindowsMessageBox.cpp" />     <ClCompile Include="SourceCode\Object\GameObject\Actor\ActorEffect\IconSmokeEffectManager\IconSmokeEffectManager.cpp" />     <ClCompile Include="SourceCode\Object\GameObject\Actor\ActorEffect\IconSmokeEffectManager\IconSmokeEffect\IconSmokeEffect.cpp" />     <ClCompile Include="SourceCode\Object\GameObject\Actor\WindowObjectManager\WindowObject\Player\ExploreManager\ExploreManager.cpp" />
+    <ClCompile Include="SourceCode\Utility\WindowsMessageBox\WindowsMessageBox.cpp" />
+    <ClCompile Include="SourceCode\Object\GameObject\Actor\ActorEffect\IconSmokeEffectManager\IconSmokeEffectManager.cpp" />
+    <ClCompile Include="SourceCode\Object\GameObject\Actor\ActorEffect\IconSmokeEffectManager\IconSmokeEffect\IconSmokeEffect.cpp" />
+    <ClCompile Include="SourceCode\Object\GameObject\Actor\WindowObjectManager\WindowObject\Player\ExploreManager\ExploreManager.cpp" />
     <ClCompile Include="SourceCode\Object\GameObject\Actor\WindowObjectManager\WindowObject\WaterManager\Water\Water.cpp" />
     <ClCompile Include="SourceCode\Object\GameObject\Actor\WindowObjectManager\WindowObject\WaterManager\WaterManager.cpp" />
     <ClCompile Include="SourceCode\Object\GameObject\Actor\ActorEffect\WateringEffectManager\WateringEffect\WateringEffect.cpp" />
@@ -489,6 +493,7 @@
     <ClInclude Include="SourceCode\Common\Font\Font.h" />
     <ClInclude Include="SourceCode\Resource\FontResource\FontResource.h" />
     <ClInclude Include="SourceCode\Common\Font\FontStruct.h" />
+    <ClInclude Include="SourceCode\Common\Font\FontTagParser\FontTagParser.h" />
     <ClInclude Include="SourceCode\Object\Collision\2D\Box2D\Box2D.h" />
     <ClInclude Include="SourceCode\Object\Collision\2D\Sphere2D\Sphere2D.h" />
     <ClInclude Include="SourceCode\Utility\Transform\PositionRenderer\PositionRenderer.h" />
@@ -524,7 +529,10 @@
     <ClInclude Include="SourceCode\Object\GameObject\Actor\BackGroundManager\ActorBackGround\WaterFall\WaterFallTile\WaterFallTile.h" />
     <ClInclude Include="SourceCode\Utility\Const\Const.h" />
     <ClInclude Include="SourceCode\Object\GameObject\Actor\WindowObjectManager\WindowObject\WateringCan\WateringCan.h" />
-    <ClInclude Include="SourceCode\Utility\WindowsMessageBox\WindowsMessageBox.h" />     <ClInclude Include="SourceCode\Object\GameObject\Actor\ActorEffect\IconSmokeEffectManager\IconSmokeEffectManager.h" />     <ClInclude Include="SourceCode\Object\GameObject\Actor\ActorEffect\IconSmokeEffectManager\IconSmokeEffect\IconSmokeEffect.h" />     <ClInclude Include="SourceCode\Object\GameObject\Actor\WindowObjectManager\WindowObject\Player\ExploreManager\ExploreManager.h" />
+    <ClInclude Include="SourceCode\Utility\WindowsMessageBox\WindowsMessageBox.h" />
+    <ClInclude Include="SourceCode\Object\GameObject\Actor\ActorEffect\IconSmokeEffectManager\IconSmokeEffectManager.h" />
+    <ClInclude Include="SourceCode\Object\GameObject\Actor\ActorEffect\IconSmokeEffectManager\IconSmokeEffect\IconSmokeEffect.h" />
+    <ClInclude Include="SourceCode\Object\GameObject\Actor\WindowObjectManager\WindowObject\Player\ExploreManager\ExploreManager.h" />
     <ClInclude Include="SourceCode\Object\GameObject\Actor\WindowObjectManager\WindowObject\WaterManager\Water\Water.h" />
     <ClInclude Include="SourceCode\Object\GameObject\Actor\WindowObjectManager\WindowObject\WaterManager\WaterManager.h" />
     <ClInclude Include="SourceCode\Object\GameObject\Actor\WindowObjectManager\WindowObject\WaterManager\WaterData.h" />
@@ -542,7 +550,7 @@
     <ClInclude Include="SourceCode\Object\GameObject\Actor\BackGroundManager\ActorBackGround\Ground\GroundTile\GroundTile.h" />
     <ClInclude Include="SourceCode\Object\GameObject\Actor\BackGroundManager\ActorBackGround\Ground\Ground.h" />
     <ClInclude Include="SourceCode\Object\GameObject\Actor\BackGroundManager\BackGroundManager.h" />
-    <ClInclude Include="SourceCode\SystemSetting.h" />
+    <ClInclude Include="SourceCode\SystemSettings.h" />
     <ClInclude Include="SourceCode\Utility\CashManager\CashManager.h" />
     <ClInclude Include="SourceCode\Utility\EventSubject\EventParam\EventParam.h" />
     <ClInclude Include="SourceCode\Utility\EventSubject\Subject\Subject.h" />

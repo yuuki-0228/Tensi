@@ -1,5 +1,5 @@
 #pragma once
-#include "..\..\SystemSetting.h"
+#include "..\..\SystemSettings.h"
 #ifdef ENABLE_CLASS_BOOL
 #include "BitFlagManager/BitFlagManager.h"
 #include <string>

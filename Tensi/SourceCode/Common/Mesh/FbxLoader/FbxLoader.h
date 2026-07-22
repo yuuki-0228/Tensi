@@ -1,5 +1,5 @@
 #pragma once
-#include "..\..\..\SystemSetting.h"
+#include "..\..\..\SystemSettings.h"
 #ifdef ENABLE_MESH
 
 //警告についてのコード分析を無効にする。4005：再定義.

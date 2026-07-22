@@ -1,5 +1,5 @@
 #pragma once
-#include "..\..\SystemSetting.h"
+#include "..\..\SystemSettings.h"
 #ifdef ENABLE_EFFEKSEER
 #include "..\..\Global.h"
 #include "Effect\Effect.h"

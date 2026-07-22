@@ -1,5 +1,5 @@
 #pragma once
-#include "..\..\SystemSetting.h"
+#include "..\..\SystemSettings.h"
 #ifdef ENABLE_SOUND
 #include <unordered_map>
 #include <iostream>

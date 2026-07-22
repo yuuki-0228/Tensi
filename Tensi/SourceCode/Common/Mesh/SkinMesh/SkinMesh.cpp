@@ -1439,6 +1439,8 @@ HRESULT CSkinMesh::CreateSampler( ID3D11SamplerState** pSampler )
 	SamDesc.AddressU = D3D11_TEXTURE_ADDRESS_WRAP;
 	SamDesc.AddressV = D3D11_TEXTURE_ADDRESS_WRAP;
 	SamDesc.AddressW = D3D11_TEXTURE_ADDRESS_WRAP;
+	// 縮小時にミップマップを使用できるようにする( 0 のままだと常に最大解像度が使われてちらつく ).
+	SamDesc.MaxLOD	 = D3D11_FLOAT32_MAX;
 	if (FAILED(
 		m_pDevice->CreateSamplerState( &SamDesc, &m_pSampleLinear )))
 	{

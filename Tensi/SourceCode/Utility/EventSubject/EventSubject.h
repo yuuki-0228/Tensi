@@ -1,5 +1,5 @@
 #pragma once
-#include "..\..\SystemSetting.h"
+#include "..\..\SystemSettings.h"
 #ifdef ENABLE_OBSERVER
 #include "Subject/Subject.h"
 #include "EventParam/EventParam.h"

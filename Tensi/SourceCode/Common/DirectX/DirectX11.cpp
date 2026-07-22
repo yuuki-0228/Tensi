@@ -27,18 +27,26 @@ DirectX11::DirectX11()
 	, m_pDCompDevice			( nullptr )
 	, m_pDCompTarget			( nullptr )
 	, m_pDCompVisual			( nullptr )
+	, m_pSceneTex				()
+	, m_pSceneRTV				()
 	, m_pCursorPixelTex			( nullptr )
+	, m_CursorPixelX			( -1 )
+	, m_CursorPixelY			( -1 )
 	, m_pDepthStencilStateOn	( nullptr )
 	, m_pDepthStencilStateOff	( nullptr )
 	, m_pAlphaBlendOn			( nullptr )
 	, m_pAlphaBlendOff			( nullptr )
-	, m_pAlphaToCoverageOn		( nullptr ) 
+	, m_pAlphaToCoverageOn		( nullptr )
 	, m_pCullNone				( nullptr )
 	, m_pCullBack				( nullptr )
 	, m_pCullFront				( nullptr )
 	, m_pWireFrame				( nullptr )
+	, m_pCurrentBlendState		( nullptr )
+	, m_pCurrentDepthState		( nullptr )
+	, m_pCurrentRasterState		( nullptr )
 	, m_WndWidth				( 0 )
 	, m_WndHeight				( 0 )
+	, m_MsaaSampleCount			( 1 )
 	, m_BackColor				( Color4::White )
 	, m_InitBackColor			( Color4::White )
 	, m_IsWindowActive			( false )
@@ -82,9 +90,12 @@ HRESULT DirectX11::Create( std::vector<HWND> hWnd )
 	pI->m_pBackBuffer_TexRTV.resize( pI->m_WindowNum );
 	pI->m_pBackBuffer_DSTex.resize( pI->m_WindowNum );
 	pI->m_pBackBuffer_DSTexDSV.resize( pI->m_WindowNum );
+	pI->m_pSceneTex.resize( pI->m_WindowNum );
+	pI->m_pSceneRTV.resize( pI->m_WindowNum );
 
 	if ( FAILED( pI->CreateDeviceAndSwapChain()			) ) return E_FAIL;
 	if ( FAILED( pI->CreateColorBackBufferRTV()			) ) return E_FAIL;
+	if ( FAILED( pI->CreateSceneRenderTargets()			) ) return E_FAIL;
 	if ( FAILED( pI->CreateDepthStencilBackBufferRTV()	) ) return E_FAIL;
 	if ( FAILED( pI->CreateDepthStencilState()			) ) return E_FAIL;
 	if ( FAILED( pI->CreateAlphaBlendState()			) ) return E_FAIL;
@@ -112,6 +123,8 @@ void DirectX11::Release()
 	SAFE_RELEASE( pI->m_pDepthStencilStateOn	);
 
 	for ( int i = pI->m_WindowNum - 1; i >= 0; --i ) {
+		SAFE_RELEASE( pI->m_pSceneRTV[i]			);
+		SAFE_RELEASE( pI->m_pSceneTex[i]			);
 		SAFE_RELEASE( pI->m_pBackBuffer_DSTexDSV[i] );
 		SAFE_RELEASE( pI->m_pBackBuffer_DSTex[i]	);
 		SAFE_RELEASE( pI->m_pBackBuffer_TexRTV[i]	);
@@ -132,24 +145,26 @@ void DirectX11::ClearBackBuffer( int No )
 {
 	DirectX11* pI = GetInstance();
 
+	// MSAA 有効時はオフスクリーンの MSAA ターゲットへ描画する( Present 時にバックバッファへ解決する ).
+	ID3D11RenderTargetView* pRTV =
+		pI->m_MsaaSampleCount > 1 ? pI->m_pSceneRTV[No] : pI->m_pBackBuffer_TexRTV[No];
+
 	// カラーバックバッファ.
 	if ( No == 0 ) {
 		pI->m_BackColor.w = 0.0f;
-		pI->m_pContext11->ClearRenderTargetView(
-			pI->m_pBackBuffer_TexRTV[No], pI->m_BackColor );
+		pI->m_pContext11->ClearRenderTargetView( pRTV, pI->m_BackColor );
 	}
 	else {
 		// サブウィンドウはプリマルチプライドアルファ合成のため完全透明(0,0,0,0)でクリアする.
 		// ( 描画した部分以外は透過して、デスクトップの壁紙がそのまま表示される ).
 		constexpr float ClearColor[4] = { 0.0f, 0.0f, 0.0f, 0.0f };
-		pI->m_pContext11->ClearRenderTargetView(
-			pI->m_pBackBuffer_TexRTV[No], ClearColor );
+		pI->m_pContext11->ClearRenderTargetView( pRTV, ClearColor );
 	}
 
 	// レンダーターゲットビューとデプスステンシルビューをパイプラインにセット.
 	pI->m_pContext11->OMSetRenderTargets(
 		1,
-		&pI->m_pBackBuffer_TexRTV[No],
+		&pRTV,
 		pI->m_pBackBuffer_DSTexDSV[No] );
 
 	// デプスステンシルバックバッファ.
@@ -167,6 +182,23 @@ void DirectX11::ClearBackBuffer( int No )
 void DirectX11::Present( int No )
 {
 	DirectX11* pI = GetInstance();
+
+	// MSAA 有効時はシーンターゲットをバックバッファへ解決してから表示する.
+	//	( サブウィンドウはフリップモデルのため、現在のバックバッファを毎フレーム取得する ).
+	if ( pI->m_MsaaSampleCount > 1 || No == 0 ) {
+		ID3D11Texture2D* pBackBuffer = nullptr;
+		if ( SUCCEEDED( pI->m_pSwapChain[No]->GetBuffer( 0, __uuidof( ID3D11Texture2D ), (void**)&pBackBuffer ) ) ) {
+			if ( pI->m_MsaaSampleCount > 1 ) {
+				pI->m_pContext11->ResolveSubresource(
+					pBackBuffer, 0, pI->m_pSceneTex[No], 0, DXGI_FORMAT_B8G8R8A8_UNORM );
+			}
+
+			// クリック透過判定用のカーソル位置の色コピー( メインウィンドウのみ ).
+			if ( No == 0 ) pI->DoCopyCursorPixel( pBackBuffer );
+
+			SAFE_RELEASE( pBackBuffer );
+		}
+	}
 
 	pI->m_pSwapChain[No]->Present( 0, 0 );
 }
@@ -269,6 +301,20 @@ HRESULT DirectX11::CreateDeviceAndSwapChain()
 		}
 	}
 
+	// MSAAのサンプル数を決定する( 非対応の場合は段階的に下げる ).
+	UINT MsaaRequest = static_cast<UINT>( WndSetting["MSAA"].Get( 4 ) );
+	if ( MsaaRequest > 8 ) MsaaRequest = 8;
+	m_MsaaSampleCount = 1;
+	for ( UINT Count = MsaaRequest; Count > 1; Count /= 2 ) {
+		UINT Quality = 0;
+		if ( SUCCEEDED( m_pDevice11->CheckMultisampleQualityLevels(
+				DXGI_FORMAT_B8G8R8A8_UNORM, Count, &Quality ) ) && Quality > 0 ) {
+			m_MsaaSampleCount = Count;
+			break;
+		}
+	}
+	Log::PushLogInfo( "MSAA サンプル数 : " + std::to_string( m_MsaaSampleCount ) );
+
 	// 背景の色の設定.
 	m_InitBackColor = Color4::RGBA(
 		WndSetting["BackColor"]["R"].Get( 1.0f ),
@@ -280,16 +326,31 @@ HRESULT DirectX11::CreateDeviceAndSwapChain()
 }
 
 //---------------------------.
-// クリック透過判定用: カーソル位置のバックバッファの色をコピー.
-//	メインウィンドウ( swapchain 0 )の Present 直前に呼ぶこと.
-//	( DISCARD モデルは Present 後のバックバッファの内容が不定になるため ).
+// クリック透過判定用: カーソル位置を記録する.
+//	メインウィンドウ( swapchain 0 )の Present 前に呼ぶこと.
+//	実際のコピーは Present 内で MSAA の解決後に行う.
 //---------------------------.
 void DirectX11::CopyCursorPixel( const int x, const int y )
 {
 	DirectX11* pI = GetInstance();
 
+	pI->m_CursorPixelX = x;
+	pI->m_CursorPixelY = y;
+}
+
+//---------------------------.
+// クリック透過判定用: 記録しておいたカーソル位置の 1x1 をコピーする.
+//	Present 内で解決済みのバックバッファに対して呼ぶ.
+//	( DISCARD モデルは Present 後のバックバッファの内容が不定になるため Present 前に行う ).
+//---------------------------.
+void DirectX11::DoCopyCursorPixel( ID3D11Texture2D* pBackBuffer )
+{
+	// 画面外の場合は前回の値を保持する.
+	if ( m_CursorPixelX < 0 || m_CursorPixelY < 0 ||
+		 m_CursorPixelX >= static_cast<int>( m_WndWidth ) || m_CursorPixelY >= static_cast<int>( m_WndHeight ) ) return;
+
 	// 初回にステージングテクスチャを作成する.
-	if ( pI->m_pCursorPixelTex == nullptr ) {
+	if ( m_pCursorPixelTex == nullptr ) {
 		D3D11_TEXTURE2D_DESC Desc = {};
 		Desc.Width				= 1;
 		Desc.Height				= 1;
@@ -303,22 +364,14 @@ void DirectX11::CopyCursorPixel( const int x, const int y )
 		// 初期値は黒( 透過扱い ).
 		const UINT32 Black = 0xFF000000;
 		D3D11_SUBRESOURCE_DATA Init = { &Black, sizeof( UINT32 ), sizeof( UINT32 ) };
-		if ( FAILED( pI->m_pDevice11->CreateTexture2D( &Desc, &Init, &pI->m_pCursorPixelTex ) ) ) return;
+		if ( FAILED( m_pDevice11->CreateTexture2D( &Desc, &Init, &m_pCursorPixelTex ) ) ) return;
 	}
 
-	// 画面外の場合は前回の値を保持する.
-	if ( x < 0 || y < 0 ||
-		 x >= static_cast<int>( pI->m_WndWidth ) || y >= static_cast<int>( pI->m_WndHeight ) ) return;
-
 	// バックバッファのカーソル位置 1x1 をコピーする.
-	ID3D11Texture2D* pBackBuffer = nullptr;
-	if ( FAILED( pI->m_pSwapChain[0]->GetBuffer( 0, __uuidof( ID3D11Texture2D ), (void**)&pBackBuffer ) ) ) return;
-
 	D3D11_BOX Box = {
-		static_cast<UINT>( x ),		static_cast<UINT>( y ),		0,
-		static_cast<UINT>( x ) + 1,	static_cast<UINT>( y ) + 1,	1 };
-	pI->m_pContext11->CopySubresourceRegion( pI->m_pCursorPixelTex, 0, 0, 0, 0, pBackBuffer, 0, &Box );
-	SAFE_RELEASE( pBackBuffer );
+		static_cast<UINT>( m_CursorPixelX ),		static_cast<UINT>( m_CursorPixelY ),		0,
+		static_cast<UINT>( m_CursorPixelX ) + 1,	static_cast<UINT>( m_CursorPixelY ) + 1,	1 };
+	m_pContext11->CopySubresourceRegion( m_pCursorPixelTex, 0, 0, 0, 0, pBackBuffer, 0, &Box );
 }
 
 //---------------------------.
@@ -374,26 +427,33 @@ void DirectX11::SetRasterizerState( const ERS_STATE& RsState )
 {
 	DirectX11* pI = GetInstance();
 
+	ID3D11RasterizerState* pTmp = nullptr;
 	switch ( RsState ) {
 	case ERS_STATE::None:
 		// 正背面描画.
-		pI->m_pContext11->RSSetState( pI->m_pCullNone );
+		pTmp = pI->m_pCullNone;
 		break;
 	case ERS_STATE::Back:
 		// 背面を描画しない.
-		pI->m_pContext11->RSSetState( pI->m_pCullBack );
+		pTmp = pI->m_pCullBack;
 		break;
 	case ERS_STATE::Front:
 		// 正面を描画しない.
-		pI->m_pContext11->RSSetState( pI->m_pCullFront );
+		pTmp = pI->m_pCullFront;
 		break;
 	case ERS_STATE::Wire:
 		// ワイヤーフレーム描画.
-		pI->m_pContext11->RSSetState( pI->m_pWireFrame );
+		pTmp = pI->m_pWireFrame;
 		break;
 	default:
-		break;
+		return;
 	}
+
+	// 既に同じステートがセットされている場合は何もしない( 冗長なステート切り替えの削減 ).
+	if ( pTmp == pI->m_pCurrentRasterState ) return;
+
+	pI->m_pContext11->RSSetState( pTmp );
+	pI->m_pCurrentRasterState = pTmp;
 }
 
 //---------------------------.
@@ -500,16 +560,24 @@ void DirectX11::Resize()
 			PushError( "デプスステンシルビュー作成失敗", result );
 			return;
 		}
+		// MSAA 用オフスクリーンターゲットも新しいサイズで作り直す.
+		result = pI->CreateSceneRenderTargets();
+		if ( FAILED( result ) ) {
+			PushError( "MSAA レンダーターゲット作成失敗", result );
+			return;
+		}
 		result = pI->CreateDepthStencilBackBufferRTV();
 		if( FAILED( result ) ) {
 			PushError( "デプスステンシルビュー作成失敗", result );
 			return;
 		}
 
-		// レンダーターゲットの設定.
-		pI->m_pContext11->OMSetRenderTargets( 
-			1, 
-			&pI->m_pBackBuffer_TexRTV[i],
+		// レンダーターゲットの設定( MSAA 有効時はシーンターゲットをセットする ).
+		ID3D11RenderTargetView* pRTV =
+			pI->m_MsaaSampleCount > 1 ? pI->m_pSceneRTV[i] : pI->m_pBackBuffer_TexRTV[i];
+		pI->m_pContext11->OMSetRenderTargets(
+			1,
+			&pRTV,
 			pI->m_pBackBuffer_DSTexDSV[i] );
 		// デプスステンシルバッファ.
 		pI->m_pContext11->ClearDepthStencilView(
@@ -852,6 +920,7 @@ HRESULT DirectX11::CreateRasterizer()
 	rdc.DepthClipEnable = FALSE;
 
 	m_pContext11->RSSetState( m_pCullNone );
+	m_pCurrentRasterState = m_pCullNone;
 
 	return S_OK;
 }
@@ -1007,10 +1076,14 @@ void DirectX11::SetAlphaBlend( bool flag )
 	UINT mask = 0xffffffff;	// マスク値.
 	ID3D11BlendState* pTmp
 		= ( flag == true ) ? pI->m_pAlphaBlendOn : pI->m_pAlphaBlendOff;
+	pI->m_IsAlphaBlend = flag;
+
+	// 既に同じステートがセットされている場合は何もしない( 冗長なステート切り替えの削減 ).
+	if ( pTmp == pI->m_pCurrentBlendState ) return;
 
 	// アルファブレンド設定をセット.
 	pI->m_pContext11->OMSetBlendState( pTmp, nullptr, mask );
-	pI->m_IsAlphaBlend = flag;
+	pI->m_pCurrentBlendState = pTmp;
 }
 
 //----------------------------.
@@ -1022,10 +1095,15 @@ void DirectX11::SetAlphaToCoverage( bool flag )
 
 	// ブレンドステートの設定.
 	UINT mask = 0xffffffff;	// マスク値.
-	ID3D11BlendState* blend 
+	ID3D11BlendState* blend
 		= ( flag == true ) ? pI->m_pAlphaToCoverageOn : pI->m_pAlphaBlendOff;
-	pI->m_pContext11->OMSetBlendState( blend, nullptr, mask );
 	pI->m_IsAlphaToCoverage = flag;
+
+	// 既に同じステートがセットされている場合は何もしない( 冗長なステート切り替えの削減 ).
+	if ( blend == pI->m_pCurrentBlendState ) return;
+
+	pI->m_pContext11->OMSetBlendState( blend, nullptr, mask );
+	pI->m_pCurrentBlendState = blend;
 }
 
 //----------------------------.
@@ -1037,10 +1115,14 @@ void DirectX11::SetDepth(bool flag)
 
 	ID3D11DepthStencilState* pTmp
 		= (flag == true) ? pI->m_pDepthStencilStateOn : pI->m_pDepthStencilStateOff;
+	pI->m_IsDepth = flag;
+
+	// 既に同じステートがセットされている場合は何もしない( 冗長なステート切り替えの削減 ).
+	if ( pTmp == pI->m_pCurrentDepthState ) return;
 
 	// 深度設定をセット.
 	pI->m_pContext11->OMSetDepthStencilState( pTmp, 1 );
-	pI->m_IsDepth = flag;
+	pI->m_pCurrentDepthState = pTmp;
 }
 
 //----------------------------.
@@ -1049,6 +1131,9 @@ void DirectX11::SetDepth(bool flag)
 HRESULT DirectX11::CreateColorBackBufferRTV()
 {
 	for ( int i = 0; i < m_WindowNum; ++i ) {
+		// 再作成に備えて解放しておく.
+		SAFE_RELEASE( m_pBackBuffer_TexRTV[i] );
+
 		// バックバッファテクスチャを取得(既にあるので作成ではない).
 		ID3D11Texture2D* pBackBuffer_Tex = nullptr;
 		auto result = m_pSwapChain[i]->GetBuffer(
@@ -1081,6 +1166,68 @@ HRESULT DirectX11::CreateColorBackBufferRTV()
 }
 
 //----------------------------.
+// MSAA 用オフスクリーンレンダーターゲット作成.
+//	MSAA が有効な場合、描画は一旦こちらへ行い Present 時にバックバッファへ解決する.
+//	作成に失敗した場合は MSAA を無効にして続行する.
+//----------------------------.
+HRESULT DirectX11::CreateSceneRenderTargets()
+{
+	// MSAA 無効時はバックバッファへ直接描画するため作成しない.
+	if ( m_MsaaSampleCount <= 1 ) return S_OK;
+
+	for ( int i = 0; i < m_WindowNum; ++i ) {
+		// 再作成に備えて解放しておく.
+		SAFE_RELEASE( m_pSceneRTV[i] );
+		SAFE_RELEASE( m_pSceneTex[i] );
+
+		// 実際に作成されたバックバッファのサイズに合わせる.
+		UINT Width  = ( m_WndWidth  != 0 ) ? m_WndWidth  : 1;
+		UINT Height = ( m_WndHeight != 0 ) ? m_WndHeight : 1;
+		ID3D11Texture2D* pBackBuffer_Tex = nullptr;
+		if ( SUCCEEDED( m_pSwapChain[i]->GetBuffer( 0, __uuidof( ID3D11Texture2D ), (LPVOID*)&pBackBuffer_Tex ) ) ) {
+			D3D11_TEXTURE2D_DESC BufferDesc = {};
+			pBackBuffer_Tex->GetDesc( &BufferDesc );
+			SAFE_RELEASE( pBackBuffer_Tex );
+			if ( BufferDesc.Width  != 0 ) Width  = BufferDesc.Width;
+			if ( BufferDesc.Height != 0 ) Height = BufferDesc.Height;
+		}
+
+		// MSAA カラーテクスチャの作成.
+		D3D11_TEXTURE2D_DESC Desc = {};
+		Desc.Width				= Width;
+		Desc.Height				= Height;
+		Desc.MipLevels			= 1;
+		Desc.ArraySize			= 1;
+		Desc.Format				= DXGI_FORMAT_B8G8R8A8_UNORM;
+		Desc.SampleDesc.Count	= m_MsaaSampleCount;
+		Desc.SampleDesc.Quality	= 0;
+		Desc.Usage				= D3D11_USAGE_DEFAULT;
+		Desc.BindFlags			= D3D11_BIND_RENDER_TARGET;
+
+		HRESULT result = m_pDevice11->CreateTexture2D( &Desc, nullptr, &m_pSceneTex[i] );
+		if ( SUCCEEDED( result ) ) {
+			result = m_pDevice11->CreateRenderTargetView( m_pSceneTex[i], nullptr, &m_pSceneRTV[i] );
+		}
+
+		// 作成に失敗した場合は MSAA を無効にして従来のバックバッファ直接描画に戻す.
+		if ( FAILED( result ) ) {
+			std::ostringstream ss;
+			ss	<< "MSAA レンダーターゲット作成失敗 ( window " << i << " ), MSAA を無効にします."
+				<< " HRESULT : 0x" << std::hex << static_cast<unsigned long>( result );
+			Log::PushLogInfo( ss.str() );
+
+			m_MsaaSampleCount = 1;
+			for ( int j = 0; j <= i; ++j ) {
+				SAFE_RELEASE( m_pSceneRTV[j] );
+				SAFE_RELEASE( m_pSceneTex[j] );
+			}
+			break;
+		}
+	}
+	return S_OK;
+}
+
+//----------------------------.
 // バックバッファ作成:デプスステンシル用レンダーターゲットビュー作成.
 //----------------------------.
 HRESULT DirectX11::CreateDepthStencilBackBufferRTV()
@@ -1088,6 +1235,10 @@ HRESULT DirectX11::CreateDepthStencilBackBufferRTV()
 	DirectX11* pI = GetInstance();
 
 	for ( int i = 0; i < m_WindowNum; ++i ) {
+		// 再作成に備えて解放しておく.
+		SAFE_RELEASE( m_pBackBuffer_DSTexDSV[i] );
+		SAFE_RELEASE( m_pBackBuffer_DSTex[i] );
+
 		// 各スワップチェーンの実際のバックバッファのサイズを一致させる。
 		//	m_WndWidth / m_WndHeight は、実際に作成されたバッファのサイズと
 		//	異なる場合がある（コンポジション・スワップチェーン、DPI、ドライバによる調整など）。
@@ -1110,7 +1261,7 @@ HRESULT DirectX11::CreateDepthStencilBackBufferRTV()
 		descDepth.MipLevels				= 1;							// Mip levels.
 		descDepth.ArraySize				= 1;							// Array size.
 		descDepth.Format				= DXGI_FORMAT_D32_FLOAT;		// Set per attempt below.
-		descDepth.SampleDesc.Count		= 1;							// Multi sample count.
+		descDepth.SampleDesc.Count		= m_MsaaSampleCount;			// Multi sample count( カラーターゲットと一致させる ).
 		descDepth.SampleDesc.Quality	= 0;							// Multi sample quality.
 		descDepth.Usage					= D3D11_USAGE_DEFAULT;			// Usage.
 		descDepth.BindFlags				= D3D11_BIND_DEPTH_STENCIL;		// Use as depth stencil.
@@ -1147,9 +1298,12 @@ HRESULT DirectX11::CreateDepthStencilBackBufferRTV()
 		}
 
 		// レンダリングターゲットビューと深度・ステンシルビューを設定
+		//	( MSAA 有効時はサンプル数を一致させるためシーンターゲットをセットする ).
+		ID3D11RenderTargetView* pRTV =
+			m_MsaaSampleCount > 1 ? m_pSceneRTV[i] : m_pBackBuffer_TexRTV[i];
 		pI->m_pContext11->OMSetRenderTargets(
 			1,
-			&m_pBackBuffer_TexRTV[i],
+			&pRTV,
 			m_pBackBuffer_DSTexDSV[i] );
 	}
 	return S_OK;

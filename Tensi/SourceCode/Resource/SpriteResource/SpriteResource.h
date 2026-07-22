@@ -1,5 +1,5 @@
 #pragma once
-#include "..\..\SystemSetting.h"
+#include "..\..\SystemSettings.h"
 #ifdef ENABLE_SPRITE
 #include "..\..\Global.h"
 #include "..\..\Common\Sprite\Sprite.h"

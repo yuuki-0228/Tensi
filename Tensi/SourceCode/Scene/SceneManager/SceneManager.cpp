@@ -93,7 +93,6 @@ void SceneManager::Update( const float& DeltaTime )
 	DebugWindow::PushProc( u8"SceneManager",
 	[&] {
 		if ( ImGuiManager::Button( u8"ゲームメインへ移動"		) ) SceneChange( ESceneList::GameMain	);
-		if ( ImGuiManager::Button( u8"UIエディタへ移動"		) ) SceneChange( ESceneList::UIEdit		);
 	} );
 }
 

@@ -1,5 +1,5 @@
 #pragma once
-#include "..\..\SystemSetting.h"
+#include "..\..\SystemSettings.h"
 #ifdef ENABLE_SPRITE
 #include "..\..\Global.h"
 
@@ -44,7 +44,7 @@ struct stSpriteShaderConstantBuffer
 	ALIGN16 D3DXVECTOR4	vRenderArea;		// 描画するエリア.
 	ALIGN16 float		fViewPortWidth;		// ビューポート幅.
 	ALIGN16 float		fViewPortHeight;	// ビューポート高さ.
-	ALIGN16 D3DXVECTOR4 vFlag;				// フラグ(1以上なら使用する)(x:ディザ抜きを使用するか)(y:アルファブロックを使用するか)(z:カラーにマスクを使用するか).
+	ALIGN16 D3DXVECTOR4 vFlag;				// フラグ(1以上なら使用する)(x:ディザ抜きを使用するか)(y:アルファブロックを使用するか)(z:カラーにマスクを使用するか)(w:高品質サンプリングを使用するか).
 } typedef SSpriteShaderConstantBuffer;
 
 // 幅高さ構造体.

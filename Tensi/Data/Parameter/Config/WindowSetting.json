@@ -17,6 +17,7 @@
     "[IsShowOnTop         ] : ウィンドウを最前面で固定するか",
     "[IsStartFullScreen   ] : 起動時にフルスクリーンで起動するか",
     "[IsSizeLock          ] : サイズを変更できないようにするか",
+    "[MSAA                ] : アンチエイリアスのサンプル数( 1:無効 / 2 / 4 / 8, 非対応の場合は自動で下がる )",
     "[Name                ] : アプリ / ウィンドウ名",
     "[Pos                 ] : ウィンドウの表示位置",
     "[Size                ] : ウィンドウのサイズ",
@@ -42,6 +43,7 @@
   "IsShowOnTop": true,
   "IsSizeLock": true,
   "IsStartFullScreen": false,
+  "MSAA": 4,
   "Name": {
     "App": "Slime",
     "Wnd": "Slime"

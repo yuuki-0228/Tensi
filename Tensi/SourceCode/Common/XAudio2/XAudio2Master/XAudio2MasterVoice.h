@@ -1,5 +1,5 @@
 #pragma once
-#include "..\..\..\SystemSetting.h"
+#include "..\..\..\SystemSettings.h"
 #ifdef ENABLE_SOUND
 #include "XAudio2.h"
 #define COM_SAFE_RELEASE( p ) { if(p) { (p)->Release(); (p) = nullptr; } }

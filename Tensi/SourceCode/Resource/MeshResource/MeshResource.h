@@ -1,5 +1,5 @@
 #pragma once
-#include "..\..\SystemSetting.h"
+#include "..\..\SystemSettings.h"
 #ifdef ENABLE_MESH
 #include "..\..\Global.h"
 #include "..\..\Common\Mesh\SkinMesh\SkinMesh.h"

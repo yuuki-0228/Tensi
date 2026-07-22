@@ -2,12 +2,73 @@
 #ifdef ENABLE_FONT
 #include "..\..\DirectX\DirectX11.h"
 #include "..\..\..\Utility\StringConversion\StringConversion.h"
+#include <vector>
+#include <cmath>
 #ifndef _DEBUG
 #include <encrypt/file.h>
 #endif
 
 namespace {
-	const int FONT_BMP_SIZE	= 256;
+	const int	FONT_BMP_SIZE	= 256;		// フォントのラスタライズサイズ.
+	const int	SDF_PAD			= 32;		// SDFセル周囲の余白(px).
+	const float	SDF_SPREAD		= 32.0f;	// SDFの距離レンジ(px).
+	const int	SEDT_INF		= 1 << 14;	// 距離変換の初期値.
+
+	// 8SSEDT用の最近傍点までのベクトル.
+	struct SSedtPoint
+	{
+		int dx, dy;
+		int DistSq() const { return dx * dx + dy * dy; }
+	};
+
+	// 近傍の画素と比較して近い方を採用する.
+	inline void SedtCompare( const std::vector<SSedtPoint>& Grid, SSedtPoint& Point, const int x, const int y, const int ox, const int oy, const int w, const int h )
+	{
+		const int nx = x + ox;
+		const int ny = y + oy;
+		SSedtPoint Other = { SEDT_INF, SEDT_INF };
+		if ( nx >= 0 && ny >= 0 && nx < w && ny < h ) Other = Grid[ny * w + nx];
+		Other.dx += ox;
+		Other.dy += oy;
+		if ( Other.DistSq() < Point.DistSq() ) Point = Other;
+	}
+
+	// 8SSEDT(2パスの距離変換).
+	void SedtGenerate( std::vector<SSedtPoint>& Grid, const int w, const int h )
+	{
+		// 1パス目(左上から右下).
+		for ( int y = 0; y < h; ++y ) {
+			for ( int x = 0; x < w; ++x ) {
+				SSedtPoint Point = Grid[y * w + x];
+				SedtCompare( Grid, Point, x, y, -1,  0, w, h );
+				SedtCompare( Grid, Point, x, y,  0, -1, w, h );
+				SedtCompare( Grid, Point, x, y, -1, -1, w, h );
+				SedtCompare( Grid, Point, x, y,  1, -1, w, h );
+				Grid[y * w + x] = Point;
+			}
+			for ( int x = w - 1; x >= 0; --x ) {
+				SSedtPoint Point = Grid[y * w + x];
+				SedtCompare( Grid, Point, x, y, 1, 0, w, h );
+				Grid[y * w + x] = Point;
+			}
+		}
+		// 2パス目(右下から左上).
+		for ( int y = h - 1; y >= 0; --y ) {
+			for ( int x = w - 1; x >= 0; --x ) {
+				SSedtPoint Point = Grid[y * w + x];
+				SedtCompare( Grid, Point, x, y,  1,  0, w, h );
+				SedtCompare( Grid, Point, x, y,  0,  1, w, h );
+				SedtCompare( Grid, Point, x, y, -1,  1, w, h );
+				SedtCompare( Grid, Point, x, y,  1,  1, w, h );
+				Grid[y * w + x] = Point;
+			}
+			for ( int x = 0; x < w; ++x ) {
+				SSedtPoint Point = Grid[y * w + x];
+				SedtCompare( Grid, Point, x, y, -1, 0, w, h );
+				Grid[y * w + x] = Point;
+			}
+		}
+	}
 }
 
 CFontCreate::CFontCreate( const std::string& FilePath, const std::string& FileName )
@@ -51,12 +112,13 @@ CFontCreate::~CFontCreate()
 }
 
 //-----------------------------------.
-// フォント画像の作成.
+// フォントSDF画像の作成.
 //-----------------------------------.
-HRESULT CFontCreate::CreateFontTexture2D( const char* c, ID3D11ShaderResourceView** resource )
+HRESULT CFontCreate::CreateFontTexture2D( const char* c, SFontGlyph* pGlyph )
 {
-	if( m_pDevice	== nullptr ) return E_FAIL;
-	if( m_pContext	== nullptr ) return E_FAIL;
+	if ( m_pDevice	== nullptr ) return E_FAIL;
+	if ( m_pContext	== nullptr ) return E_FAIL;
+	if ( pGlyph		== nullptr ) return E_FAIL;
 
 	// 文字コード取得.
 	std::wstring	wString = StringConversion::to_wString( c );
@@ -65,7 +127,7 @@ HRESULT CFontCreate::CreateFontTexture2D( const char* c, ID3D11ShaderResourceVie
 	//-------------------------------------------------.
 	// フォントの生成.
 	//-------------------------------------------------.
-	LOGFONT lf = { 
+	LOGFONT lf = {
 		FONT_BMP_SIZE,					// 文字セルまたは文字の高さ.
 		0,								// 平均文字幅.
 		0,								// 文字送りの方向とX軸との角度.
@@ -101,23 +163,89 @@ HRESULT CFontCreate::CreateFontTexture2D( const char* c, ID3D11ShaderResourceVie
 	// フォントビットマップ取得.
 	TEXTMETRIC		TM;
 	GetTextMetrics( Hdc, &TM );
-	GLYPHMETRICS	GM;
+	GLYPHMETRICS	GM = {};
 	CONST MAT2		Mat		= { { 0, 1 }, { 0, 0 }, { 0, 0 }, { 0, 1 } };
 	DWORD			Size	= GetGlyphOutline( Hdc, Code, GGO_GRAY4_BITMAP, &GM, 0, nullptr, &Mat );
-	BYTE*			Ptr		= new BYTE[Size];
-	GetGlyphOutline( Hdc, Code, GGO_GRAY4_BITMAP, &GM, Size, Ptr, &Mat );
+	BYTE*			Ptr		= nullptr;
+	if ( Size != GDI_ERROR && Size > 0 ) {
+		Ptr = new BYTE[Size];
+		GetGlyphOutline( Hdc, Code, GGO_GRAY4_BITMAP, &GM, Size, Ptr, &Mat );
+	}
 
 	// デバイスコンテキストとフォントハンドルの開放.
 	SelectObject( Hdc, OldFont );
 	DeleteObject( hFont );
 	ReleaseDC( nullptr, Hdc );
 
+	//-------------------------------------------------.
+	// 文字のカバレッジ(不透明度)をセルに書き込む.
+	//	セルの周囲にはアウトラインやグロー用の余白を設ける.
+	//-------------------------------------------------.
+	const int CellW	= GM.gmCellIncX > 0 ? static_cast<int>( GM.gmCellIncX ) : static_cast<int>( TM.tmAveCharWidth );
+	const int CellH	= static_cast<int>( TM.tmHeight );
+	const int GridW	= CellW + SDF_PAD * 2;
+	const int GridH	= CellH + SDF_PAD * 2;
+
+	std::vector<BYTE> Coverage( GridW * GridH, 0 );
+	if ( Ptr != nullptr ) {
+		// 書き出し位置( 左上 )とフォントビットマップの幅高.
+		//	α値はGGO_GRAY4_BITMAPのため17段階.
+		const int iOfs_x	= GM.gmptGlyphOrigin.x;
+		const int iOfs_y	= TM.tmAscent - GM.gmptGlyphOrigin.y;
+		const int iBmp_w	= GM.gmBlackBoxX + ( 4 - ( GM.gmBlackBoxX % 4 ) ) % 4;
+		const int iBmp_h	= GM.gmBlackBoxY;
+		const int Level		= 17;
+		for ( int y = 0; y < iBmp_h; ++y ) {
+			for ( int x = 0; x < iBmp_w; ++x ) {
+				const int cx = SDF_PAD + iOfs_x + x;
+				const int cy = SDF_PAD + iOfs_y + y;
+				if ( cx < 0 || cy < 0 || cx >= GridW || cy >= GridH ) continue;
+				const int Alpha = ( 255 * Ptr[x + iBmp_w * y] ) / ( Level - 1 );
+				Coverage[cy * GridW + cx] = static_cast<BYTE>( Alpha > 255 ? 255 : Alpha );
+			}
+		}
+		delete[] Ptr;
+	}
+
+	//-------------------------------------------------.
+	// カバレッジからSDF(符号付き距離場)を生成する.
+	//-------------------------------------------------.
+	// 内側/外側それぞれの距離変換用グリッドを作成する.
+	std::vector<SSedtPoint> GridIn ( GridW * GridH );
+	std::vector<SSedtPoint> GridOut( GridW * GridH );
+	for ( int i = 0; i < GridW * GridH; ++i ) {
+		const bool IsInside = ( Coverage[i] >= 128 );
+		GridIn[i]	= IsInside ? SSedtPoint{ 0, 0 } : SSedtPoint{ SEDT_INF, SEDT_INF };
+		GridOut[i]	= IsInside ? SSedtPoint{ SEDT_INF, SEDT_INF } : SSedtPoint{ 0, 0 };
+	}
+	SedtGenerate( GridIn,  GridW, GridH );
+	SedtGenerate( GridOut, GridW, GridH );
+
+	// 符号付き距離を0～255にエンコードする(0.5が輪郭).
+	std::vector<BYTE> SDF( GridW * GridH, 0 );
+	for ( int i = 0; i < GridW * GridH; ++i ) {
+		float Dist = 0.0f;
+		if ( Coverage[i] > 0 && Coverage[i] < 255 ) {
+			// 輪郭付近はカバレッジから距離を近似してサブピクセル精度を出す.
+			Dist = Coverage[i] / 255.0f - 0.5f;
+		}
+		else {
+			// 内側で正、外側で負の距離.
+			const float DistIn	= std::sqrt( static_cast<float>( GridIn[i].DistSq() ) );
+			const float DistOut	= std::sqrt( static_cast<float>( GridOut[i].DistSq() ) );
+			Dist = DistOut - DistIn;
+		}
+		float Encode = 0.5f + Dist / ( SDF_SPREAD * 2.0f );
+		if ( Encode < 0.0f ) Encode = 0.0f;
+		if ( Encode > 1.0f ) Encode = 1.0f;
+		SDF[i] = static_cast<BYTE>( Encode * 255.0f + 0.5f );
+	}
 
 	//-------------------------------------------------.
 	// 書き込み可能テクスチャ作成.
 	//	CPUで書き込みができるテクスチャを作成.
 	//-------------------------------------------------.
-	D3D11_TEXTURE2D_DESC	Desc		= CreateDesc( GM.gmCellIncX, TM.tmHeight );
+	D3D11_TEXTURE2D_DESC	Desc		= CreateDesc( GridW, GridH );
 	ID3D11Texture2D*		Texture2D	= nullptr;
 
 	if ( FAILED( m_pDevice->CreateTexture2D( &Desc, 0, &Texture2D ) ) ) {
@@ -131,32 +259,12 @@ HRESULT CFontCreate::CreateFontTexture2D( const char* c, ID3D11ShaderResourceVie
 		return E_FAIL;
 	}
 
-	// データを取得する.
+	// SDFの書き込み(1画素1バイト).
 	BYTE* pBits = (BYTE*)hMappedResource.pData;
-	
-	// フォント情報の書き込み.
-	//	iOfs_x, iOfs_y : 書き出し位置( 左上 ).
-	//	iBmp_w, iBmp_h : フォントビットマップの幅高.
-	//	Level : α値の段階( GGO_GRAY4_BITMAPなので17段階 ).
-	int iOfs_x	= GM.gmptGlyphOrigin.x;
-	int iOfs_y	= TM.tmAscent - GM.gmptGlyphOrigin.y;
-	int iBmp_w	= GM.gmBlackBoxX + ( 4 - ( GM.gmBlackBoxX % 4 ) ) % 4 ;
-	int iBmp_h	= GM.gmBlackBoxY;
-	int Level	= 17;
-	int x, y;
-	DWORD Alpha, Color;
-	memset( pBits, 0, hMappedResource.RowPitch * TM.tmHeight );
-	for ( y = iOfs_y; y < iOfs_y + iBmp_h; y++ ) {
-		for ( x = iOfs_x; x < iOfs_x + iBmp_w; x++ ) {
-			Alpha = ( 255 * Ptr[x - iOfs_x + iBmp_w * ( y - iOfs_y )]) / ( Level - 1 );
-			Color = 0x00ffffff | ( Alpha << 24 );
-
-			memcpy( (BYTE*) pBits + hMappedResource.RowPitch * y + 4 * x, &Color, sizeof( DWORD ) );
-		}
+	for ( int y = 0; y < GridH; ++y ) {
+		memcpy( pBits + hMappedResource.RowPitch * y, SDF.data() + GridW * y, GridW );
 	}
 	m_pContext->Unmap( Texture2D, 0 );
-
-	delete[] Ptr;
 
 	//-------------------------------------------------.
 	// テクスチャ情報をシェーダーリソースビューにする.
@@ -172,12 +280,17 @@ HRESULT CFontCreate::CreateFontTexture2D( const char* c, ID3D11ShaderResourceVie
 	srvDesc.Texture2D.MostDetailedMip	= 0;
 	srvDesc.Texture2D.MipLevels			= texDesc.MipLevels;
 
-	if ( FAILED( m_pDevice->CreateShaderResourceView( Texture2D, &srvDesc, resource ) ) ) {
+	if ( FAILED( m_pDevice->CreateShaderResourceView( Texture2D, &srvDesc, &pGlyph->pTexture ) ) ) {
 		SAFE_RELEASE( Texture2D );
 		return E_FAIL;
 	}
-
 	SAFE_RELEASE( Texture2D );
+
+	// グリフ情報を保存する.
+	pGlyph->CellW	= static_cast<float>( CellW );
+	pGlyph->CellH	= static_cast<float>( CellH );
+	pGlyph->Pad		= static_cast<float>( SDF_PAD );
+	pGlyph->Spread	= SDF_SPREAD;
 	return S_OK;
 }
 
@@ -187,7 +300,7 @@ HRESULT CFontCreate::CreateFontTexture2D( const char* c, ID3D11ShaderResourceVie
 int CFontCreate::FontAvailable()
 {
 #ifdef _DEBUG
-	return AddFontResourceEx( 
+	return AddFontResourceEx(
 		m_wFilePath.c_str(),	// フォントリソース名.
 		FR_PRIVATE,				// プロセス終了時にインストールしたフォントを削除.
 		nullptr );				// フォント構造体.
@@ -222,7 +335,7 @@ D3D11_TEXTURE2D_DESC CFontCreate::CreateDesc( UINT width, UINT height )
 	desc.Height				= height;
 	desc.MipLevels			= 1;
 	desc.ArraySize			= 1;
-	desc.Format				= DXGI_FORMAT_R8G8B8A8_UNORM;	// RGBA(255,255,255,255)タイプ
+	desc.Format				= DXGI_FORMAT_R8_UNORM;			// SDF用(1画素1バイト)
 	desc.SampleDesc.Count	= 1;
 	desc.Usage				= D3D11_USAGE_DYNAMIC;			// 動的（書き込みするための必須条件）
 	desc.BindFlags			= D3D11_BIND_SHADER_RESOURCE;	// シェーダリソースとして使う

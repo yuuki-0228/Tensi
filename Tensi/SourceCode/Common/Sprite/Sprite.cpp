@@ -171,6 +171,10 @@ void CSprite::RenderUI( SSpriteRenderState* pRenderState )
 		// カラーマスクを使用するかを渡す.
 		cb.vFlag.z = RenderState->IsColorMask == true ? 1.0f : 0.0f;
 
+		// 拡大表示時は高品質サンプリング(バイキュービック)を使用して画質を担保する.
+		const D3DXSCALE3& Scale = RenderState->Transform.Scale;
+		cb.vFlag.w = ( fabsf( Scale.x ) > 1.001f || fabsf( Scale.y ) > 1.001f ) ? 1.0f : 0.0f;
+
 		memcpy_s( pData.pData, pData.RowPitch,
 			(void*) ( &cb ), sizeof( cb ) );
 
@@ -301,6 +305,10 @@ void CSprite::Render3D( SSpriteRenderState* pRenderState, const bool IsBillBoard
 
 		// カラーマスクを使用するかを渡す.
 		cb.vFlag.z = RenderState->IsColorMask == true ? 1.0f : 0.0f;
+
+		// 3Dは距離で縮小表示されることがあるため高品質サンプリングは使用しない.
+		//	(ミップマップを使用したバイリニアでサンプリングする).
+		cb.vFlag.w = 0.0f;
 
 		memcpy_s( pData.pData, pData.RowPitch,
 			(void*) ( &cb ), sizeof( cb ) );
@@ -702,6 +710,8 @@ HRESULT CSprite::CreateSampler()
 	samDesc.AddressU	= D3D11_TEXTURE_ADDRESS_WRAP;
 	samDesc.AddressV	= D3D11_TEXTURE_ADDRESS_WRAP;
 	samDesc.AddressW	= D3D11_TEXTURE_ADDRESS_WRAP;
+	// 縮小時にミップマップを使用できるようにする( 0 のままだと常に最大解像度が使われてちらつく ).
+	samDesc.MaxLOD		= D3D11_FLOAT32_MAX;
 
 	// サンプラ作成.
 	for( int i = 0; i < static_cast<int>( ESamplerState::Max ); i++ ){

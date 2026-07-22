@@ -1,5 +1,5 @@
 #pragma once
-#include "..\..\SystemSetting.h"
+#include "..\..\SystemSettings.h"
 #ifdef ENABLE_MASTER_DATA
 #include "..\..\Global.h"
 #include "..\FileManager\FileManager.h"

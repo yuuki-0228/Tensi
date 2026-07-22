@@ -11,7 +11,7 @@ namespace {
 
 FontResource::FontResource()
 	: m_FontList		()
-	, m_FontTextureList	()
+	, m_FontGlyphList	()
 	, m_FontDataList	()
 	, m_FontNames		()
 	, m_Mutex			()
@@ -21,9 +21,9 @@ FontResource::FontResource()
 
 FontResource::~FontResource()
 {
-	for ( auto& [FileName, List] : m_FontTextureList ) {
-		for ( auto& [Key, Texture] : List ) {
-			SAFE_RELEASE( Texture );
+	for ( auto& [FileName, List] : m_FontGlyphList ) {
+		for ( auto& [Key, Glyph] : List ) {
+			SAFE_RELEASE( Glyph.pTexture );
 		}
 	}
 }
@@ -126,31 +126,31 @@ CFont* FontResource::GetFont( const std::string& FileName, SFontRenderStateList*
 }
 
 //---------------------------.
-// フォントテクスチャ取得関数.
+// フォントグリフ(SDFテクスチャ)取得関数.
 //---------------------------.
-ID3D11ShaderResourceView* FontResource::GetFontTexture( const std::string& FileName, const std::string& Key )
+SFontGlyph FontResource::GetFontGlyph( const std::string& FileName, const std::string& Key )
 {
-	// 読み込みが終わっていなかったら null を返す.
-	if ( GetInstance()->m_IsLoadEnd == false ) 
-		return nullptr;
+	// 読み込みが終わっていなかったら空のグリフを返す.
+	if ( GetInstance()->m_IsLoadEnd == false )
+		return SFontGlyph();
 
-	// 指定したモデルを取得.
-	for( auto& m : GetInstance()->m_FontTextureList[FileName] ){
-		if( m.first == Key ) return m.second;
-	}
+	// 作成済みのグリフを取得.
+	auto& GlyphList = GetInstance()->m_FontGlyphList[FileName];
+	auto Itr = GlyphList.find( Key );
+	if ( Itr != GlyphList.end() ) return Itr->second;
 
 	// まだ作成していない文字のため作成する.
-	if( FAILED( CreateTexture( FileName, Key ) ) ) return nullptr;
-	return GetFontTexture( FileName, Key );
+	if ( FAILED( CreateGlyph( FileName, Key ) ) ) return SFontGlyph();
+	return GetFontGlyph( FileName, Key );
 }
 
 //---------------------------.
-// テクスチャの作成.
+// グリフの作成.
 //---------------------------.
-HRESULT FontResource::CreateTexture( const std::string& FileName, const std::string& Key )
+HRESULT FontResource::CreateGlyph( const std::string& FileName, const std::string& Key )
 {
 	FontResource* pI = GetInstance();
-	
+
 	// 作成する文字を取得.
 	std::string f = Key.substr( 0, 1 );
 	if ( IsDBCSLeadByte( Key[0] ) == TRUE ) {
@@ -161,12 +161,12 @@ HRESULT FontResource::CreateTexture( const std::string& FileName, const std::str
 	}
 
 	// すでに作成済みか.
-	const bool KeyFind = ( pI->m_FontTextureList[FileName].find( f ) != pI->m_FontTextureList[FileName].end() );
+	const bool KeyFind = ( pI->m_FontGlyphList[FileName].find( f ) != pI->m_FontGlyphList[FileName].end() );
 	if ( KeyFind ) return E_FAIL;
 
-	// テクスチャの作成.
+	// グリフの作成.
 	std::unique_ptr<CFontCreate> pFontCreate = std::make_unique<CFontCreate>( pI->m_FontDataList[FileName], FileName );
-	pFontCreate->CreateFontTexture2D( f.c_str(), &pI->m_FontTextureList[FileName][f] );
+	if ( FAILED( pFontCreate->CreateFontTexture2D( f.c_str(), &pI->m_FontGlyphList[FileName][f] ) ) ) return E_FAIL;
 
 	Log::PushLogInfo( "フォント「" + FileName + "」の「" + Key + "」テクスチャ作成 : 成功");
 	return S_OK;

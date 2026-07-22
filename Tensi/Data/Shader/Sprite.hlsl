@@ -16,7 +16,7 @@ cbuffer per_mesh : register(b0)	//ﾚｼﾞｽﾀ番号.
 	float4	g_RenderArea		: packoffset(c6);	//描画する範囲(左上x, 左上y, 幅, 高さ).
 	float	g_ViewPortW			: packoffset(c7);	//ﾋﾞｭｰﾎﾟｰﾄ幅.
 	float	g_ViewPortH			: packoffset(c8);	//ﾋﾞｭｰﾎﾟｰﾄ高さ.
-	float4	g_vFlag				: packoffset(c9);	//ﾌﾗｸﾞ(x:ﾃﾞｲｻﾞ抜きを使用するか)(y:ｱﾙﾌｧﾌﾞﾛｯｸを使用するか)(z:ｶﾗｰにﾏｽｸを使用するか).
+	float4	g_vFlag				: packoffset(c9);	//ﾌﾗｸﾞ(x:ﾃﾞｲｻﾞ抜きを使用するか)(y:ｱﾙﾌｧﾌﾞﾛｯｸを使用するか)(z:ｶﾗｰにﾏｽｸを使用するか)(w:高品質ｻﾝﾌﾟﾘﾝｸﾞを使用するか).
 };
 
 //頂点ｼｪｰﾀﾞの出力ﾊﾟﾗﾒｰﾀ.
@@ -27,13 +27,74 @@ struct VS_OUTPUT
 	float2	UV		: TEXCOORD0;	//UV座標.
 };
 
-static const float DITHER_PATTERN[4][4] = 
+static const float DITHER_PATTERN[4][4] =
 {
 	{ 0.00f, 0.32f, 0.08f, 0.40f, },
 	{ 0.48f, 0.16f, 0.56f, 0.24f, },
 	{ 0.12f, 0.44f, 0.04f, 0.36f, },
 	{ 0.60f, 0.28f, 0.52f, 0.20f, },
 };
+
+//Catmull-Rom の重みを求める(t:ﾃｸｾﾙ中心からの距離).
+float4 CatmullRomWeights( float t )
+{
+	//4ﾃｸｾﾙ分の重み(合計1になる).
+	float t2 = t * t;
+	float t3 = t2 * t;
+	float4 w;
+	w.x = -0.5f * t3 + 1.0f * t2 - 0.5f * t;
+	w.y =  1.5f * t3 - 2.5f * t2 + 1.0f;
+	w.z = -1.5f * t3 + 2.0f * t2 + 0.5f * t;
+	w.w =  0.5f * t3 - 0.5f * t2;
+	return w;
+}
+
+//高品質ｻﾝﾌﾟﾘﾝｸﾞ(Catmull-Rom ﾊﾞｲｷｭｰﾋﾞｯｸ 16ﾀｯﾌﾟ).
+//拡大時にﾊﾞｲﾘﾆｱよりｼｬｰﾌﾟで滑らかな結果になる.
+//各ﾀｯﾌﾟをｱﾙﾌｧで重み付け(ﾌﾟﾘﾏﾙﾁﾌﾟﾗｲﾄﾞ)して合成することで、
+//透明ﾋﾟｸｾﾙの色が混ざって縁が黒ずむのも防ぐ.
+float4 SampleTextureHQ( Texture2D tex, float2 uv )
+{
+	//ﾃｸｽﾁｬｻｲｽﾞの取得.
+	float2 texSize;
+	tex.GetDimensions( texSize.x, texSize.y );
+
+	//基準ﾃｸｾﾙ(左上から2番目)と小数部を求める.
+	float2 samplePos	= uv * texSize - 0.5f;
+	float2 basePos		= floor( samplePos );
+	float2 f			= samplePos - basePos;
+
+	//縦横それぞれの重み.
+	float4 wx = CatmullRomWeights( f.x );
+	float4 wy = CatmullRomWeights( f.y );
+
+	//4x4ﾃｸｾﾙを合成する.
+	float4 result = (float4)0;
+	[unroll]
+	for ( int y = 0; y < 4; ++y ) {
+		[unroll]
+		for ( int x = 0; x < 4; ++x ) {
+			float2 tapUV	= ( basePos + float2( x - 1, y - 1 ) + 0.5f ) / texSize;
+			float4 tapColor	= tex.SampleLevel( g_samLinear, tapUV, 0 );
+
+			//ﾌﾟﾘﾏﾙﾁﾌﾟﾗｲﾄﾞ化して重み付け.
+			tapColor.rgb *= tapColor.a;
+			result += tapColor * ( wx[x] * wy[y] );
+		}
+	}
+
+	//ｽﾄﾚｰﾄｱﾙﾌｧに戻す(ｵｰﾊﾞｰｼｭｰﾄはｸﾗﾝﾌﾟする).
+	result.rgb /= max( result.a, 0.0001f );
+	return saturate( result );
+}
+
+//ｽﾌﾟﾗｲﾄの色の取得.
+//高品質ｻﾝﾌﾟﾘﾝｸﾞﾌﾗｸﾞが有効な場合は Catmull-Rom で、無効な場合はﾊﾞｲﾘﾆｱでｻﾝﾌﾟﾘﾝｸﾞする.
+float4 SampleSpriteColor( float2 uv )
+{
+	if ( g_vFlag.w >= 1.0f ) return SampleTextureHQ( g_Texture, uv );
+	return g_Texture.Sample( g_samLinear, uv );
+}
 
 //頂点ｼｪｰﾀﾞ.
 //主にﾓﾃﾞﾙの頂点の表示位置を決定する.
@@ -62,7 +123,7 @@ VS_OUTPUT VS_Main(
 //画面上に評されるﾋﾟｸｾﾙ(ﾄﾞｯﾄ1つ分)の色を決定する.
 float4 PS_Main( VS_OUTPUT input ) : SV_Target
 {
-	float4 finalColor = g_Texture.Sample(g_samLinear, input.UV); //色を返す.
+	float4 finalColor = SampleSpriteColor( input.UV ); //色を返す.
 
 	//ﾌﾟﾛｸﾞﾗﾑ制御の色をかけ合わせる.
 	if (g_vFlag.z >= 1.0f){
@@ -100,7 +161,7 @@ float4 PS_Main( VS_OUTPUT input ) : SV_Target
 //画面上に評されるﾋﾟｸｾﾙ(ﾄﾞｯﾄ1つ分)の色を決定する.
 float4 PS_Mask(VS_OUTPUT input) : SV_Target
 {
-	float4 finalColor = g_Texture.Sample(g_samLinear, input.UV); //色を返す.
+	float4 finalColor = SampleSpriteColor( input.UV ); //色を返す.
 	float4 maskColor  = g_MaskTexture.Sample(g_samLinear, input.UV - g_UV.xy);
 
 	// 色を掛け合わせる.
@@ -135,7 +196,7 @@ float4 PS_Mask(VS_OUTPUT input) : SV_Target
 float4 PS_Transition(VS_OUTPUT input) : SV_Target
 {
 	float4 maskColor = g_RuleTexture.Sample(g_samLinear, input.UV);
-	float4 texColor  = g_Texture.Sample(g_samLinear, input.UV);
+	float4 texColor  = SampleSpriteColor( input.UV );
 	
 	// マスクを使ったアルファ抜き.
 	float  maskAlpha  = saturate(maskColor.r + (g_Color.a * 2.0f - 1.0f));

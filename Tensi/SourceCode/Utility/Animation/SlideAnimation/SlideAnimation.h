@@ -1,5 +1,5 @@
 #pragma once
-#include "..\..\..\SystemSetting.h"
+#include "..\..\..\SystemSettings.h"
 #ifdef ENABLE_ANIMATION
 #include "..\..\..\Global.h"
 #include "..\..\Easing\Easing.h"
