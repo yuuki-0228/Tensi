@@ -7,7 +7,6 @@
 #include "..\..\Utility\FileManager\ImagSize\ImageSize.h"
 #include "..\..\Utility\ImGuiManager\ImGuiManager.h"
 #include "..\..\Utility\ImGuiManager\MessageWindow\MessageWindow.h"
-#include "..\..\Utility\Message\Message.h"
 #ifdef ENABLE_MESH
 #include "..\..\Utility\Transform\PositionRenderer\PositionRenderer.h"
 #endif

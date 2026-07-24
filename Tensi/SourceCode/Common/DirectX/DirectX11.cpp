@@ -24,6 +24,7 @@ DirectX11::DirectX11()
 	, m_pBackBuffer_TexRTV		()
 	, m_pBackBuffer_DSTex		()
 	, m_pBackBuffer_DSTexDSV	()
+	, m_pBackBuffer_DSTexSRV	()
 	, m_pDCompDevice			( nullptr )
 	, m_pDCompTarget			( nullptr )
 	, m_pDCompVisual			( nullptr )
@@ -90,6 +91,7 @@ HRESULT DirectX11::Create( std::vector<HWND> hWnd )
 	pI->m_pBackBuffer_TexRTV.resize( pI->m_WindowNum );
 	pI->m_pBackBuffer_DSTex.resize( pI->m_WindowNum );
 	pI->m_pBackBuffer_DSTexDSV.resize( pI->m_WindowNum );
+	pI->m_pBackBuffer_DSTexSRV.resize( pI->m_WindowNum );
 	pI->m_pSceneTex.resize( pI->m_WindowNum );
 	pI->m_pSceneRTV.resize( pI->m_WindowNum );
 
@@ -125,6 +127,7 @@ void DirectX11::Release()
 	for ( int i = pI->m_WindowNum - 1; i >= 0; --i ) {
 		SAFE_RELEASE( pI->m_pSceneRTV[i]			);
 		SAFE_RELEASE( pI->m_pSceneTex[i]			);
+		SAFE_RELEASE( pI->m_pBackBuffer_DSTexSRV[i] );
 		SAFE_RELEASE( pI->m_pBackBuffer_DSTexDSV[i] );
 		SAFE_RELEASE( pI->m_pBackBuffer_DSTex[i]	);
 		SAFE_RELEASE( pI->m_pBackBuffer_TexRTV[i]	);
@@ -201,6 +204,64 @@ void DirectX11::Present( int No )
 	}
 
 	pI->m_pSwapChain[No]->Present( 0, 0 );
+}
+
+//---------------------------.
+// MSAA用オフスクリーンシーンテクスチャの取得( MSAA無効時は nullptr ).
+//---------------------------.
+ID3D11Texture2D* DirectX11::GetSceneTex( const int No )
+{
+	DirectX11* pI = GetInstance();
+	if ( No < 0 || No >= static_cast<int>( pI->m_pSceneTex.size() ) ) return nullptr;
+	return pI->m_pSceneTex[No];
+}
+
+//---------------------------.
+// MSAA用オフスクリーンシーンRTVの取得( MSAA無効時は nullptr ).
+//---------------------------.
+ID3D11RenderTargetView* DirectX11::GetSceneRTV( const int No )
+{
+	DirectX11* pI = GetInstance();
+	if ( No < 0 || No >= static_cast<int>( pI->m_pSceneRTV.size() ) ) return nullptr;
+	return pI->m_pSceneRTV[No];
+}
+
+//---------------------------.
+// バックバッファRTVの取得.
+//---------------------------.
+ID3D11RenderTargetView* DirectX11::GetBackBufferRTV( const int No )
+{
+	DirectX11* pI = GetInstance();
+	if ( No < 0 || No >= static_cast<int>( pI->m_pBackBuffer_TexRTV.size() ) ) return nullptr;
+	return pI->m_pBackBuffer_TexRTV[No];
+}
+
+//---------------------------.
+// バックバッファテクスチャの取得.
+//	スワップチェーンが参照を保持しているため、呼び出し側での解放は不要.
+//---------------------------.
+ID3D11Texture2D* DirectX11::GetBackBufferTex( const int No )
+{
+	DirectX11* pI = GetInstance();
+	if ( No < 0 || No >= static_cast<int>( pI->m_pSwapChain.size() ) ) return nullptr;
+
+	ID3D11Texture2D* pBackBuffer = nullptr;
+	if ( FAILED( pI->m_pSwapChain[No]->GetBuffer( 0, __uuidof( ID3D11Texture2D ), (void**)&pBackBuffer ) ) ) {
+		return nullptr;
+	}
+	// GetBuffer で増えた参照はここで返しておく( スワップチェーンが保持し続ける ).
+	pBackBuffer->Release();
+	return pBackBuffer;
+}
+
+//---------------------------.
+// 深度バッファのシェーダリソースビューの取得( 未対応環境では nullptr ).
+//---------------------------.
+ID3D11ShaderResourceView* DirectX11::GetDepthSRV( const int No )
+{
+	DirectX11* pI = GetInstance();
+	if ( No < 0 || No >= static_cast<int>( pI->m_pBackBuffer_DSTexSRV.size() ) ) return nullptr;
+	return pI->m_pBackBuffer_DSTexSRV[No];
 }
 
 //---------------------------.
@@ -531,6 +592,7 @@ void DirectX11::Resize()
 		SAFE_RELEASE( pI->m_pBackBuffer_TexRTV[i]	);
 		SAFE_RELEASE( pI->m_pBackBuffer_DSTex[i]	);
 		SAFE_RELEASE( pI->m_pBackBuffer_DSTexDSV[i] );
+		SAFE_RELEASE( pI->m_pBackBuffer_DSTexSRV[i] );
 
 		// スワップチェーンをリサイズする.
 		// width, height を指定しない場合、hWndを参照し、自動で計算してくれる.
@@ -1236,6 +1298,7 @@ HRESULT DirectX11::CreateDepthStencilBackBufferRTV()
 
 	for ( int i = 0; i < m_WindowNum; ++i ) {
 		// 再作成に備えて解放しておく.
+		SAFE_RELEASE( m_pBackBuffer_DSTexSRV[i] );
 		SAFE_RELEASE( m_pBackBuffer_DSTexDSV[i] );
 		SAFE_RELEASE( m_pBackBuffer_DSTex[i] );
 
@@ -1268,24 +1331,65 @@ HRESULT DirectX11::CreateDepthStencilBackBufferRTV()
 		descDepth.CPUAccessFlags		= 0;							// No CPU access.
 		descDepth.MiscFlags				= 0;							// No misc flags.
 
-		// Some GPU / driver combinations reject a format : try fallbacks.
-		constexpr DXGI_FORMAT DepthFormats[] = {
-			DXGI_FORMAT_D32_FLOAT, DXGI_FORMAT_D24_UNORM_S8_UINT, DXGI_FORMAT_D16_UNORM
+		// 深度をシェーダから参照できるように TYPELESS で作成する( 深度フォグ等のポストエフェクト用 ).
+		//	{ テクスチャ, DSV, SRV } のフォーマットの組み合わせ.
+		struct SDepthFormat {
+			DXGI_FORMAT Tex;
+			DXGI_FORMAT Dsv;
+			DXGI_FORMAT Srv;
+		};
+		constexpr SDepthFormat DepthFormats[] = {
+			{ DXGI_FORMAT_R32_TYPELESS,		DXGI_FORMAT_D32_FLOAT,			DXGI_FORMAT_R32_FLOAT				},
+			{ DXGI_FORMAT_R24G8_TYPELESS,	DXGI_FORMAT_D24_UNORM_S8_UINT,	DXGI_FORMAT_R24_UNORM_X8_TYPELESS	},
+			{ DXGI_FORMAT_R16_TYPELESS,		DXGI_FORMAT_D16_UNORM,			DXGI_FORMAT_R16_UNORM				},
+			// SRV 付きが全滅した場合の保険( 従来通りの SRV 無し ).
+			{ DXGI_FORMAT_D32_FLOAT,		DXGI_FORMAT_UNKNOWN,			DXGI_FORMAT_UNKNOWN					},
+			{ DXGI_FORMAT_D24_UNORM_S8_UINT,DXGI_FORMAT_UNKNOWN,			DXGI_FORMAT_UNKNOWN					},
+			{ DXGI_FORMAT_D16_UNORM,		DXGI_FORMAT_UNKNOWN,			DXGI_FORMAT_UNKNOWN					},
 		};
 		HRESULT result = E_FAIL;
 		for ( const auto& Format : DepthFormats ) {
-			descDepth.Format = Format;
+			const bool UseSrv = ( Format.Srv != DXGI_FORMAT_UNKNOWN );
+			descDepth.Format	= Format.Tex;
+			descDepth.BindFlags	= D3D11_BIND_DEPTH_STENCIL | ( UseSrv ? D3D11_BIND_SHADER_RESOURCE : 0 );
 			result = m_pDevice11->CreateTexture2D( &descDepth, nullptr, &m_pBackBuffer_DSTex[i] );
-			if ( SUCCEEDED( result ) ) break;
-			m_pBackBuffer_DSTex[i] = nullptr;
-		}
+			if ( FAILED( result ) ) {
+				m_pBackBuffer_DSTex[i] = nullptr;
+				continue;
+			}
 
-		if ( SUCCEEDED( result ) ) {
-			result = m_pDevice11->CreateDepthStencilView(
-				m_pBackBuffer_DSTex[i],
-				nullptr,
-				&m_pBackBuffer_DSTexDSV[i] );
-			if ( FAILED( result ) ) m_pBackBuffer_DSTexDSV[i] = nullptr;
+			// DSV の作成( TYPELESS の場合はフォーマットを明示する ).
+			if ( UseSrv ) {
+				D3D11_DEPTH_STENCIL_VIEW_DESC DsvDesc = {};
+				DsvDesc.Format			= Format.Dsv;
+				DsvDesc.ViewDimension	= m_MsaaSampleCount > 1 ? D3D11_DSV_DIMENSION_TEXTURE2DMS : D3D11_DSV_DIMENSION_TEXTURE2D;
+				result = m_pDevice11->CreateDepthStencilView( m_pBackBuffer_DSTex[i], &DsvDesc, &m_pBackBuffer_DSTexDSV[i] );
+			}
+			else {
+				result = m_pDevice11->CreateDepthStencilView( m_pBackBuffer_DSTex[i], nullptr, &m_pBackBuffer_DSTexDSV[i] );
+			}
+			if ( FAILED( result ) ) {
+				m_pBackBuffer_DSTexDSV[i] = nullptr;
+				SAFE_RELEASE( m_pBackBuffer_DSTex[i] );
+				continue;
+			}
+
+			// SRV の作成( 失敗しても深度自体は使えるので続行する ).
+			if ( UseSrv ) {
+				D3D11_SHADER_RESOURCE_VIEW_DESC SrvDesc = {};
+				SrvDesc.Format = Format.Srv;
+				if ( m_MsaaSampleCount > 1 ) {
+					SrvDesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2DMS;
+				}
+				else {
+					SrvDesc.ViewDimension		= D3D11_SRV_DIMENSION_TEXTURE2D;
+					SrvDesc.Texture2D.MipLevels	= 1;
+				}
+				if ( FAILED( m_pDevice11->CreateShaderResourceView( m_pBackBuffer_DSTex[i], &SrvDesc, &m_pBackBuffer_DSTexSRV[i] ) ) ) {
+					m_pBackBuffer_DSTexSRV[i] = nullptr;
+				}
+			}
+			break;
 		}
 
 		if ( m_pBackBuffer_DSTexDSV[i] == nullptr ) {
@@ -1307,4 +1411,4 @@ HRESULT DirectX11::CreateDepthStencilBackBufferRTV()
 			m_pBackBuffer_DSTexDSV[i] );
 	}
 	return S_OK;
-}
+}

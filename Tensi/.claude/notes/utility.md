@@ -83,6 +83,30 @@ CLAUDE.md には入れていません（毎回読む内容ではないため）�
 | `Animation\*` | `FadeAnimation` `SlideAnimation` `ShakeAnimation` `BlinkAnimation` `PulseAnimation` `ButtonAnimation` `PopupAnimation` `FloatingAnimation` `SpringAnimation` 等、UI/オブジェクト向けの汎用アニメーション一式 | `ENABLE_ANIMATION` |
 | `Easing` | イージング関数 | `ENABLE_EASING` |
 
+### 描画・視覚効果
+
+| フォルダ | 概要 | フラグ |
+|---|---|---|
+| `VisualEffects` | ポストエフェクト集（全40種）。色調系：白黒/セピア/色反転/ポスタライズ/カラーフィルター/色調補正/ビネット/2値化/色相シフト。質感系：ノイズ/フィルムグレイン/スキャンライン/CRT/ピクセル化/RGB分離/グリッチ/オールドフィルム。アート系：トゥーン/水彩/油絵/色鉛筆/ハーフトーン/エンボス。エッジ系：アウトライン/エッジ検出/エッジ強調/シャープ。ブラー系：ガウス/放射/モーション/ソフトフォーカス/ブルーム/曇り。歪み系：波/魚眼/熱気揺らぎ。天候系：水滴/雨/雪/フォグ(ミスト式)/深度フォグ。`VisualEffectManager::AddScreenEffect` で画面全体、`BeginCapture`/`EndCapture` で囲った描画物のみ（2D/3D不問）に適用。`Param<SXXXParam>()` でパラメータ設定、ImGui の DebugWindow「VisualEffect」タブで実行中に調整可 | `ENABLE_VISUAL_EFFECT` |
+
+#### VisualEffects 実装メモ（地雷含む）
+
+- シェーダは `Data\Shader\VisualEffects\*.hlsl`（CP932）。実行時コンパイルなので **hlsl を書き換えたら再起動だけで反映**される。エントリ追加時は fxc での事前検証が楽（`/T ps_5_0 /E PS_XXX`）
+- **重要な地雷（微分と可変フロー）**: このアプリの実行時コンパイラは古い D3DX11(`D3DCompiler_43`)。`Texture2D.Sample()` はミップ選択用の微分を暗黙計算するため、**ピクセル依存の分岐（`if(IsOutArea(...)) return;` の後や、`continue` を含むループ／早期returnを持つ関数の中）で、計算した座標を `Sample()` すると `error X8000: ... derivatives ... within flow control that could vary across pixels` でコンパイル失敗**する。失敗したエフェクトはチェーンで無言スキップされ「何も表示されない」ようになる（fxc(d3dcompiler_47)は通ってしまうので気付きにくい）。**対策: 分岐後に計算座標をサンプルする箇所は `SampleLevel(sampler, uv, 0.0f)`（微分不要）を使う**。描画先RTはミップ1枚なので結果は同一。Raindrop/Rain の GlassBlur・レンズ・水筋はこれで対応済み。関数先頭の `Sample(i.UV)`（分岐前・生の補間座標）は従来 `Sample` のままでよい。**新しいポストエフェクトを足すときは、IsOutArea の return より後ろのテクスチャ読みは SampleLevel を使うこと**
+- コンパイル失敗の切り分けは `Data\$system.log`（各起動で新規作成・CP932）を `CVisualEffectBase::CompilePS` で grep。「Invert は効くが特定エフェクトだけ無表示」はこのコンパイル失敗を疑う
+- 画面全体適用は `Main.cpp` が `SceneManager::Render()` 直後に `ApplyScreenEffects()` を自動で呼ぶ。**UI を対象外にしたい場合はシーン側で UI 描画前に手動で呼ぶ**（そのフレームの自動適用はスキップされる）
+- MSAA 有効時はフレーム途中で `m_pSceneTex` を Resolve してエフェクトを掛け、結果を MSAA シーンRTV に書き戻す（Present の既存 Resolve はそのまま活きる）。このために `DirectX11` に `GetMsaaSampleCount / GetSceneTex / GetSceneRTV / GetBackBufferRTV / GetBackBufferTex` を追加した
+- ラスタライザステートは `DirectX11` のキャッシュとずれないように**自前ステートを RSSetState 直接**で設定し、`RSGetState` で取った元ポインタへ戻している。ブレンド/深度は getter で退避して setter で復元（`SetAlphaBlend` は AlphaToCoverage 有効中は無視される点に注意）
+- 透明ウィンドウ（本プロジェクト）ではアルファ0の部分にエフェクトは見えない。`SetAlphaLift` で持ち上げると見えるが**クリック透過判定にも影響**する。通常ウィンドウの別プロジェクトでは気にしなくてよい
+- キャプチャ合成は「透明クリア→描画→ストレートアルファ合成」なので、半透明の縁にわずかな黒フリンジが出ることがある
+- **フォグは2種類**：`Fog`（ノイズミスト式・深度不要・2D/3D両用）と `FogDepth`（深度バッファ参照・3D向け）。`FogDepth` の Near/Far はカメラのニア/ファーと手動で合わせる（カメラ側に getter が無いため）。旧 `Common\Fog`（メッシュ向け・未使用）はこの移行時に削除済み（`ENABLE_FOG` フラグも撤去）
+- 深度フォグのために深度バッファは **TYPELESS 形式＋SRV 付き**で作成するよう `DirectX11::CreateDepthStencilBackBufferRTV` を変更した（`GetDepthSRV` で取得。MSAA 時は `Texture2DMS` として参照。非対応環境では従来形式にフォールバックし SRV は nullptr）
+- 雨/雪/フォグ/ミスト等のオーバーレイ系は、効果が乗った部分の**アルファも自動で持ち上がる**（透明ウィンドウのデスクトップ上にも見える）。トゥーン等の加工系は元のアルファを維持
+- **Rain（雨滴）は BigWIngs「Heartfelt / Rain on Screen」系の手続き的雨ガラス**（`Weather.hlsl` の `DropLayer`/`RainHeight`/`PS_Rain`）。列を流れ落ちる水滴＋背後に残る雫のトレイルを**高さ場**として生成し、その勾配を法線として、ぼかしたガラス面（`GlassBlur`）を屈折させてサンプリングする。**水滴はすべて流れ落ちる（静止した水玉は無い）**。水のある所ほどぼかしを弱めて鮮明（水滴がレンズになる）。パラメータ：`Amount`（雨量）/`Speed`（落下速度）/`Refract`（屈折）/`Blur`（すりガラスぼかし）/`Brightness`（ハイライト）。参照：ユーザ指定の noriben327 の Unity 実装（BigWIngs ShaderToy "Heartfelt" 相当）
+- 法線は**高さ場を3点評価した手動の有限差分**で求めている（`ddx/ddy` を使わない＝上記の微分ハマりを回避）。透明背景では屈折対象が無いので縁＋ハイライト＋アルファで薄く見える程度。**本領は不透明背景のゲーム**で発揮（ユーザの想定用途）
+- **旧 Raindrop / 旧 Rain(水筋版) は削除して Rain に統一**（2026-07-24）：当初は「Raindrop＝ビーズ」「Rain＝リビュレット(縦の水筋)」の2種だったが、水筋版が破綻していた・見た目が近い等の理由で、良い方（ビーズ）を `EVisualEffect::Rain` に一本化し `Raindrop` を撤去。`EVisualEffect` の enum から `Raindrop` を削除したので、以降 enum 値の並びが変わっている点に注意（`EFFECT_NAMES` 配列と `CreateEffect` の並びも合わせてある。enum要素数＝EFFECT_NAMES要素数＝40）
+- 油絵（Kuwahara フィルタ）は Radius に応じてサンプル数が増える（Radius 6 で約200タップ）。全画面常用は Radius 3〜4 までが無難
+
 ### デバッグ・UI
 
 | フォルダ | 概要 |
@@ -109,3 +133,5 @@ CLAUDE.md には入れていません（毎回読む内容ではないため）�
 
 - 2026-07-23: Network（通信）機能追加時に本ファイルを新規作成（当初 `SourceCode\Utility\README.md`）。creator の PreBuild 未接続・include 順の地雷を記録。
 - 2026-07-23: `.claude\notes\utility.md` へ移動（ソースツリーではなく Claude Code 専用の作業メモとして管理するため）。
+- 2026-07-24: `VisualEffects`（ポストエフェクト22種）を追加。併せて、コミット bfaf45c で `Utility\Message` が削除されたのに `Main.cpp` / `Sprite.cpp` / `SystemWindowManager.cpp` に include が残っていてビルドが壊れていたため、stale include を除去した（`ErrorMessage` 等は `Global.h` に定義済み）。
+- 2026-07-24: アート系・エッジ系・天候系など19種を追加し全41種に。`Common\Fog` を廃止して `Fog`（ミスト式）/`FogDepth`（深度参照）へ移行。深度バッファを SRV 対応（TYPELESS化）に変更。

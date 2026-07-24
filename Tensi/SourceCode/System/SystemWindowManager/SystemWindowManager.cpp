@@ -5,7 +5,6 @@
 #include "..\..\Common\Sprite\Sprite.h"
 #include "..\..\Resource\SpriteResource\SpriteResource.h"
 #include "..\..\Utility\FileManager\FileManager.h"
-#include "..\..\Utility\Message\Message.h"
 
 SystemWindowManager::SystemWindowManager()
 	: m_pInputSetting	( nullptr )

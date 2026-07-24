@@ -175,7 +175,6 @@
     <ClCompile Include="SourceCode\Object\Object.cpp" />
     <ClCompile Include="SourceCode\Resource\SpriteResource\SpriteResource.cpp" />
     <ClCompile Include="SourceCode\Scene\FadeManager\FadeBase\UFOFade\UFOFade.cpp" />
-    <ClCompile Include="SourceCode\Common\Fog\Fog.cpp" />
     <ClCompile Include="SourceCode\Object\Light\Light.cpp" />
     <ClCompile Include="SourceCode\Object\Camera\CameraManager\CameraManager.cpp" />
     <ClCompile Include="SourceCode\Object\Camera\FreeCamera\FreeCamera.cpp" />
@@ -282,6 +281,15 @@
     <ClCompile Include="SourceCode\Utility\Network\NetworkManager.cpp" />
     <ClCompile Include="SourceCode\Utility\Network\RoomCode\RoomCode.cpp" />
     <ClCompile Include="SourceCode\Utility\Network\UPnP\UPnPPortMapper.cpp" />
+    <ClCompile Include="SourceCode\Utility\VisualEffects\RenderTexture.cpp" />
+    <ClCompile Include="SourceCode\Utility\VisualEffects\VisualEffectManager.cpp" />
+    <ClCompile Include="SourceCode\Utility\VisualEffects\Effects\VisualEffectBase.cpp" />
+    <ClCompile Include="SourceCode\Utility\VisualEffects\Effects\SinglePassEffects.cpp" />
+    <ClCompile Include="SourceCode\Utility\VisualEffects\Effects\GaussianBlurEffect.cpp" />
+    <ClCompile Include="SourceCode\Utility\VisualEffects\Effects\BloomEffect.cpp" />
+    <ClCompile Include="SourceCode\Utility\VisualEffects\Effects\MotionBlurEffect.cpp" />
+    <ClCompile Include="SourceCode\Utility\VisualEffects\Effects\FrostEffect.cpp" />
+    <ClCompile Include="SourceCode\Utility\VisualEffects\Effects\SoftFocusEffect.cpp" />
     <ClCompile Include="SourceCode\Object\GameObject\Actor\ActorEffect\NoteEffectManager\NoteEffect\NoteEffect.cpp" />
     <ClCompile Include="SourceCode\Object\GameObject\Actor\ActorEffect\NoteEffectManager\NoteEffectManager.cpp" />
     <ClCompile Include="SourceCode\Object\GameObject\Actor\BackGroundManager\ActorBackGround\Tree\Tree.cpp" />
@@ -407,7 +415,6 @@
     <ClInclude Include="SourceCode\Object\Object.h" />
     <ClInclude Include="SourceCode\Resource\SpriteResource\SpriteResource.h" />
     <ClInclude Include="SourceCode\Scene\FadeManager\FadeBase\UFOFade\UFOFade.h" />
-    <ClInclude Include="SourceCode\Common\Fog\Fog.h" />
     <ClInclude Include="SourceCode\Object\Light\Light.h" />
     <ClInclude Include="SourceCode\Object\Camera\CameraManager\CameraManager.h" />
     <ClInclude Include="SourceCode\Object\Camera\FreeCamera\FreeCamera.h" />
@@ -519,6 +526,16 @@
     <ClInclude Include="SourceCode\Utility\Network\NetworkStruct.h" />
     <ClInclude Include="SourceCode\Utility\Network\RoomCode\RoomCode.h" />
     <ClInclude Include="SourceCode\Utility\Network\UPnP\UPnPPortMapper.h" />
+    <ClInclude Include="SourceCode\Utility\VisualEffects\VisualEffectTypes.h" />
+    <ClInclude Include="SourceCode\Utility\VisualEffects\RenderTexture.h" />
+    <ClInclude Include="SourceCode\Utility\VisualEffects\VisualEffectManager.h" />
+    <ClInclude Include="SourceCode\Utility\VisualEffects\Effects\VisualEffectBase.h" />
+    <ClInclude Include="SourceCode\Utility\VisualEffects\Effects\SinglePassEffects.h" />
+    <ClInclude Include="SourceCode\Utility\VisualEffects\Effects\GaussianBlurEffect.h" />
+    <ClInclude Include="SourceCode\Utility\VisualEffects\Effects\BloomEffect.h" />
+    <ClInclude Include="SourceCode\Utility\VisualEffects\Effects\MotionBlurEffect.h" />
+    <ClInclude Include="SourceCode\Utility\VisualEffects\Effects\FrostEffect.h" />
+    <ClInclude Include="SourceCode\Utility\VisualEffects\Effects\SoftFocusEffect.h" />
     <ClInclude Include="SourceCode\Object\GameObject\Actor\ActorEffect\NoteEffectManager\NoteEffectManager.h" />
     <ClInclude Include="SourceCode\Object\GameObject\Actor\ActorEffect\NoteEffectManager\NoteEffect\NoteEffect.h" />
     <ClInclude Include="SourceCode\Object\GameObject\Actor\BackGroundManager\ActorBackGround\Tree\Tree.h" />
@@ -576,7 +593,6 @@
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="Data\Shader\Collision.hlsl" />
-    <FxCompile Include="Data\Shader\Fog.hlsl" />
     <FxCompile Include="Data\Shader\Font.hlsl" />
     <FxCompile Include="Data\Shader\Mesh.hlsl" />
     <FxCompile Include="Data\Shader\Ray.hlsl" />
@@ -584,5 +600,14 @@
     <FxCompile Include="Data\Shader\SkyBox.hlsl" />
     <FxCompile Include="Data\Shader\Sprite.hlsl" />
     <FxCompile Include="Data\Shader\WindowText.hlsl" />
+    <FxCompile Include="Data\Shader\VisualEffects\SinglePass.hlsl" />
+    <FxCompile Include="Data\Shader\VisualEffects\GaussianBlur.hlsl" />
+    <FxCompile Include="Data\Shader\VisualEffects\Bloom.hlsl" />
+    <FxCompile Include="Data\Shader\VisualEffects\MotionBlur.hlsl" />
+    <FxCompile Include="Data\Shader\VisualEffects\Frost.hlsl" />
+    <FxCompile Include="Data\Shader\VisualEffects\Artistic.hlsl" />
+    <FxCompile Include="Data\Shader\VisualEffects\Edge.hlsl" />
+    <FxCompile Include="Data\Shader\VisualEffects\Lens.hlsl" />
+    <FxCompile Include="Data\Shader\VisualEffects\Weather.hlsl" />
   </ItemGroup>
 </Project>

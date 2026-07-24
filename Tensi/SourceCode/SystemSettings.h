@@ -7,10 +7,10 @@
 #define ENABLE_SPRITE
 // フォント機能の有効/無効
 #define ENABLE_FONT
-// フォグ機能の有効/無効
-//#define ENABLE_FOG
 // Effekseerによるエフェクト機能の有効/無効
 //#define ENABLE_EFFEKSEER
+// 視覚効果(ポストエフェクト)機能の有効/無効
+#define ENABLE_VISUAL_EFFECT
 
 // フラグマネージャーで管理されるbool型を有効/無効
 #define ENABLE_CLASS_BOOL
@@ -29,19 +29,20 @@
 // アニメーションに関する機能の有効/無効
 #define ENABLE_ANIMATION
 // オブザーバーに関する機能の有効/無効
-#define ENABLE_OBSERVER
+//#define ENABLE_OBSERVER
 // スレッドに関する機能の有効/無効
 #define ENABLE_THREAD
 // ネットワーク通信(ローカル/オンライン)に関する機能の有効/無効
-#define ENABLE_NETWORK
+//#define ENABLE_NETWORK
 // 定数に関する機能の有効/無効
 #define ENABLE_CONST
 // マスターデータに関する機能の有効/無効
 #define ENABLE_MASTER_DATA
 // キャッシュデータに関する機能の有効/無効
-#define ENABLE_CASH
+//#define ENABLE_CASH
 // 時間に関する機能の有効/無効
 #define ENABLE_TIME
+
 // Windowsのウィンドウに関する機能の有効/無効
 #define ENABLE_WINDOWS_WINDOW
 // Windowsのオーディオデバイスに関する機能の有効/無効

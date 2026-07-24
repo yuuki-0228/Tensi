@@ -85,6 +85,15 @@
     <ClCompile Include="SourceCode\Utility\Network\NetworkManager.cpp" />
     <ClCompile Include="SourceCode\Utility\Network\RoomCode\RoomCode.cpp" />
     <ClCompile Include="SourceCode\Utility\Network\UPnP\UPnPPortMapper.cpp" />
+    <ClCompile Include="SourceCode\Utility\VisualEffects\RenderTexture.cpp" />
+    <ClCompile Include="SourceCode\Utility\VisualEffects\VisualEffectManager.cpp" />
+    <ClCompile Include="SourceCode\Utility\VisualEffects\Effects\VisualEffectBase.cpp" />
+    <ClCompile Include="SourceCode\Utility\VisualEffects\Effects\SinglePassEffects.cpp" />
+    <ClCompile Include="SourceCode\Utility\VisualEffects\Effects\GaussianBlurEffect.cpp" />
+    <ClCompile Include="SourceCode\Utility\VisualEffects\Effects\BloomEffect.cpp" />
+    <ClCompile Include="SourceCode\Utility\VisualEffects\Effects\MotionBlurEffect.cpp" />
+    <ClCompile Include="SourceCode\Utility\VisualEffects\Effects\FrostEffect.cpp" />
+    <ClCompile Include="SourceCode\Utility\VisualEffects\Effects\SoftFocusEffect.cpp" />
     <ClCompile Include="SourceCode\Object\GameObject\Actor\BackGroundManager\ActorBackGround\Tree\Tree.cpp" />
     <ClCompile Include="SourceCode\Object\GameObject\Actor\BackGroundManager\ActorBackGround\WeedManager\WeedManager.cpp" />
     <ClCompile Include="SourceCode\Object\GameObject\Actor\WindowObjectManager\WindowObjectManager.cpp" />
@@ -153,7 +162,6 @@
     <ClCompile Include="SourceCode\Common\WindowTextRenderer\WindowTextRenderer.cpp" />
     <ClCompile Include="SourceCode\Utility\FileManager\FileManager.cpp" />
     <ClCompile Include="SourceCode\Utility\FileManager\Json\Json.cpp" />
-    <ClCompile Include="SourceCode\Common\Fog\Fog.cpp" />
     <ClCompile Include="SourceCode\Utility\Input\Key\DebugKeyInput.cpp" />
     <ClCompile Include="SourceCode\Utility\Input\Input.cpp" />
     <ClCompile Include="SourceCode\Utility\Input\MouseSpeedGuard\MouseSpeedGuard.cpp" />
@@ -280,6 +288,16 @@
     <ClInclude Include="SourceCode\Utility\Network\NetworkStruct.h" />
     <ClInclude Include="SourceCode\Utility\Network\RoomCode\RoomCode.h" />
     <ClInclude Include="SourceCode\Utility\Network\UPnP\UPnPPortMapper.h" />
+    <ClInclude Include="SourceCode\Utility\VisualEffects\VisualEffectTypes.h" />
+    <ClInclude Include="SourceCode\Utility\VisualEffects\RenderTexture.h" />
+    <ClInclude Include="SourceCode\Utility\VisualEffects\VisualEffectManager.h" />
+    <ClInclude Include="SourceCode\Utility\VisualEffects\Effects\VisualEffectBase.h" />
+    <ClInclude Include="SourceCode\Utility\VisualEffects\Effects\SinglePassEffects.h" />
+    <ClInclude Include="SourceCode\Utility\VisualEffects\Effects\GaussianBlurEffect.h" />
+    <ClInclude Include="SourceCode\Utility\VisualEffects\Effects\BloomEffect.h" />
+    <ClInclude Include="SourceCode\Utility\VisualEffects\Effects\MotionBlurEffect.h" />
+    <ClInclude Include="SourceCode\Utility\VisualEffects\Effects\FrostEffect.h" />
+    <ClInclude Include="SourceCode\Utility\VisualEffects\Effects\SoftFocusEffect.h" />
     <ClInclude Include="SourceCode\Object\GameObject\Actor\BackGroundManager\ActorBackGround\Tree\Tree.h" />
     <ClInclude Include="SourceCode\Object\GameObject\Actor\BackGroundManager\ActorBackGround\WeedManager\WeedManager.h" />
     <ClInclude Include="SourceCode\Object\GameObject\Actor\WindowObjectManager\WindowObjectManager.h" />
@@ -362,7 +380,6 @@
     <ClInclude Include="SourceCode\Common\WindowTextRenderer\WindowTextRenderer.h" />
     <ClInclude Include="SourceCode\Utility\FileManager\FileManager.h" />
     <ClInclude Include="SourceCode\Utility\FileManager\Json\Json.h" />
-    <ClInclude Include="SourceCode\Common\Fog\Fog.h" />
     <ClInclude Include="SourceCode\Utility\Input\Key\DebugKeyInput.h" />
     <ClInclude Include="SourceCode\Utility\Input\Input.h" />
     <ClInclude Include="SourceCode\Utility\Input\MouseSpeedGuard\MouseSpeedGuard.h" />
@@ -409,11 +426,6 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Creator|x64'">true</ExcludedFromBuild>
     </FxCompile>
-    <FxCompile Include="Data\Shader\Fog.hlsl">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Creator|x64'">true</ExcludedFromBuild>
-    </FxCompile>
     <FxCompile Include="Data\Shader\Font.hlsl">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
@@ -445,6 +457,51 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Creator|x64'">true</ExcludedFromBuild>
     </FxCompile>
     <FxCompile Include="Data\Shader\WindowText.hlsl">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Creator|x64'">true</ExcludedFromBuild>
+    </FxCompile>
+    <FxCompile Include="Data\Shader\VisualEffects\SinglePass.hlsl">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Creator|x64'">true</ExcludedFromBuild>
+    </FxCompile>
+    <FxCompile Include="Data\Shader\VisualEffects\GaussianBlur.hlsl">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Creator|x64'">true</ExcludedFromBuild>
+    </FxCompile>
+    <FxCompile Include="Data\Shader\VisualEffects\Bloom.hlsl">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Creator|x64'">true</ExcludedFromBuild>
+    </FxCompile>
+    <FxCompile Include="Data\Shader\VisualEffects\MotionBlur.hlsl">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Creator|x64'">true</ExcludedFromBuild>
+    </FxCompile>
+    <FxCompile Include="Data\Shader\VisualEffects\Frost.hlsl">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Creator|x64'">true</ExcludedFromBuild>
+    </FxCompile>
+    <FxCompile Include="Data\Shader\VisualEffects\Artistic.hlsl">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Creator|x64'">true</ExcludedFromBuild>
+    </FxCompile>
+    <FxCompile Include="Data\Shader\VisualEffects\Edge.hlsl">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Creator|x64'">true</ExcludedFromBuild>
+    </FxCompile>
+    <FxCompile Include="Data\Shader\VisualEffects\Lens.hlsl">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Creator|x64'">true</ExcludedFromBuild>
+    </FxCompile>
+    <FxCompile Include="Data\Shader\VisualEffects\Weather.hlsl">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Creator|x64'">true</ExcludedFromBuild>

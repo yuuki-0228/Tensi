@@ -15,13 +15,13 @@
 #include "..\Utility\FileManager\FileManager.h"
 #include "..\Utility\FileManager\DragAndDrop\DragAndDrop.h"
 #include "..\Utility\FileManager\DragAndDrop\DragAndDrop.h"
-#include "..\Utility\Message\Message.h"
 #include "..\Utility\WindowsWindowManager\WindowsWindowManager.h"
 #include "..\Utility\WindowsShortCutManager\WindowsShortCutManager.h"
 #include "..\Utility\WindowsMenuManager\WindowsMenuManager.h"
 #include "..\Utility\WindowsMessageBox\WindowsMessageBox.h"
 #include "..\Utility\ThreadManager\ThreadManager.h"
 #include "..\Utility\Network\NetworkManager.h"
+#include "..\Utility\VisualEffects\VisualEffectManager.h"
 #include "..\System\SystemWindowManager\SystemWindowManager.h"
 #include <dwmapi.h>
 #include "../Utility/Const/Const.h"
@@ -125,14 +125,19 @@ void CMain::Update( const float& DeltaTime )
 	CameraManager::Update( DeltaTime );
 	Light::Update();
 	SystemWindowManager::Update( DeltaTime );
+#ifdef ENABLE_VISUAL_EFFECT
+	VisualEffectManager::Update( DeltaTime );
+#endif	// #ifdef ENABLE_VISUAL_EFFECT
 
 	// バックバッファをクリアにする.
 	DirectX11::ClearBackBuffer( 0 );
 
 	// 描画処理.
 	SceneManager::Render();
-	FPSRender();
-
+	#ifdef ENABLE_VISUAL_EFFECT
+	// 画面全体の視覚効果の適用( シーン側で手動適用済みの場合は何もしない ).
+	VisualEffectManager::ApplyScreenEffects();
+#endif	// #ifdef ENABLE_VISUAL_EFFECT
 	// クリック透過判定用にカーソル位置のバックバッファの色をコピーしておく.
 	//	( 次フレームの ClickUpdate で読み取る ).
 	const D3DXVECTOR2 MousePos = Input::GetMousePosition();
@@ -145,15 +150,14 @@ void CMain::Update( const float& DeltaTime )
 
 	// サブウィンドウの描画処理.
 	SceneManager::SubRender();
+
+	// 画面に表示.
+	DirectX11::Present( 1 );
 #endif // ENABLE_SUB_WINDOW
 
 	CollisionRenderer::Render();
 	ImGuiManager::Render();
-
-#ifdef ENABLE_SUB_WINDOW
-	// 画面に表示.
-	DirectX11::Present( 1 );
-#endif // ENABLE_SUB_WINDOW
+	FPSRender();
 
 	// 操作のログを出力.
 	Input::KeyLogOutput();
@@ -481,6 +485,8 @@ HRESULT CMain::InitWindow( HINSTANCE hInstance )
 		DirectX11::SetIsDispMouseCursor( false );
 		ShowCursor( FALSE );
 	}
+
+	VisualEffectManager::AddScreenEffect( EVisualEffect::Rain );
 	return S_OK;
 }
 

@@ -57,6 +57,20 @@ public:
 	// アルファトゥカバレージが有効か取得.
 	static bool GetAlphaToCoverage() { return GetInstance()->m_IsAlphaToCoverage; }
 
+	// MSAAのサンプル数の取得( 1で無効 ).
+	static UINT GetMsaaSampleCount() { return GetInstance()->m_MsaaSampleCount; }
+	// MSAA用オフスクリーンシーンテクスチャの取得( MSAA無効時は nullptr ).
+	static ID3D11Texture2D* GetSceneTex( const int No );
+	// MSAA用オフスクリーンシーンRTVの取得( MSAA無効時は nullptr ).
+	static ID3D11RenderTargetView* GetSceneRTV( const int No );
+	// バックバッファRTVの取得.
+	static ID3D11RenderTargetView* GetBackBufferRTV( const int No );
+	// バックバッファテクスチャの取得( スワップチェーンが保持しているため解放不要 ).
+	static ID3D11Texture2D* GetBackBufferTex( const int No );
+	// 深度バッファのシェーダリソースビューの取得( 未対応環境では nullptr ).
+	//	MSAA 有効時はマルチサンプルテクスチャのため Texture2DMS として参照すること.
+	static ID3D11ShaderResourceView* GetDepthSRV( const int No );
+
 	// 背景の色の初期化.
 	static void InitBackColor() { GetInstance()->m_BackColor = GetInstance()->m_InitBackColor; }
 
@@ -162,6 +176,7 @@ private:
 	std::vector<ID3D11RenderTargetView*>	m_pBackBuffer_TexRTV;		// レンダ―ターゲットビュー.
 	std::vector<ID3D11Texture2D*>			m_pBackBuffer_DSTex;		// デプスステンシル用テクスチャ.
 	std::vector<ID3D11DepthStencilView*>	m_pBackBuffer_DSTexDSV;		// デプスステンシルビュー.
+	std::vector<ID3D11ShaderResourceView*>	m_pBackBuffer_DSTexSRV;		// デプスのシェーダリソースビュー( 深度フォグ等のポストエフェクト用 ).
 
 	// MSAA 用オフスクリーンシーンターゲット( サンプル数が 1 の場合は未使用 ).
 	std::vector<ID3D11Texture2D*>			m_pSceneTex;				// MSAA カラーテクスチャ.
@@ -222,4 +237,4 @@ private:
 	DirectX11& operator = ( const DirectX11 & )	= delete;
 	DirectX11( DirectX11 && )						= delete;
 	DirectX11& operator = ( DirectX11 && )		= delete;
-};
+};
