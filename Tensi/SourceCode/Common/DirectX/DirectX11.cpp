@@ -1,11 +1,12 @@
 #include "DirectX11.h"
+#include "Obfuscate/Obfuscate.h"
 #include "DCompHelper.h"
 #include "..\..\Utility\Log\Log.h"
 #include "..\..\Utility\FileManager\FileManager.h"
 #include <mutex>
 
 namespace {
-	constexpr char WINDOW_SETTING_FILE_PATH[] = "Data\\Parameter\\Config\\WindowSetting.json";	// ウィンドウの設定のファイルパス.
+	const std::string WINDOW_SETTING_FILE_PATH = OBF( "Data\\Parameter\\Config\\WindowSetting.json" );	// ウィンドウの設定のファイルパス.
 	std::mutex D10CFFmtx;	// D3DX10CompileFromFile関数用mutex.
 	std::mutex D11CFFmtx;	// D3DX11CompileFromFile関数用mutex.
 	std::mutex D11CSFmtx;	// D3DX11CreateShaderResourceViewFromFile関数用mutex.

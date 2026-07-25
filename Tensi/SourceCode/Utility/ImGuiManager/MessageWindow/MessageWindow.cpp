@@ -1,4 +1,5 @@
 #include "MessageWindow.h"
+#include "Obfuscate/Obfuscate.h"
 #include "..\..\FileManager\FileManager.h"
 #include <fstream>
 #include <sstream>
@@ -11,7 +12,7 @@ namespace{
 	// 新しいメッセージが来た時の色の変更時間.
 	constexpr int	NEW_MESSAGE_COLOR_TIME	= 120;
 	// テキストのパス.
-	constexpr char	TEXT_PATH[]				= "Data\\Parameter\\Config\\MessageWindow.json";
+	const std::string TEXT_PATH = OBF( "Data\\Parameter\\Config\\MessageWindow.json" );
 
 	// 使用色の列挙体.
 	enum enColor{

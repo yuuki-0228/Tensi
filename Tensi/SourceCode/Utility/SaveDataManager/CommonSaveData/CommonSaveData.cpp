@@ -1,8 +1,9 @@
 #include "CommonSaveData.h"
+#include "Obfuscate/Obfuscate.h"
 #include "..\..\FileManager\FileManager.h"
 
 namespace {
-	constexpr char FILE_PATH[] = "Data\\DataCache\\cms.bin";
+	const std::string FILE_PATH = OBF( "Data\\DataCache\\cms.bin" );
 }
 
 CCommonSaveData::CCommonSaveData()
@@ -35,7 +36,7 @@ void CCommonSaveData::Save()
 	m_SaveData.WateringCanTransform.pParent = nullptr;
 
 	// バイナリデータの保存
-	FileManager::BinarySave( FILE_PATH, m_SaveData );
+	FileManager::BinarySave( FILE_PATH.c_str(), m_SaveData );
 }
 
 //---------------------------.
@@ -44,7 +45,7 @@ void CCommonSaveData::Save()
 void CCommonSaveData::Load()
 {
 	// バイナリデータの読み込み
-	FileManager::BinaryLoad( FILE_PATH, m_SaveData );
+	FileManager::BinaryLoad( FILE_PATH.c_str(), m_SaveData );
 
 	// 読み込んだデータで初期化
 	*m_pSaveData.PlayerTransform = m_SaveData.PlayerTransform;

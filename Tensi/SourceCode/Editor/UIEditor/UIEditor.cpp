@@ -1,4 +1,5 @@
 #include "UIEditor.h"
+#include "Obfuscate/Obfuscate.h"
 #include "..\..\Common\DirectX\DirectX11.h"
 #include "..\..\Object\GameObject\Widget\Widget.h"
 #include "..\..\Object\GameObject\Widget\SceneWidget\GameMainWidget\GameMainWidget.h"
@@ -7,9 +8,9 @@
 
 namespace {
 	// ファイルパス.
-	constexpr char	TEXT_PATH[]				= "Data\\Parameter\\Config\\UIEdtor.json";
-	constexpr char	UNDO_LOG_FILE_PATH[]	= "Data\\UIEditor\\UndoLog\\";
-	constexpr char	REDU_LOG_FILE_PATH[]	= "Data\\UIEditor\\ReduLog\\";
+	const std::string TEXT_PATH = OBF( "Data\\Parameter\\Config\\UIEdtor.json" );
+	const std::string UNDO_LOG_FILE_PATH = OBF( "Data\\UIEditor\\UndoLog\\" );
+	const std::string REDU_LOG_FILE_PATH = OBF( "Data\\UIEditor\\ReduLog\\" );
 
 	constexpr int	LOG_FILE_MAX_NONE	= -1;		// ログファイルの上限を設けない.
 	constexpr int	GRID_MIN			= 1;		// グリッド線の下限.

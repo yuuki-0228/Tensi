@@ -5,6 +5,7 @@
 #include <psapi.h>
 #include <shlobj.h>
 #include <shellapi.h>
+#include "..\Obfuscate\Obfuscate.h"
 
 namespace {
 	// モニター列挙コールバック用データ.
@@ -530,7 +531,7 @@ std::string WindowsWindowManager::GetDesktopIconPath( const ICOINDEX Index )
 
 	// アイコンリストを更新していない場合更新する.
 	if ( pI->m_IsDesktopIconUpdate == false ) DesktopIconUpdate();
-	return "C:\\Users\\" + pI->m_UserName + "\\Desktop\\" + pI->m_IconNameMap[Index];
+	return OBF( "C:\\Users\\" ) + pI->m_UserName + OBF( "\\Desktop\\" ) + pI->m_IconNameMap[Index];
 }
 
 //---------------------------.
@@ -560,8 +561,8 @@ std::string WindowsWindowManager::GetDesktopIconFilePath( const ICOINDEX Index )
 	const SDesktopIcon& Icon = pI->m_IconList[Index];
 
 	// デスクトップ内の実ファイルを探すための候補パスを構築する.
-	const std::string UserDesktop   = "C:\\Users\\" + pI->m_UserName + "\\Desktop\\";
-	const std::string PublicDesktop = "C:\\Users\\Public\\Desktop\\";
+	const std::string UserDesktop   = OBF( "C:\\Users\\" ) + pI->m_UserName + OBF( "\\Desktop\\" );
+	const std::string PublicDesktop = OBF( "C:\\Users\\Public\\Desktop\\" );
 
 	// 表示名に管理用の拡張子が付いていない場合は補完する.
 	std::string FileName = Icon.Name;
@@ -973,8 +974,8 @@ void WindowsWindowManager::DesktopIconUpdate()
 	// デスクトップの実ファイル一覧を構築する( 種類判定用 ).
 	std::unordered_map<std::string, SDesktopFileInfo> FileFullMap;
 	std::unordered_map<std::string, SDesktopFileInfo> FileStemMap;
-	CollectDesktopFiles( "C:\\Users\\" + pI->m_UserName + "\\Desktop", FileFullMap, FileStemMap );
-	CollectDesktopFiles( "C:\\Users\\Public\\Desktop", FileFullMap, FileStemMap );
+	CollectDesktopFiles( OBF( "C:\\Users\\" ) + pI->m_UserName + OBF( "\\Desktop" ), FileFullMap, FileStemMap );
+	CollectDesktopFiles( OBF( "C:\\Users\\Public\\Desktop" ), FileFullMap, FileStemMap );
 
 	// 対象アイテムの取得.
 	for( int i = 0; i < nCount; i++ ) {

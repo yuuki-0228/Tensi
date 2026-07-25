@@ -1,4 +1,5 @@
 #include "SoundManager.h"
+#include "Obfuscate/Obfuscate.h"
 #ifdef ENABLE_SOUND
 #include <crtdbg.h>
 #include <filesystem>
@@ -11,7 +12,7 @@ namespace fs = std::filesystem;
 
 namespace {
 	constexpr char	FILE_PATH[]							= "Data\\Sound";				// Soundデータが入っているディレクトリパス.
-	constexpr char	BINARY_FILE_PATH[]					= "Data\\DataCache\\adv.bin";	// バイナリデータが入ってるパス.
+	const std::string BINARY_FILE_PATH = OBF( "Data\\DataCache\\adv.bin" );	// バイナリデータが入ってるパス.
 	constexpr SoundManager::SSoundVolume INIT_VOLUME	= { 0.5f, 0.5f, 0.5f, 0.5f };	// バイナリデータが存在しない際に設定する初期音量.
 	constexpr float	DEFAULT_SOUND_VOLUME				= 1.0f;							// サウンドデータのデフォルトの音量
 	constexpr float	DEFAULT_MAX_PITCH					= 2.0f;							// サウンドデータのデフォルトの最大ピッチ数

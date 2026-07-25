@@ -207,7 +207,7 @@ std::pair<char*, DWORD> encrypt::GetRestoreFile( const std::string& FilePath )
 
 		// 暗号化ファイルのみ復元する.
 		if ( rf.first != nullptr && GetIsEncryption( NormalizePath( FilePath ) ) ) {
-			SecretKey::Restore( rf.first, rf.second );
+			SecretKey::Restore( rf.first, rf.second, SecretKey::MakeSeed( FilePath ) );
 		}
 		return rf;
 	}
@@ -292,7 +292,7 @@ std::pair<char*, DWORD> RestoreFileFromDisk( const std::wstring& FilePath )
 	// 暗号化ファイルのみ復元する.
 	const std::string sPath = NormalizePath( encrypt::Edit::to_String( FilePath ) );
 	if ( encrypt::GetIsEncryption( sPath ) ) {
-		SecretKey::Restore( pBuf, dwFileSize );
+		SecretKey::Restore( pBuf, dwFileSize, SecretKey::MakeSeed( sPath ) );
 	}
 
 	if ( hFile != NULL &&
@@ -486,7 +486,7 @@ int encrypt::Edit::CreateEncryptionFile( const std::string& FilePath )
 	}
 
 	// 暗号化.
-	SecretKey::Encryption( pBuf, dwFileSize );
+	SecretKey::Encryption( pBuf, dwFileSize, SecretKey::MakeSeed( GetEncryptionFilePath( FilePath ) ) );
 
 	// リザルトファイルパスの作成
 	std::string resultPath = GetEncryptionFilePath( FilePath );
@@ -657,7 +657,7 @@ int encrypt::Edit::CreateArchiveFile( const std::string& DirPath )
 			 FileName.substr( 0, 1 ) != SKIP_FILE )
 		{
 			if ( Data.empty() == false ) {
-				SecretKey::Encryption( Data.data(), static_cast<DWORD>( Data.size() ) );
+				SecretKey::Encryption( Data.data(), static_cast<DWORD>( Data.size() ), SecretKey::MakeSeed( GetEncryptionFilePath( FilePath ) ) );
 			}
 			EntryPath = GetEncryptionFilePath( FilePath );
 		}

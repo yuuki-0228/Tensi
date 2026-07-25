@@ -1,4 +1,5 @@
 #include "Font.h"
+#include "Obfuscate/Obfuscate.h"
 #ifdef ENABLE_FONT
 #include "..\DirectX\DirectX11.h"
 #include "..\..\Resource\FontResource\FontResource.h"
@@ -11,7 +12,7 @@ namespace {
 	constexpr TCHAR SHADER_NAME[] = _T( "Data\\Shader\\Font.hlsl" );
 
 	// フォントデータファイルパス.
-	constexpr char FONT_DATA_FILE_PATH[] = "Data\\Sprite\\Font\\FontData.json";
+	const std::string FONT_DATA_FILE_PATH = OBF( "Data\\Sprite\\Font\\FontData.json" );
 
 	// 3D描画時の行間.
 	constexpr float LINE_SPACING_3D	= 12.0f;

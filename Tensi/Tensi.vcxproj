@@ -214,6 +214,7 @@
   <ItemGroup>
     <ClInclude Include="Library\encrypt\file.h" />
     <ClInclude Include="Library\encrypt\key.h" />
+    <ClInclude Include="SourceCode\Utility\Obfuscate\Obfuscate.h" />
     <ClInclude Include="Library\ImGui\imconfig.h" />
     <ClInclude Include="Library\ImGui\imgui.h" />
     <ClInclude Include="Library\ImGui\imgui_impl_dx11.h" />
@@ -524,7 +525,7 @@
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
     <PlatformToolset>v143</PlatformToolset>
-    <WholeProgramOptimization>false</WholeProgramOptimization>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
@@ -537,7 +538,7 @@
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
     <PlatformToolset>v143</PlatformToolset>
-    <WholeProgramOptimization>false</WholeProgramOptimization>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Creator|x64'" Label="Configuration">
@@ -569,19 +570,19 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <!-- ksmedia.h/mmreg.h 等、新旧SDK双方に存在するヘッダーは Windows SDK 側を優先させるため、
          $(DXSDK_DIR)Include は $(IncludePath) の後方( D3DX9 等 旧SDK専用ヘッダーの解決用 )に置く. -->
-    <IncludePath>Library\Effekseer\include;Library\libogg\include;Library;$(IncludePath);$(DXSDK_DIR)Include</IncludePath>
+    <IncludePath>SourceCode/Utility;Library\Effekseer\include;Library\libogg\include;Library;$(IncludePath);$(DXSDK_DIR)Include</IncludePath>
     <LibraryPath>$(DXSDK_DIR)Lib\x86;Library\Effekseer\lib\x86;Library\libogg\_lib\x86\_Debug;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
-    <IncludePath>Library\Effekseer\include;Library\libogg\include;Library;$(IncludePath);$(DXSDK_DIR)Include</IncludePath>
+    <IncludePath>SourceCode/Utility;Library\Effekseer\include;Library\libogg\include;Library;$(IncludePath);$(DXSDK_DIR)Include</IncludePath>
     <LibraryPath>$(DXSDK_DIR)Lib\x86;Library\Effekseer\lib\x86;Library\libogg\_lib\x86\_Release;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <IncludePath>Library\Effekseer\include;Library\libogg\_include;Library;$(IncludePath);$(DXSDK_DIR)Include</IncludePath>
+    <IncludePath>SourceCode/Utility;Library\Effekseer\include;Library\libogg\_include;Library;$(IncludePath);$(DXSDK_DIR)Include</IncludePath>
     <LibraryPath>$(DXSDK_DIR)Lib\x64;Library\Effekseer\lib\x64;Library\libogg\_lib\x64\_Release;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <IncludePath>Library\Effekseer\include;Library\libogg\_include;Library;$(IncludePath);$(DXSDK_DIR)Include</IncludePath>
+    <IncludePath>SourceCode/Utility;Library\Effekseer\include;Library\libogg\_include;Library;$(IncludePath);$(DXSDK_DIR)Include</IncludePath>
     <LibraryPath>$(DXSDK_DIR)Lib\x64;Library\Effekseer\lib\x64;Library\libogg\_lib\x64\_Debug;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Creator|x64'">
@@ -606,6 +607,11 @@
       <AdditionalIncludeDirectories>
       </AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
+      <!-- Edit and Continue(/ZI) は、同一ファイル内で constexpr 非型テンプレート引数を持つ
+           テンプレート( Obfuscate::ObfString 等 )を複数回インスタンス化すると
+           C2975(コンパイル時の定数式が必要)を誤検出する MSVC 側の制限があるため、
+           通常のプログラムデータベース(/Zi)に切り替える( Edit and Continue は使用不可になる ). -->
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
     </ClCompile>
     <Link>
       <AdditionalLibraryDirectories>
@@ -644,6 +650,11 @@
       <LanguageStandard>stdcpp17</LanguageStandard>
       <OmitFramePointers>false</OmitFramePointers>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
+      <!-- Edit and Continue(/ZI) は、同一ファイル内で constexpr 非型テンプレート引数を持つ
+           テンプレート( Obfuscate::ObfString 等 )を複数回インスタンス化すると
+           C2975(コンパイル時の定数式が必要)を誤検出する MSVC 側の制限があるため、
+           通常のプログラムデータベース(/Zi)に切り替える( Edit and Continue は使用不可になる ). -->
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -690,6 +701,9 @@
     <Link>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
+      <LinkTimeCodeGeneration>UseLinkTimeCodeGeneration</LinkTimeCodeGeneration>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalOptions>/PDBALTPATH:%_PDB% %(AdditionalOptions)</AdditionalOptions>
       <AdditionalLibraryDirectories>
       </AdditionalLibraryDirectories>
       <SubSystem>Windows</SubSystem>
@@ -721,6 +735,9 @@
     <Link>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
+      <LinkTimeCodeGeneration>UseLinkTimeCodeGeneration</LinkTimeCodeGeneration>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalOptions>/PDBALTPATH:%_PDB% %(AdditionalOptions)</AdditionalOptions>
       <SubSystem>Windows</SubSystem>
       <!-- D3DX( 旧DirectX SDKランタイム )のDLLを遅延読み込みにする.
            未インストールPCでは通常「d3dx11_43.dll が見つからない」という

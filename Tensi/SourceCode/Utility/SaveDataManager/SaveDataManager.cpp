@@ -1,11 +1,12 @@
 #include "SaveDataManager.h"
+#include "Obfuscate/Obfuscate.h"
 #include "CommonSaveData/CommonSaveData.h"
 #include "..\..\Utility\FileManager\FileManager.h"
 #include "..\..\Utility\TimeManager\TimeManager.h"
 
 namespace {
-	constexpr char FILE_PATH[]		 = "Data\\DataCache\\cms.bin";
-	constexpr char LOGIN_FILE_PATH[] = "Data\\DataCache\\lgt.bin";
+	const std::string FILE_PATH = OBF( "Data\\DataCache\\cms.bin" );
+	const std::string LOGIN_FILE_PATH = OBF( "Data\\DataCache\\lgt.bin" );
 
 }
 
@@ -78,7 +79,7 @@ void SaveDataManager::LoginSave()
 {
 	const std::tm& Now = TimeManager::GetTime();
 
-	FileManager::BinarySave( LOGIN_FILE_PATH, Now );
+	FileManager::BinarySave( LOGIN_FILE_PATH.c_str(), Now );
 }
 
 //---------------------------.
@@ -95,7 +96,7 @@ bool SaveDataManager::LoginLoad( std::tm* pDay )
 
 	// バイナリデータの読み込み.
 	std::tm Day;
-	FileManager::BinaryLoad( LOGIN_FILE_PATH, Day );
+	FileManager::BinaryLoad( LOGIN_FILE_PATH.c_str(), Day );
 	if ( pDay != nullptr ) {
 		*pDay = Day;
 	}

@@ -1,10 +1,11 @@
 #include "Random.h"
+#include "Obfuscate/Obfuscate.h"
 #include <fstream>
 #include <sstream>
 #include "..\FileManager\FileManager.h"
 
 namespace{
-	constexpr char BINARY_PATH[] = "Data\\DataCache\\rnd.bin";
+	const std::string BINARY_PATH = OBF( "Data\\DataCache\\rnd.bin" );
 }
 
 Random::Random()
@@ -38,11 +39,11 @@ HRESULT Random::Init()
 	// 乱数の固定化が有効なら.
 	if ( GetInstance()->m_RandLock ){
 		// 前回の初期化の値で初期化.
-		FileManager::BinaryLoad( BINARY_PATH, InitNum );
+		FileManager::BinaryLoad( BINARY_PATH.c_str(), InitNum );
 	}
 	else{
 		// 乱数の初期化の値を保存.
-		FileManager::BinarySave( BINARY_PATH, InitNum );
+		FileManager::BinarySave( BINARY_PATH.c_str(), InitNum );
 	}
 
 	// 乱数の初期化.

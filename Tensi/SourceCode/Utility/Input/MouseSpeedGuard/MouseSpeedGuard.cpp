@@ -1,4 +1,5 @@
 #include "MouseSpeedGuard.h"
+#include "Obfuscate/Obfuscate.h"
 #include "..\..\FileManager\FileManager.h"
 #include <csignal>
 #include <cstdio>
@@ -7,8 +8,8 @@
 #include <string>
 
 namespace {
-	constexpr char	RECOVERY_FILE_PATH[]	= "Data\\DataCache\\msp.bin";	// 復帰用ファイルの保存場所.
-	constexpr char	WATCHDOG_OPTION[]		= "--mouse-speed-watchdog";		// 監視プロセス起動用のコマンドライン引数.
+	const std::string RECOVERY_FILE_PATH = OBF( "Data\\DataCache\\msp.bin" );	// 復帰用ファイルの保存場所.
+	constexpr char WATCHDOG_OPTION[] = "--mouse-speed-watchdog";		// 監視プロセス起動用のコマンドライン引数.
 	constexpr int	MOUSE_SPEED_MIN			= 1;							// マウス速度の最小値.
 	constexpr int	MOUSE_SPEED_MAX			= 20;							// マウス速度の最大値.
 
@@ -111,7 +112,7 @@ bool MouseSpeedGuard::RunWatchdogIfRequested( const char* lpCmdLine )
 	//	※正常終了時は本体側でファイルが削除されているため何もしない.
 	if ( FileManager::FileCheck( RECOVERY_FILE_PATH ) == false ) return true;
 	int SavedSpeed = Speed;
-	FileManager::BinaryLoad( RECOVERY_FILE_PATH, SavedSpeed );
+	FileManager::BinaryLoad( RECOVERY_FILE_PATH.c_str(), SavedSpeed );
 	ApplyMouseSpeed( SavedSpeed );
 	return true;
 }
@@ -130,7 +131,7 @@ __int64 MouseSpeedGuard::Start()
 	//	※現在の速度は前回の実行で変更されたままの可能性があるため使用しない.
 	if ( FileManager::FileCheck( RECOVERY_FILE_PATH ) ) {
 		int SavedSpeed = Speed;
-		FileManager::BinaryLoad( RECOVERY_FILE_PATH, SavedSpeed );
+		FileManager::BinaryLoad( RECOVERY_FILE_PATH.c_str(), SavedSpeed );
 		if ( MOUSE_SPEED_MIN <= SavedSpeed && SavedSpeed <= MOUSE_SPEED_MAX ) Speed = SavedSpeed;
 		ApplyMouseSpeed( Speed );
 	}
@@ -138,7 +139,7 @@ __int64 MouseSpeedGuard::Start()
 
 	// 異常終了時に復元できるように元の速度を保存しておく.
 	//	※このファイルは正常終了時に削除される.
-	FileManager::BinarySave( RECOVERY_FILE_PATH, Speed );
+	FileManager::BinarySave( RECOVERY_FILE_PATH.c_str(), Speed );
 
 	// クラッシュ時に復元するためのハンドラを登録.
 	s_PrevExceptionFilter	= SetUnhandledExceptionFilter( CrashExceptionFilter );
@@ -161,5 +162,5 @@ void MouseSpeedGuard::Stop()
 
 	// 正常終了のため復元用ファイルを削除する.
 	//	※これにより監視プロセスは何もせずに終了する.
-	DeleteFileA( RECOVERY_FILE_PATH );
+	DeleteFileA( RECOVERY_FILE_PATH.c_str() );
 }

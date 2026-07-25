@@ -157,7 +157,7 @@ HRESULT FileManager::LogSave(
 
 	// [レベル] [呼び出し] メッセージ.
 	o << "[" << LogLevelToString( Level )	<< "] ";
-	o << "[" << Caller						<< "] ";
+	if ( !Caller.empty() ) o << "[" << Caller << "] ";
 	o << Text << std::endl;
 
 	// ファイルを閉じる.

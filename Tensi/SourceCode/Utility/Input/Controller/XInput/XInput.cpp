@@ -1,8 +1,9 @@
 #include "XInput.h"
+#include "Obfuscate/Obfuscate.h"
 #include "..\..\..\FileManager\FileManager.h"
 
 namespace {
-	constexpr char WINDOW_SETTING_FILE_PATH[] = "Data\\Parameter\\Config\\WindowSetting.json";	// ウィンドウの設定のファイルパス.
+	const std::string WINDOW_SETTING_FILE_PATH = OBF( "Data\\Parameter\\Config\\WindowSetting.json" );	// ウィンドウの設定のファイルパス.
 }
 
 // 値を範囲内に収める関数.

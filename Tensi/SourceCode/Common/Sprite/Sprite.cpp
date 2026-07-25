@@ -1,4 +1,5 @@
 #include "Sprite.h"
+#include "Obfuscate/Obfuscate.h"
 #ifdef ENABLE_SPRITE
 #include "..\DirectX\DirectX11.h"
 #include "..\..\Object\Camera\CameraManager\CameraManager.h"
@@ -16,7 +17,7 @@ namespace {
 	constexpr TCHAR SHADER_NAME[]			= _T( "Data\\Shader\\Sprite.hlsl"	);
 
 	// アンドゥ用のログファイルの移動場所のパス.
-	constexpr char	UNDO_LOG_FILE_PATH[]	= "Data\\UIEditor\\UndoLog\\";
+	const std::string UNDO_LOG_FILE_PATH = OBF( "Data\\UIEditor\\UndoLog\\" );
 	
 	// ピクセルシェーダーのエントリポイント名.
 	const std::vector<const char*> PS_SHADER_ENTRY_NAMES = {

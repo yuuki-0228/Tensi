@@ -1,4 +1,5 @@
 #include "Const.h"
+#include "Obfuscate/Obfuscate.h"
 #ifdef ENABLE_CONST
 #include "..\FileManager\FileManager.h"
 
@@ -48,7 +49,7 @@ Const* Const::GetInstance()
 //----------------------------.
 void Const::stConstGameWindow::Load()
 {
-	Json j = FileManager::JsonLoad( "Data\\Parameter\\Config\\WindowSetting.json" );
+	Json j = FileManager::JsonLoad( OBF( "Data\\Parameter\\Config\\WindowSetting.json" ) );
 
 	// èâä˙âª
 	SIZE.x		= j["Size"]["w"].Get<float>();
@@ -64,7 +65,7 @@ void Const::stConstGameWindow::Load()
 //----------------------------.
 void Const::stConstExplore::Load()
 {
-	Json j = FileManager::JsonLoad( "Data\\Parameter\\Const\\Explore.json" );
+	Json j = FileManager::JsonLoad( OBF( "Data\\Parameter\\Const\\Explore.json" ) );
 
 	// èâä˙âª
 	COMPLETE_SEC_PER_MB = j["COMPLETE_SEC_PER_MB"][_DATA].Get<float>();
@@ -103,7 +104,7 @@ void Const::stConstExplore::Load()
 //----------------------------.
 void Const::stConstFlower::Load()
 {
-	Json j = FileManager::JsonLoad( "Data\\Parameter\\Const\\Flower.json" );
+	Json j = FileManager::JsonLoad( OBF( "Data\\Parameter\\Const\\Flower.json" ) );
 
 	// èâä˙âª
 	COME_OUT_ANIM_ALPHA_SPEED = j["COME_OUT_ANIM_ALPHA_SPEED"][_DATA].Get<float>();
@@ -125,7 +126,7 @@ void Const::stConstFlower::Load()
 //----------------------------.
 void Const::stConstFreeCamera::Load()
 {
-	Json j = FileManager::JsonLoad( "Data\\Parameter\\Const\\FreeCamera.json" );
+	Json j = FileManager::JsonLoad( OBF( "Data\\Parameter\\Const\\FreeCamera.json" ) );
 
 	// èâä˙âª
 	MOVE_SPEED = j["MOVE_SPEED"][_DATA].Get<float>();
@@ -139,7 +140,7 @@ void Const::stConstFreeCamera::Load()
 //----------------------------.
 void Const::stConstNetwork::Load()
 {
-	Json j = FileManager::JsonLoad( "Data\\Parameter\\Const\\Network.json" );
+	Json j = FileManager::JsonLoad( OBF( "Data\\Parameter\\Const\\Network.json" ) );
 
 	// èâä˙âª
 	DEFAULT_CONNECTION_TIMEOUT_SEC = j["DEFAULT_CONNECTION_TIMEOUT_SEC"][_DATA].Get<float>();
@@ -161,7 +162,7 @@ void Const::stConstNetwork::Load()
 //----------------------------.
 void Const::stConstSystem::Load()
 {
-	Json j = FileManager::JsonLoad( "Data\\Parameter\\Const\\System.json" );
+	Json j = FileManager::JsonLoad( OBF( "Data\\Parameter\\Const\\System.json" ) );
 
 	// èâä˙âª
 	AUTO_SAVE_TIME = j["AUTO_SAVE_TIME"][_DATA].Get<float>();
@@ -174,7 +175,7 @@ void Const::stConstSystem::Load()
 //----------------------------.
 void Const::stConstWaterFall::Load()
 {
-	Json j = FileManager::JsonLoad( "Data\\Parameter\\Const\\WaterFall.json" );
+	Json j = FileManager::JsonLoad( OBF( "Data\\Parameter\\Const\\WaterFall.json" ) );
 
 	// èâä˙âª
 	WATER_FALL_W = j["WATER_FALL_W"][_DATA].Get<int>();
@@ -187,7 +188,7 @@ void Const::stConstWaterFall::Load()
 //----------------------------.
 void Const::stConstWateringCan::Load()
 {
-	Json j = FileManager::JsonLoad( "Data\\Parameter\\Const\\WateringCan.json" );
+	Json j = FileManager::JsonLoad( OBF( "Data\\Parameter\\Const\\WateringCan.json" ) );
 
 	// èâä˙âª
 	FALL_MAX_VECTOR = j["FALL_MAX_VECTOR"][_DATA].Get<float>();
@@ -214,7 +215,7 @@ void Const::stConstWateringCan::Load()
 //----------------------------.
 void Const::stConstWeed::Load()
 {
-	Json j = FileManager::JsonLoad( "Data\\Parameter\\Const\\Weed.json" );
+	Json j = FileManager::JsonLoad( OBF( "Data\\Parameter\\Const\\Weed.json" ) );
 
 	// èâä˙âª
 	COME_OUT_ANIM_ALPHA_SPEED = j["COME_OUT_ANIM_ALPHA_SPEED"][_DATA].Get<float>();

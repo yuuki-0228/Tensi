@@ -1,9 +1,10 @@
 #include "MasterDataAccesser.h"
+#include "Obfuscate/Obfuscate.h"
 #ifdef ENABLE_MASTER_DATA
 #include <encrypt/file.h>
 
 namespace {
-	const std::string FILE_PATH = "Data\\Parameter\\MasterData";
+	const std::string FILE_PATH = OBF( "Data\\Parameter\\MasterData" );
 }
 
 MasterDataAccesser::MasterDataAccesser()

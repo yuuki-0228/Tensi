@@ -1,4 +1,5 @@
 #include "Main.h"
+#include "Obfuscate/Obfuscate.h"
 #include "..\Common\DirectX\DirectX9.h"
 #include "..\Common\DirectX\DirectX11.h"
 #include "..\Common\WindowTextRenderer\WindowTextRenderer.h"
@@ -32,8 +33,8 @@ extern LRESULT ImGui_ImplWin32_WndProcHandler( HWND, UINT, WPARAM, LPARAM );
 static const decltype( WM_USER ) WM_NOTIFYICON = WM_USER + 100;
 
 namespace{
-	constexpr char		PARAMETER_FILE_PATH[]		= "Data\\Parameter\\";								// パラメーターファイルパス.
-	constexpr char		WINDOW_SETTING_FILE_PATH[]	= "Data\\Parameter\\Config\\WindowSetting.json";	// ウィンドウの設定のファイルパス.
+	const std::string PARAMETER_FILE_PATH = OBF( "Data\\Parameter\\" );								// パラメーターファイルパス.
+	const std::string WINDOW_SETTING_FILE_PATH = OBF( "Data\\Parameter\\Config\\WindowSetting.json" );	// ウィンドウの設定のファイルパス.
 	constexpr float		FPS_RENDER_SIZE				= 0.5f;												// FPS描画サイズ.
 	constexpr float		FPS_RENDER_POS[2]			= { 0.0f, 1.0f };									// FPS描画位置.
 	constexpr float		FPS_RENDER_COLOR[4]			= { 0.9f, 0.2f, 0.2f, 1.0f };						// FPS描画色.
@@ -485,8 +486,6 @@ HRESULT CMain::InitWindow( HINSTANCE hInstance )
 		DirectX11::SetIsDispMouseCursor( false );
 		ShowCursor( FALSE );
 	}
-
-	VisualEffectManager::AddScreenEffect( EVisualEffect::Rain );
 	return S_OK;
 }
 

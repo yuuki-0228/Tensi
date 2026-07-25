@@ -1,6 +1,7 @@
 #include "WindowsShortCutManager.h"
 #ifdef ENABLE_WINDOWS_SHORT_CUT
 #include <shlobj.h>
+#include "..\Obfuscate\Obfuscate.h"
 
 //---------------------------.
 // ショートカットを作成する.
@@ -143,13 +144,13 @@ bool WindowsShortCutManager::CreateStartupShortcutApprovalForce(
 void WindowsShortCutManager::EnableStartupApproval( LPCWSTR pszLinkName )
 {
 	// スタートアップの有効/無効を管理するレジストリキー.
-	static const WCHAR* KeyPath =
-		L"Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\StartupApproved\\StartupFolder";
+	const std::wstring KeyPath =
+		OBFW( L"Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\StartupApproved\\StartupFolder" );
 
 	// キーを開く( 無ければ作成する ).
 	HKEY hKey = NULL;
 	LONG lResult = ::RegCreateKeyExW(
-		HKEY_CURRENT_USER, KeyPath, 0, NULL,
+		HKEY_CURRENT_USER, KeyPath.c_str(), 0, NULL,
 		REG_OPTION_NON_VOLATILE, KEY_READ | KEY_WRITE, NULL, &hKey, NULL );
 	if ( lResult != ERROR_SUCCESS ) return;
 
@@ -168,13 +169,13 @@ void WindowsShortCutManager::EnableStartupApproval( LPCWSTR pszLinkName )
 void WindowsShortCutManager::SetStartupApprovalForce( LPCWSTR pszLinkName, const bool IsEnable )
 {
 	// スタートアップの有効/無効を管理するレジストリキー.
-	static const WCHAR* KeyPath =
-		L"Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\StartupApproved\\StartupFolder";
+	const std::wstring KeyPath =
+		OBFW( L"Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\StartupApproved\\StartupFolder" );
 
 	// キーを開く( 無ければ作成する ).
 	HKEY hKey = NULL;
 	LONG lResult = ::RegCreateKeyExW(
-		HKEY_CURRENT_USER, KeyPath, 0, NULL,
+		HKEY_CURRENT_USER, KeyPath.c_str(), 0, NULL,
 		REG_OPTION_NON_VOLATILE, KEY_READ | KEY_WRITE, NULL, &hKey, NULL );
 	if ( lResult != ERROR_SUCCESS ) return;
 

@@ -1,4 +1,5 @@
 #include "BugReport.h"
+#include "Obfuscate/Obfuscate.h"
 #include "..\..\Utility\FileManager\FileManager.h"
 #include <fstream>
 #include <sstream>
@@ -7,7 +8,7 @@
 #include <filesystem>
 
 namespace {
-	constexpr char SAVE_FILE_PATH[]			= "Data\\Debug\\BugReport";	// 保存する場所のファイルパス.
+	const std::string SAVE_FILE_PATH = OBF( "Data\\Debug\\BugReport" );	// 保存する場所のファイルパス.
 	constexpr int  BUG_TEXT_NORMAL_COLUMN	= 10;					// バグ報告テキストの通常時(内容に改行を含まない時)の列数.
 	constexpr int  BUG_TEXT_TITLE_POS		= 1;					// バグ報告テキストのタイトルの位置.
 	constexpr int  BUG_TEXT_LV_POS			= 4;					// バグ報告テキストのレベルの位置.

@@ -1,10 +1,11 @@
 #include "InputSetting.h"
+#include "Obfuscate/Obfuscate.h"
 #include "..\..\Utility\Input\InputList.h"
 #include "..\..\Utility\FileManager\FileManager.h"
 #include "..\..\Utility\Input\Input.h"
 
 namespace {
-	constexpr char KEY_BIND_FILE_PATH[] = "Data\\Parameter\\Config\\KeyBind.json";	// キーバインドの保存場所.
+	const std::string KEY_BIND_FILE_PATH = OBF( "Data\\Parameter\\Config\\KeyBind.json" );	// キーバインドの保存場所.
 }
 
 InputSetting::InputSetting()

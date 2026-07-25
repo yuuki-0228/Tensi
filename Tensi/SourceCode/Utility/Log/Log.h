@@ -47,11 +47,19 @@ private:
 };
 
 // ログの入力.
-//	呼び出し元(クラス::関数名)を __FUNCTION__ で自動的に付与する.
+//	呼び出し元(クラス::関数名)を LOG_CALLER で自動的に付与する.
 //	使用例 : Log::PushLogInfo( "メッセージ" );
 //	出力例 : [12:34:56] [INFO] [CMain::InitWindow] メッセージ.
-#define PushLogDebug( Text )	PushLogDebugImpl	( Text, __FUNCTION__ )
-#define PushLogInfo( Text )		PushLogInfoImpl		( Text, __FUNCTION__ )
-#define PushLogWarning( Text )	PushLogWarningImpl	( Text, __FUNCTION__ )
-#define PushLogError( Text )	PushLogErrorImpl	( Text, __FUNCTION__ )
-#define PushLogFatal( Text )	PushLogFatalImpl	( Text, __FUNCTION__ )
+// Releaseでは呼び出し元の関数名( __FUNCTION__ )をバイナリに残さないため空にする.
+//	Debugのみ関数名を付与し、ログの可読性を保つ.
+#ifdef _DEBUG
+#define LOG_CALLER __FUNCTION__
+#else
+#define LOG_CALLER ""
+#endif
+
+#define PushLogDebug( Text )	PushLogDebugImpl	( Text, LOG_CALLER )
+#define PushLogInfo( Text )		PushLogInfoImpl		( Text, LOG_CALLER )
+#define PushLogWarning( Text )	PushLogWarningImpl	( Text, LOG_CALLER )
+#define PushLogError( Text )	PushLogErrorImpl	( Text, LOG_CALLER )
+#define PushLogFatal( Text )	PushLogFatalImpl	( Text, LOG_CALLER )

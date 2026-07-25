@@ -1,9 +1,10 @@
 #include "KeyLog.h"
+#include "Obfuscate/Obfuscate.h"
 #include <fstream>
 #include <sstream>
 
 namespace {
-	constexpr char TEXT_PATH[]	= "Data\\Parameter\\Key.txt";	// キーテキストのファイルパス.
+	const std::string TEXT_PATH = OBF( "Data\\Parameter\\Key.txt" );	// キーテキストのファイルパス.
 	constexpr char END_CHAR[]	= "E";							// 終了文字.
 	constexpr char DELIM		= ',';							// 区切り文字.
 }

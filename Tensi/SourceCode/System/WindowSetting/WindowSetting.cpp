@@ -1,8 +1,9 @@
 #include "WindowSetting.h"
+#include "Obfuscate/Obfuscate.h"
 #include "../../Utility/Const/Const.h"
 
 namespace {
-	constexpr char WINDOW_SETTING_FILE_PATH[] = "Data\\Parameter\\Config\\WindowSetting.json";	// ウィンドウの設定のファイルパス.
+	const std::string WINDOW_SETTING_FILE_PATH = OBF( "Data\\Parameter\\Config\\WindowSetting.json" );	// ウィンドウの設定のファイルパス.
 }
 
 CWindowSetting::CWindowSetting()

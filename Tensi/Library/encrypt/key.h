@@ -2,21 +2,9 @@
 #include <Windows.h>
 #include <vector>
 #include <string>
+#include <cstdint>
 
 namespace SecretKey{
-	// 暗号化時に使用する秘密鍵(8bit)
-	//	1Byteごとに秘密鍵を使用して暗号化する
-	//	複数鍵を指定している場合順番に使用していく
-	const std::vector<char> SECRET_KEY = {
-		(char) 0b10010101,
-		(char) 0b01011101,
-		(char) 0b11010110,
-		(char) 0b00100101,
-	};
-	
-	// 登録されている秘密鍵の数.
-	const int KEY_NUM = static_cast<int>( SECRET_KEY.size() );
-
 	// 暗号化対応ファイル.
 	//	<<拡張子1, 拡張子2>, ファイルID(00~99)>
 	const std::vector<std::pair<std::pair<std::string, std::string>, std::string>> FILE_LIST = {
@@ -55,9 +43,15 @@ namespace SecretKey{
 	// 対応したパスの取得.
 	std::string GetFileExt( const std::string& FId );
 
+	// ファイルパスから暗号化シードを生成する.
+	//	暗号化ファイル名のベース名からシードを作るため、暗号化側と復号側で一致する.
+	std::uint32_t MakeSeed( const std::string& FilePath );
+
 	// 暗号化.
-	void Encryption( char* data, const DWORD& size );
+	//	seed をファイルごとに変えることで、ファイル単位で鍵ストリームが変わり、
+	//	既知平文攻撃( 同じ位置の平文が既知でも他ファイルへ流用できない )に耐性を持つ.
+	void Encryption( char* data, const DWORD& size, std::uint32_t seed = 0 );
 
 	// 暗号化を復元
-	void Restore( char* data, const DWORD& size );
+	void Restore( char* data, const DWORD& size, std::uint32_t seed = 0 );
 }

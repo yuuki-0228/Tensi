@@ -1,4 +1,5 @@
 #include "Log.h"
+#include "..\Obfuscate\Obfuscate.h"
 #include "..\FileManager\FileManager.h"
 #include "..\ThreadManager\ThreadManager.h"
 #include <iostream>
@@ -6,8 +7,8 @@
 #include <sstream>
 
 namespace {
-	constexpr char LOG_TEXT_FILE_PATH[]			= "Data\\$system.log";								// ログテキストのファイルパス.
-	constexpr char WINDOW_SETTING_FILE_PATH[]	= "Data\\Parameter\\Config\\WindowSetting.json";	// ウィンドウの設定のファイルパス.
+	const std::string LOG_TEXT_FILE_PATH		= OBF( "Data\\$system.log" );								// ログテキストのファイルパス.
+	const std::string WINDOW_SETTING_FILE_PATH	= OBF( "Data\\Parameter\\Config\\WindowSetting.json" );	// ウィンドウの設定のファイルパス.
 #ifdef ENABLE_THREAD
 	constexpr char LOG_THREAD_TAG[]				= "Log";											// 書き込みの直列実行タグ.
 #endif // ENABLE_THREAD
@@ -59,7 +60,7 @@ HRESULT Log::OpenLogText()
 	if ( GetInstance()->m_Stop ) return S_OK;
 
 	// アプリ起動ログを日付付きで新規作成する.
-	return FileManager::LogSave( LOG_TEXT_FILE_PATH, "App launch", FileManager::ELogLevel::Info, __FUNCTION__, false );
+	return FileManager::LogSave( LOG_TEXT_FILE_PATH, "App launch", FileManager::ELogLevel::Info, LOG_CALLER, false );
 }
 
 //----------------------------.
@@ -70,7 +71,7 @@ HRESULT Log::CloseLogText()
 	if ( GetInstance()->m_Stop ) return S_OK;
 
 	// アプリ終了ログを追記する.
-	return FileManager::LogSave( LOG_TEXT_FILE_PATH, "App End", FileManager::ELogLevel::Info, __FUNCTION__ );
+	return FileManager::LogSave( LOG_TEXT_FILE_PATH, "App End", FileManager::ELogLevel::Info, LOG_CALLER );
 }
 
 //----------------------------.

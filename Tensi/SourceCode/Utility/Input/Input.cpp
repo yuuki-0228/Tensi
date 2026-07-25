@@ -1,4 +1,5 @@
 #include "Input.h"
+#include "Obfuscate/Obfuscate.h"
 #include "InputList.h"
 #include "Key\KeyInput.h"
 #include "Controller\XInput\XInput.h"
@@ -9,8 +10,8 @@
 #include "MouseSpeedGuard\MouseSpeedGuard.h"
 
 namespace {
-	constexpr char KEY_BIND_FILE_PATH[]			= "Data\\Parameter\\Config\\KeyBind.json";	// キーバインドの保存場所.
-	constexpr char WINDOW_SETTING_FILE_PATH[]	= "Data\\Parameter\\Config\\WindowSetting.json";	// ウィンドウの設定のファイルパス.
+	const std::string KEY_BIND_FILE_PATH = OBF( "Data\\Parameter\\Config\\KeyBind.json" );	// キーバインドの保存場所.
+	const std::string WINDOW_SETTING_FILE_PATH = OBF( "Data\\Parameter\\Config\\WindowSetting.json" );	// ウィンドウの設定のファイルパス.
 }
 
 Input::Input()

@@ -393,6 +393,7 @@
     <ClInclude Include="SourceCode\Object\GameObject\GameObject.h" />
     <ClInclude Include="SourceCode\Resource\EffectResource\EffectResource.h" />
     <ClInclude Include="SourceCode\Utility\Log\Log.h" />
+    <ClInclude Include="SourceCode\Utility\Obfuscate\Obfuscate.h" />
     <ClInclude Include="SourceCode\Resource\LoadManager\LoadManager.h" />
     <ClInclude Include="SourceCode\Utility\Random\Random.h" />
     <ClInclude Include="SourceCode\Utility\Input\Key\KeyInput.h" />
